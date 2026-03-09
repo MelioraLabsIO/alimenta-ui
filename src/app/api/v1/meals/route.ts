@@ -1,16 +1,9 @@
-
-
 import { NextResponse } from "next/server";
+import { getMeals } from "@/repositories/meals/get-meals";
 
-export const runtime = "nodejs"; // safe default; remove if you want edge
+export const runtime = "nodejs";
 
 export async function GET() {
-    return NextResponse.json(
-        {
-            status: "ok",
-            service: "alimenta-ui",
-            ts: new Date().toISOString(),
-        },
-        { status: 200 }
-    );
+    const meals = await getMeals();
+    return NextResponse.json(meals, { status: 200 });
 }
