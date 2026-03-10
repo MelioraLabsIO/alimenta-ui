@@ -1,0 +1,16 @@
+model Meal {
+  id        String   @id @default(uuid())
+  title     String
+  notes     String?
+  type      MealType
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum MealType {
+  MEAL
+  BREAKFAST
+  DINNER
+  SNACK
+}

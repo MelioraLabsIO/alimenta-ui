@@ -6,5 +6,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
     const meals = await getAllMealsService();
+    console.log("meals: ", meals);
+
     return NextResponse.json(meals, { status: 200 });
 }
