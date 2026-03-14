@@ -3,9 +3,23 @@ model Meal {
   title     String
   notes     String?
   type      MealType
+  mood      Int
+  energy    Int
+  digestion Int
+  foodTime DateTime
+  foodItems Food[]
   // Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Food {
+  id String @id @default(uuid())
+  name String
+  quantity Decimal
+  unit String
+  food Meal @relation(fields: [foodId], references: [id])
+  foodId String
 }
 
 enum MealType {
@@ -13,4 +27,5 @@ enum MealType {
   BREAKFAST
   DINNER
   SNACK
+  OTHER
 }
