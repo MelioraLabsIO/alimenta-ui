@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/sheet";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SidebarNav } from "@/components/layout/sidebar-nav";
+import { logout } from "@/app/login/actions";
 
 export function AppHeader() {
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -96,7 +97,10 @@ export function AppHeader() {
                 <Link href="/app/settings">Settings</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive">
+              <DropdownMenuItem 
+                className="text-destructive cursor-pointer"
+                onSelect={() => logout()}
+              >
                 Sign out
               </DropdownMenuItem>
             </DropdownMenuContent>

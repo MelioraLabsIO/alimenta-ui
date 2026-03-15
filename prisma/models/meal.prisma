@@ -6,20 +6,23 @@ model Meal {
   mood      Int
   energy    Int
   digestion Int
-  foodTime DateTime
-  foodItems Food[]
-  // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  foodTime  DateTime @map("food_timee")
+  createdAt DateTime @map("created_at") @default(now())
+  updatedAt DateTime @map("updated_at") @updatedAt
+  foodItem Food[]
+
+  @@map("meals")
 }
 
 model Food {
-  id String @id @default(uuid())
-  name String
+  id       String  @id @default(uuid())
+  name     String
   quantity Decimal
-  unit String
-  food Meal @relation(fields: [foodId], references: [id])
-  foodId String
+  unit     String
+  foodId   String @map("food_id")
+  food     Meal    @relation(fields: [foodId], references: [id])
+
+  @@map("foods")
 }
 
 enum MealType {

@@ -12,8 +12,8 @@ export default function LandingPage() {
         <span className="text-xl font-bold tracking-tight text-primary">
           🌿 Alimenta
         </span>
-        <Link href="/app">
-          <Button size="sm">Open Dashboard</Button>
+        <Link href="/login">
+          <Button size="sm">Sign In</Button>
         </Link>
       </nav>
 
@@ -34,9 +34,9 @@ export default function LandingPage() {
           build a diet that actually works for you.
         </p>
         <div className="flex gap-3 flex-wrap justify-center">
-          <Link href="/app">
+          <Link href="/login">
             <Button size="lg" className="gap-2">
-              Open Dashboard <ArrowRight className="h-4 w-4" />
+              Get Started <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
           <Button size="lg" variant="outline">

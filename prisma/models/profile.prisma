@@ -1,0 +1,11 @@
+model Profile {
+  id        String   @id @db.Uuid
+  firstName String   @map("first_name")
+  lastName  String   @map("last_name")
+  email     String   @unique
+  // Timestamps
+  createdAt DateTime @map("created_at") @default(now())
+  updatedAt DateTime @map("updated_at") @updatedAt
+
+  @@map("profiles")
+}
