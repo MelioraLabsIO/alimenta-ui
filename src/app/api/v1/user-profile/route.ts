@@ -30,5 +30,5 @@ export async function PUT(request: Request){
         return NextResponse.json({ message: "Failed to update user profile" }, { status: 500 });
     }
 
-    return NextResponse.json({ message: "User profile updated successfully" }, { status: 200 });
+    return NextResponse.json({ message: "User profile updated successfully", data: updatedProfile }, { status: 200 });
 }

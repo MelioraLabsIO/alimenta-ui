@@ -13,7 +13,8 @@ async function updateProfile( data: Partial<UpdateProfileInput>) {
     if (!response.ok) {
         throw new Error("Failed to update user profile");
     }
-    return response.json();
+    const result = await response.json()
+    return result?.data;
 }
 
 export { updateProfile };
