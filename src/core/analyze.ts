@@ -1,6 +1,8 @@
 // src/core/analyze.ts
 
-import {aiClient} from "@/services/ai/aiClient";
+// import {aiClient} from "@/services/ai/aiClient";
+
+import {aiClient} from "@/domain/ai/aiClient";
 
 export type AnalyzeInput = {
     text: string;
