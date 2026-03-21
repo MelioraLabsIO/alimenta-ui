@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,10 +18,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { X, Plus, User, Settings2, Sparkles } from "lucide-react";
+import {useMutation, useQuery} from "@tanstack/react-query";
+import {getUserProfile} from "@/services/profile/queries";
+import {updateProfile} from "@/services/profile/mutations";
+
+type UserProfileResponse = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  fullName: string;
+};
 
 export default function SettingsPage() {
   // Profile
-  const [name, setName] = useState("Eric Hernandez");
+  const [name, setName] = useState({ firstName: "", lastName: "" });
 
   // Preferences
   const [units, setUnits] = useState("metric");
@@ -32,6 +43,40 @@ export default function SettingsPage() {
   // AI toggles
   const [autoExtract, setAutoExtract] = useState(true);
   const [askBeforeSave, setAskBeforeSave] = useState(false);
+
+  /********************************************* QUERIES ************************************************/
+  const { data, isLoading, error } = useQuery<UserProfileResponse>({
+    queryKey: ["user-profile"],
+    queryFn: async () => getUserProfile(),
+  });
+  
+  /********************************************* MUTATIONS ************************************************/
+  const {mutate: mutateUserProfile} = useMutation({
+    mutationKey: ["update-user-profile"],
+    mutationFn: async (data: Partial<UserProfileResponse>) => updateProfile(data),
+    onSuccess: () => {
+      toast.success("Profile updated successfully");
+    },
+    onError: () => {
+      toast.error("Failed to update profile, please try again.");
+    },
+  });
+
+  useEffect(() => {
+    if (data) {
+      setName({
+        firstName: data.firstName ?? "",
+        lastName: data.lastName ?? "",
+      });
+    }
+  }, [data]);
+
+  const email = data?.email ?? "";
+  const fullName = `${name.firstName} ${name.lastName}`.trim();
+  const avatarInitials = data
+    ? `${data.firstName[0] ?? ""}${data.lastName[0] ?? ""}`.toUpperCase()
+    : "";
+  const hasModifiedProfile = data && data.firstName !== name.firstName || data && data.lastName !== name.lastName;
 
   function addTag() {
     const t = tagInput.trim();
@@ -46,7 +91,10 @@ export default function SettingsPage() {
   }
 
   function handleSaveProfile() {
-    toast.success("Profile saved!");
+    mutateUserProfile({
+      firstName: name.firstName,
+      lastName: name.lastName
+    });
   }
 
   function handleSavePreferences() {
@@ -73,12 +121,13 @@ export default function SettingsPage() {
           <div className="flex items-center gap-4">
             <Avatar className="h-16 w-16">
               <AvatarFallback className="text-xl bg-primary/20 text-primary font-bold">
-                EH
+                {isLoading ? ".." : avatarInitials}
               </AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-sm font-medium">{name}</p>
-              <p className="text-xs text-muted-foreground">eric@example.com</p>
+              <p className="text-sm font-medium">{isLoading ? "Loading..." : fullName}</p>
+              <p className="text-xs text-muted-foreground">{email}</p>
+              {error ? <p className="text-xs text-destructive mt-1">Error loading user profile.</p> : null}
               <Button variant="outline" size="sm" className="mt-2 h-7 text-xs">
                 Change avatar
               </Button>
@@ -89,25 +138,40 @@ export default function SettingsPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="name">Display name</Label>
+              <Label htmlFor="firstName">First name</Label>
               <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                id="firstName"
+                value={name.firstName}
+                type={"text"}
+                onChange={(e) =>
+                  setName((prev) => ({ ...prev, firstName: e.target.value }))
+                }
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="lastName">Last name</Label>
               <Input
-                id="email"
-                value="eric@example.com"
-                readOnly
-                className="opacity-60 cursor-not-allowed"
+                id="lastName"
+                type={"text"}
+                value={name.lastName}
+                onChange={(e) =>
+                  setName((prev) => ({ ...prev, lastName: e.target.value }))
+                }
               />
             </div>
           </div>
 
-          <Button size="sm" onClick={handleSaveProfile}>Save profile</Button>
+          <div className="space-y-1.5">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                value={email}
+                readOnly
+                className="opacity-60 cursor-not-allowed"
+              />
+            </div>
+
+          <Button size="sm" disabled={!hasModifiedProfile} onClick={handleSaveProfile}>Save profile</Button>
         </CardContent>
       </Card>
 

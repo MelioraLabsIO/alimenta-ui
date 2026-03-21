@@ -1,9 +1,11 @@
 // src/app/layout.tsx
 import type {Metadata} from "next";
 import {Geist, Geist_Mono} from "next/font/google";
+// import {QueryProvider} from "@/components/query-provider";
 import {ThemeProvider} from "@/components/theme-provider";
 import {Toaster} from "@/components/ui/sonner";
 import "./globals.css";
+import ReactQueryProvider from "@/providers/QueryProvider";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -32,8 +34,10 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
         >
-            {children}
-            <Toaster richColors position="top-right"/>
+            <ReactQueryProvider>
+                {children}
+                <Toaster richColors position="top-right"/>
+            </ReactQueryProvider>
         </ThemeProvider>
         </body>
         </html>
