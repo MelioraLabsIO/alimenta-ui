@@ -1,6 +1,6 @@
 // src/core/types.ts
 
-export type MealType = "breakfast" | "lunch" | "dinner" | "snack" | "other";
+export type MealType = "Breakfast" | "Lunch" | "Dinner" | "Snack" | "Other";
 
 export type FoodItem = {
   id: string;
@@ -17,10 +17,10 @@ export type MoodMetrics = {
 };
 
 export type NutritionSummary = {
-  calories?: number;
-  protein?: number;
-  carbs?: number;
-  fat?: number;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
 };
 
 export type Meal = {
