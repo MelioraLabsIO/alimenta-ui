@@ -1,3 +1,17 @@
+model CatalogFood {
+  id       String   @id @default(uuid())
+  name     String
+  calories Decimal?
+  protein  Decimal?
+  carbs    Decimal?
+  fat      Decimal?
+
+  mealItems              MealItem[]
+  preferenceRestrictions PreferenceRestriction[]
+
+  @@map("catalog_foods")
+}
+
 model Meal {
   id        String   @id @default(uuid())
   title     String
@@ -9,25 +23,32 @@ model Meal {
   foodTime  DateTime @map("food_timee")
   createdAt DateTime @map("created_at") @default(now())
   updatedAt DateTime @map("updated_at") @updatedAt
-  foodItem Food[]
+
+  userId String @db.Uuid
+  user   Profile @relation(fields: [userId], references: [id])
+
+  items MealItem[]
 
   @@map("meals")
 }
 
-model Food {
-  id       String  @id @default(uuid())
-  name     String
-  quantity Decimal
-  unit     String
-  foodId   String @map("food_id")
-  food     Meal    @relation(fields: [foodId], references: [id])
+model MealItem {
+  id            String  @id @default(uuid())
+  mealId        String // Foreign
+  catalogFoodId String // Foreign
+  quantity      Decimal
+  unit          String
 
-  @@map("foods")
+  meal        Meal        @relation(fields: [mealId], references: [id])
+  catalogFood CatalogFood @relation(fields: [catalogFoodId], references: [id])
+
+  @@unique([mealId, catalogFoodId])
+  @@map("meal_items")
 }
 
 enum MealType {
-  MEAL
   BREAKFAST
+  LUNCH
   DINNER
   SNACK
   OTHER

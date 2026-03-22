@@ -1,16 +1,32 @@
 model Profile {
-  id          String    @id @db.Uuid
-  firstName   String    @map("first_name")
-  lastName    String    @map("last_name")
-  email       String    @unique
-  username    String?   @unique
-  lastLogin   DateTime? @map("last_login")
-  dateOfBirth DateTime? @map("date_of_birth")
-  bio         String?
+  id           String       @id @db.Uuid
+  firstName    String       @map("first_name")
+  lastName     String       @map("last_name")
+  email        String       @unique
+  username     String?      @unique
+  avatar       String?
+  lastLogin    DateTime?    @map("last_login")
+  dateOfBirth  DateTime?    @map("date_of_birth")
+  bio          String?
 
-  // Timestamps
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  meals        Meal[]
+  preferences  Preferences?
+
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
 
   @@map("profiles")
+}
+
+model Preferences {
+  id         String   @id @default(uuid())
+  profileId  String   @unique @db.Uuid
+  units      String
+  goal       String
+
+  profile    Profile  @relation(fields: [profileId], references: [id])
+  restrictions PreferenceRestriction[]
+
+  @@index([profileId])
+  @@map("preferences")
 }

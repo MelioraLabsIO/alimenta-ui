@@ -1,0 +1,17 @@
+model PreferenceRestriction {
+  id             String           @id @default(uuid())
+  type           RestrictionType
+  preferencesId  String
+  catalogFoodId  String
+
+  preferences    Preferences      @relation(fields: [preferencesId], references: [id])
+  catalogFood    CatalogFood      @relation(fields: [catalogFoodId], references: [id])
+
+  @@unique([preferencesId, catalogFoodId, type])
+  @@map("preference_restrictions")
+}
+
+enum RestrictionType {
+  DISLIKE
+  ALLERGY
+}
