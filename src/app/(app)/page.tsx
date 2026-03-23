@@ -22,13 +22,14 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Meal } from "@/core/types";
+import { LogMealDialog } from "@/components/meals/log-meal-dialog";
 
 const MEAL_TYPE_COLORS: Record<string, string> = {
-  breakfast: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-  lunch: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  dinner: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  snack: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-  other: "bg-muted text-muted-foreground",
+  Breakfast: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
+  Lunch: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  Dinner: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+  Snack: "bg-purple-500/10 text-purple-400 border-purple-500/20",
+  Other: "bg-muted text-muted-foreground",
 };
 
 function MealRow({ meal, onDuplicate }: { meal: Meal; onDuplicate: (id: string) => void }) {
@@ -123,11 +124,7 @@ export default function DashboardPage() {
             {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
           </p>
         </div>
-        <Link href="/app/log">
-          <Button className="gap-2">
-            <Utensils className="h-4 w-4" /> Log Meal
-          </Button>
-        </Link>
+        <LogMealDialog />
       </div>
 
       {/* KPI cards */}

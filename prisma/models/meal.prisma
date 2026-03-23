@@ -13,18 +13,18 @@ model CatalogFood {
 }
 
 model Meal {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   title     String
   notes     String?
   type      MealType
   mood      Int
   energy    Int
   digestion Int
-  foodTime  DateTime @map("food_timee")
-  createdAt DateTime @map("created_at") @default(now())
-  updatedAt DateTime @map("updated_at") @updatedAt
+  foodTime  DateTime  @map("food_timee")
+  createdAt DateTime? @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
 
-  userId String @db.Uuid
+  userId String  @db.Uuid
   user   Profile @relation(fields: [userId], references: [id])
 
   items MealItem[]

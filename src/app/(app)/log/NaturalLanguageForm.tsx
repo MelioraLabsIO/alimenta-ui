@@ -1,7 +1,7 @@
 import {useState} from "react";
 import {ParsedMeal} from "@/core/types";
 import {analyzeMeal} from "@/core/analyze/analyzeMeal";
-import {mealsRepo} from "@/core/meals/mealsRepo";
+import {logMeal} from "@/services/meal/mutations";
 import {toast} from "sonner";
 import {Button} from "@/components/ui/button";
 import {Label} from "@/components/ui/label";
@@ -11,7 +11,7 @@ import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Badge} from "@/components/ui/badge";
 import {ManualForm} from "@/app/(app)/log/ManualForm";
 
-export function NaturalLanguageForm() {
+export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {
     const [text, setText] = useState("");
     const [loading, setLoading] = useState(false);
     const [parsed, setParsed] = useState<ParsedMeal | null>(null);
@@ -38,19 +38,36 @@ export function NaturalLanguageForm() {
         }
     }
 
-    function handleConfirm() {
+    async function handleConfirm() {
         if (!parsed) return;
-        mealsRepo.create({
-            title: parsed.title,
-            mealType: "Other",
-            date: new Date().toISOString(),
-            foods: parsed.foods,
-            nutrition: parsed.nutrition,
-        });
-        toast.success("Meal saved!", {description: parsed.title});
-        setSaved(true);
-        setParsed(null);
-        setText("");
+        try {
+            await logMeal({
+                title: parsed.title,
+                mealType: "Other",
+                date: new Date().toISOString(),
+                foods: parsed.foods.map(f => ({ ...f, quantity: String(f.quantity) })),
+                nutrition: {
+                    calories: String(parsed.nutrition.calories),
+                    protein: String(parsed.nutrition.protein),
+                    carbs: String(parsed.nutrition.carbs),
+                    fat: String(parsed.nutrition.fat),
+                },
+                mood: 3,
+                energy: 3,
+                digestion: 3,
+                notes: "",
+            });
+            toast.success("Meal saved!", {description: parsed.title});
+            setSaved(true);
+            setParsed(null);
+            setText("");
+            if (onSuccess) {
+                onSuccess();
+            }
+        } catch (e) {
+            console.error("Error saving meal:", e);
+            toast.error("Failed to save meal. Please try again.");
+        }
     }
 
     if (editMode && parsed) {
@@ -62,6 +79,7 @@ export function NaturalLanguageForm() {
                     </Button>
                 </div>
                 <ManualForm
+                    onSuccess={onSuccess}
                     prefill={{
                         title: parsed.title,
                         foods: parsed.foods,

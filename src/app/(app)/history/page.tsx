@@ -145,7 +145,7 @@ export default function HistoryPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All types</SelectItem>
-                {(["breakfast","lunch","dinner","snack","other"] as MealType[]).map((t) => (
+                {(["Breakfast","Lunch","Dinner","Snack","Other"] as MealType[]).map((t) => (
                   <SelectItem key={t} value={t} className="capitalize">{t}</SelectItem>
                 ))}
               </SelectContent>

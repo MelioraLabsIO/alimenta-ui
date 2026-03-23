@@ -35,9 +35,7 @@ const UNITS = ["g", "ml", "oz", "cup", "tbsp", "tsp", "piece", "slice", "serving
 // ─── Manual Form ─────────────────────────────────────────────────────────────
 
 
-export function ManualForm({prefill}: { prefill?: Partial<Meal> }) {
-    const router = useRouter();
-
+export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSuccess?: () => void }) {
     const form = useForm<MealFormValues>({
         defaultValues: {
             title: prefill?.title ?? "",
@@ -73,7 +71,11 @@ export function ManualForm({prefill}: { prefill?: Partial<Meal> }) {
         onSuccess: (data) => {
             console.log("Meal logged successfully:", data);
             toast.success("Meal logged successfully!" );
-            redirect("/history")
+            // if (onSuccess) {
+            //     onSuccess();
+            // } else {
+            //     redirect("/history")
+            // }
         },
         onError: (error) => {
             console.error("Error logging meal:", error);
@@ -84,10 +86,9 @@ export function ManualForm({prefill}: { prefill?: Partial<Meal> }) {
     /********************************************* HANDLERS ************************************************/
     function handleSave(data: MealFormValues) {
         console.log("handleSave", data)
-
-        reset();
-        router.replace("/log", {scroll: true});
+        mutate(data)
     }
+
     const sliderLabel = (v: number) => ["", "Poor", "Fair", "Okay", "Good", "Great"][v] ?? "";
 
     return (
