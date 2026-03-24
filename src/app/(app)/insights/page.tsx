@@ -31,7 +31,7 @@ export default function InsightsPage() {
       .map((m) => ({
         title: m.title,
         score: ((m.metrics!.mood + m.metrics!.energy) / 2),
-        mealType: m.mealType,
+        mealType: m.type,
       }))
       .sort((a, b) => b.score - a.score)
       .slice(0, 5);

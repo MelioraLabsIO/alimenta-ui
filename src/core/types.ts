@@ -34,9 +34,11 @@ export type NutritionSummary = {
 export type Meal = {
     id: string;
     title: string;
-    mealType: MealType;
+    type: MealType;
     date: string; // ISO string
     foods: FoodItem[];
+    notes?: string;
+    mood?: number;
     nutrition?: NutritionSummary;
     metrics?: MoodMetrics;
     createdAt: string;

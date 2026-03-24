@@ -247,10 +247,10 @@ export default function HistoryPage() {
         return allMeals.filter((m) => {
             if (search && !m.title.toLowerCase().includes(search.toLowerCase()) &&
                 !m.foods.some((f) => f.name.toLowerCase().includes(search.toLowerCase()))) return false;
-            if (typeFilter !== "all" && m.mealType !== typeFilter) return false;
+            if (typeFilter !== "all" && m.type !== typeFilter) return false;
             if (dateFrom && new Date(m.date) < new Date(dateFrom)) return false;
-            if (dateTo && new Date(m.date) > new Date(dateTo + "T23:59:59")) return false;
-            return true;
+            return !(dateTo && new Date(m.date) > new Date(dateTo + "T23:59:59"));
+
         });
     }, [allMeals, search, typeFilter, dateFrom, dateTo]);
 
@@ -386,7 +386,7 @@ export default function HistoryPage() {
                             </TableHeader>
                             <TableBody>
                                 {displayMode === "whole"
-                                    ? data.map((meal) => (
+                                    ? data.map((meal: Meal) => (
                                         <TableRow key={meal.id} className="border-border/50 hover:bg-muted/30">
                                             <TableCell className="font-medium text-sm py-3">{meal.title}</TableCell>
                                             <TableCell>
@@ -438,15 +438,15 @@ export default function HistoryPage() {
                                                   className="border-border/50 hover:bg-muted/30">
                                             <TableCell className="font-medium text-sm py-3">{meal.title}</TableCell>
                                             <TableCell
-                                                className="text-xs text-muted-foreground max-w-[240px] sm:max-w-[320px] break-words">
+                                                className="text-xs text-muted-foreground max-w-60 sm:max-w-[320px] wrap-break-word">
                                                 {food.name} {food.quantity} {food.unit}
                                             </TableCell>
                                             <TableCell>
                                                 <Badge
                                                     variant="outline"
-                                                    className={`text-[10px] capitalize ${MEAL_TYPE_COLORS[meal.mealType]}`}
+                                                    className={`text-[10px] capitalize ${MEAL_TYPE_COLORS[meal.type]}`}
                                                 >
-                                                    {meal.mealType}
+                                                    {meal.type}
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="text-xs text-muted-foreground">
