@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAllMealsService } from "@/domain/meals/get-meal-entries";
 import {createMealEntry} from "@/domain/meals/create-meal-entry";
+import {deleteMealEntry} from "@/domain/meals/delete-meal-entry";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -36,4 +37,21 @@ export async function POST(request: NextRequest) {
 
     const mealSaved = await createMealEntry(body)
     return NextResponse.json(mealSaved, { status: 201 })
+}
+
+export async function DELETE(request: NextRequest) {
+    const {searchParams} = new URL(request.url)
+    const id = searchParams.get("id")
+    console.log("id", id)
+    if (!id) {
+        return NextResponse.json({ error: "Meal ID is required" }, { status: 400 });
+    }
+
+    const deletedMeal = await deleteMealEntry(id)
+    console.log("deletedMeal:", deletedMeal)
+    if (!deletedMeal) {
+        return NextResponse.json({ error: "Meal not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(deletedMeal, { status: 200 })
 }

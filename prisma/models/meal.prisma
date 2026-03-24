@@ -39,7 +39,7 @@ model MealItem {
   quantity      Decimal
   unit          String
 
-  meal        Meal        @relation(fields: [mealId], references: [id])
+  meal        Meal        @relation(fields: [mealId], references: [id], onDelete: Cascade)
   catalogFood CatalogFood @relation(fields: [catalogFoodId], references: [id])
 
   @@unique([mealId, catalogFoodId])

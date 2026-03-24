@@ -68,14 +68,14 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
         mutationFn: async (data: MealFormValues) => {
             return logMeal(data)
         },
-        onSuccess: (data) => {
-            console.log("Meal logged successfully:", data);
+        onSuccess: () => {
             toast.success("Meal logged successfully!" );
-            // if (onSuccess) {
-            //     onSuccess();
-            // } else {
-            //     redirect("/history")
-            // }
+            if (onSuccess) {
+                onSuccess();
+            } else {
+                redirect("/history")
+            }
+            reset()
         },
         onError: (error) => {
             console.error("Error logging meal:", error);

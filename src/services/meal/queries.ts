@@ -1,11 +1,14 @@
 async function getAllMeals() {
     const response = await fetch("/api/v1/meals");
 
+
     if (!response.ok) {
         throw new Error("Failed to fetch all meals");
     }
 
-    return response.json();
+    const result = response.json();
+    console.log("result", result);
+    return result;
 }
 
 async function getThisWeekMeals() {
