@@ -17,7 +17,7 @@ const seed: Meal[] = [
   {
     id: "m1",
     title: "Avocado Toast & Eggs",
-    mealType: "Breakfast",
+    type: "Breakfast",
     date: iso(0, 8),
     foods: [
       { id: "f1", name: "Sourdough bread", quantity: 2, unit: "slices" },
@@ -32,7 +32,7 @@ const seed: Meal[] = [
   {
     id: "m2",
     title: "Grilled Chicken Salad",
-    mealType: "Lunch",
+    type: "Lunch",
     date: iso(0, 13),
     foods: [
       { id: "f4", name: "Chicken breast", quantity: 180, unit: "g" },
@@ -48,7 +48,7 @@ const seed: Meal[] = [
   {
     id: "m3",
     title: "Pasta Bolognese",
-    mealType: "Dinner",
+    type: "Dinner",
     date: iso(1, 19),
     foods: [
       { id: "f8", name: "Spaghetti", quantity: 200, unit: "g" },
@@ -64,7 +64,7 @@ const seed: Meal[] = [
   {
     id: "m4",
     title: "Greek Yogurt & Berries",
-    mealType: "Snack",
+    type: "Snack",
     date: iso(1, 15),
     foods: [
       { id: "f12", name: "Greek yogurt", quantity: 200, unit: "g" },
@@ -79,7 +79,7 @@ const seed: Meal[] = [
   {
     id: "m5",
     title: "Oatmeal with Banana",
-    mealType: "Breakfast",
+    type: "Breakfast",
     date: iso(2, 8),
     foods: [
       { id: "f15", name: "Rolled oats", quantity: 80, unit: "g" },
@@ -94,7 +94,7 @@ const seed: Meal[] = [
   {
     id: "m6",
     title: "Salmon & Roasted Veggies",
-    mealType: "Dinner",
+    type: "Dinner",
     date: iso(2, 19),
     foods: [
       { id: "f18", name: "Salmon fillet", quantity: 200, unit: "g" },
@@ -109,7 +109,7 @@ const seed: Meal[] = [
   {
     id: "m7",
     title: "Protein Smoothie",
-    mealType: "Snack",
+    type: "Snack",
     date: iso(3, 10),
     foods: [
       { id: "f21", name: "Whey protein", quantity: 30, unit: "g" },
@@ -125,7 +125,7 @@ const seed: Meal[] = [
   {
     id: "m8",
     title: "Veggie Stir Fry",
-    mealType: "Lunch",
+    type: "Lunch",
     date: iso(3, 13),
     foods: [
       { id: "f25", name: "Tofu", quantity: 150, unit: "g" },
@@ -141,7 +141,7 @@ const seed: Meal[] = [
   {
     id: "m9",
     title: "Overnight Oats",
-    mealType: "Breakfast",
+    type: "Breakfast",
     date: iso(4, 8),
     foods: [
       { id: "f29", name: "Rolled oats", quantity: 70, unit: "g" },
@@ -157,7 +157,7 @@ const seed: Meal[] = [
   {
     id: "m10",
     title: "Burger & Fries",
-    mealType: "Dinner",
+    type: "Dinner",
     date: iso(5, 20),
     foods: [
       { id: "f33", name: "Beef burger", quantity: 1, unit: "whole" },
@@ -172,7 +172,7 @@ const seed: Meal[] = [
   {
     id: "m11",
     title: "Tuna Wrap",
-    mealType: "Lunch",
+    type: "Lunch",
     date: iso(5, 13),
     foods: [
       { id: "f36", name: "Whole wheat wrap", quantity: 1, unit: "large" },
@@ -188,7 +188,7 @@ const seed: Meal[] = [
   {
     id: "m12",
     title: "Scrambled Eggs & Toast",
-    mealType: "Breakfast",
+    type: "Breakfast",
     date: iso(6, 8),
     foods: [
       { id: "f40", name: "Eggs", quantity: 3, unit: "large" },

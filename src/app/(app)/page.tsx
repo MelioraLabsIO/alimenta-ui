@@ -46,9 +46,9 @@ function MealRow({ meal, onDuplicate }: { meal: Meal; onDuplicate: (id: string) 
       </div>
       <Badge
         variant="outline"
-        className={`text-[10px] capitalize shrink-0 ${MEAL_TYPE_COLORS[meal.mealType]}`}
+        className={`text-[10px] capitalize shrink-0 ${MEAL_TYPE_COLORS[meal.type]}`}
       >
-        {meal.mealType}
+        {meal.type}
       </Badge>
       <div className="flex gap-1 shrink-0">
         <Button variant="ghost" size="icon" className="h-7 w-7" asChild>

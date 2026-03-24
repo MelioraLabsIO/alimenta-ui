@@ -42,7 +42,7 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
             date: prefill?.date
                 ? new Date(prefill.date).toISOString().slice(0, 16)
                 : new Date().toISOString().slice(0, 16),
-            mealType: prefill?.mealType ?? "Lunch",
+            mealType: prefill?.type ?? "Lunch",
             foods: prefill?.foods?.map((f) => ({...f, id: uid(), quantity: String(f.quantity)})) ?? [emptyFood()],
             nutrition: {
                 calories: String(prefill?.nutrition?.calories ?? ""),
@@ -68,14 +68,14 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
         mutationFn: async (data: MealFormValues) => {
             return logMeal(data)
         },
-        onSuccess: (data) => {
-            console.log("Meal logged successfully:", data);
+        onSuccess: () => {
             toast.success("Meal logged successfully!" );
-            // if (onSuccess) {
-            //     onSuccess();
-            // } else {
-            //     redirect("/history")
-            // }
+            if (onSuccess) {
+                onSuccess();
+            } else {
+                redirect("/history")
+            }
+            reset()
         },
         onError: (error) => {
             console.error("Error logging meal:", error);
