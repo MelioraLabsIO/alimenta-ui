@@ -13,9 +13,12 @@ import { Utensils, Sparkles } from "lucide-react";
 import { ManualForm } from "@/app/(app)/log/ManualForm";
 import { NaturalLanguageForm } from "@/app/(app)/log/NaturalLanguageForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {useQueryClient} from "@tanstack/react-query";
 
 export function LogMealDialog() {
   const [open, setOpen] = useState(false);
+
+  const queryClient = useQueryClient();
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -41,7 +44,10 @@ export function LogMealDialog() {
 
             <div className="flex-1 mt-4 overflow-y-auto pr-2">
               <TabsContent value="manual" className="mt-0 pb-4">
-                <ManualForm onSuccess={() => setOpen(false)} />
+                <ManualForm onSuccess={() => {setOpen(false)
+
+                  queryClient.invalidateQueries({ queryKey: ["meals"] });
+                }} />
               </TabsContent>
 
               <TabsContent value="natural" className="mt-0 pb-4">
@@ -50,7 +56,9 @@ export function LogMealDialog() {
                     <Sparkles className="h-4 w-4 text-emerald-400" />
                     AI-Powered Parsing
                   </div>
-                  <NaturalLanguageForm onSuccess={() => setOpen(false)} />
+                  <NaturalLanguageForm onSuccess={() => {setOpen(false)
+                    queryClient.invalidateQueries({ queryKey: ["meals"] });
+                  }} />
                 </div>
               </TabsContent>
             </div>
