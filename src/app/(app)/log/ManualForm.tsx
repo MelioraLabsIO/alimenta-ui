@@ -85,7 +85,6 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
 
     /********************************************* HANDLERS ************************************************/
     function handleSave(data: MealFormValues) {
-        console.log("handleSave", data)
         mutate(data)
     }
 
