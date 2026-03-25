@@ -1,4 +1,6 @@
-async function getAllMeals() {
+import {Meal} from "@/core/types";
+
+async function getAllMeals(): Promise<Meal[]> {
     const response = await fetch("/api/v1/meals");
 
 

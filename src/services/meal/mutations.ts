@@ -27,5 +27,5 @@ export async function deleteMealById(id: string): Promise<Meal> {
         throw new Error("Failed to delete meal")
     }
 
-    return response as unknown as Meal;
+    return  response.json()
 }
