@@ -9,9 +9,14 @@ on:
 jobs:
     validate:
         runs-on: ubuntu-latest
+        environment: Production
 
         permissions:
             contents: read
+
+        env:
+            DATABASE_URL: ${{ secrets.DATABASE_URL }}
+            NEXT_PUBLIC_BASE_URL: ${{ secrets.NEXT_PUBLIC_BASE_URL }}
 
         steps:
             -   name: Checkout repository
@@ -28,8 +33,6 @@ jobs:
 
             -   name: Generate Prisma Client
                 run: npx prisma generate
-                env:
-                    DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
             -   name: Lint
                 run: npm run lint
@@ -39,6 +42,3 @@ jobs:
 
             -   name: Build Next.js
                 run: npm run build
-                env:
-                    DATABASE_URL: ${{ secrets.DATABASE_URL }}
-                    NEXT_PUBLIC_BASE_URL: ${{ secrets.NEXT_PUBLIC_BASE_URL }}
