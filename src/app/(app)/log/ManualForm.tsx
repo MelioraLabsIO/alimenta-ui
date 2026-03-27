@@ -59,7 +59,7 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
             energy: prefill?.metrics?.energy ?? 3,
             digestion: prefill?.metrics?.digestion ?? 3,
             notes: prefill?.metrics?.notes ?? "",
-        }now 
+        }
     })
     const {register, control, handleSubmit, reset, formState: {errors}} = form
     const {fields: foods, append: addFood, remove: removeFood} = useFieldArray({
