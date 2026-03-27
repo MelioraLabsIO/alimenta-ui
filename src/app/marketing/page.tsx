@@ -1,8 +1,8 @@
 // src/app/(marketing)/page.tsx
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Leaf, BarChart2, Zap } from "lucide-react";
+import {Button} from "@/components/ui/button";
+import {Badge} from "@/components/ui/badge";
+import {ArrowRight, BarChart2, Leaf, Zap} from "lucide-react";
 
 export default function LandingPage() {
   return (

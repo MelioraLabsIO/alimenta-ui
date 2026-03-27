@@ -1,10 +1,10 @@
-import {MealType} from "@/core/types";
+import {EMealType} from "@/core/types";
 
 export type FoodRow = { id: string; name: string; quantity: string; unit: string };
 export type MealFormValues = {
     title: string;
     date: string;
-    mealType: MealType;
+    mealType: EMealType;
     foods: FoodRow[];
     nutrition: {
         calories: string;
