@@ -36,6 +36,10 @@ export async function POST(request: NextRequest) {
     console.log("body:", body)
 
     const mealSaved = await createMealEntry(body)
+    if (!mealSaved) {
+        return NextResponse.json({ error: "Failed to create meal entry" }, { status: 500 })
+    }
+
     return NextResponse.json(mealSaved, { status: 201 })
 }
 

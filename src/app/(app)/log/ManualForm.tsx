@@ -2,8 +2,8 @@
 
 import {DevTool} from "@hookform/devtools";
 
-import {redirect, useRouter} from "next/navigation";
-import {Meal, MealType} from "@/core/types";
+import {redirect} from "next/navigation";
+import {EMealType, Meal} from "@/core/types";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {Textarea} from "@/components/ui/textarea";
@@ -13,10 +13,13 @@ import {Separator} from "@/components/ui/separator";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
 import {Plus, Trash2} from "lucide-react";
 import {Controller, useFieldArray, useForm} from "react-hook-form";
+import {zodResolver} from "@hookform/resolvers/zod";
 import {toast} from "sonner";
 import {useMutation} from "@tanstack/react-query";
 import {logMeal} from "@/services/meal/mutations";
 import {FoodRow, MealFormValues} from "@/core/meals/types";
+import {z} from "zod";
+import {MEAL_TYPES, mealSchema} from "@/contracts/meals/create-meal.schema";
 
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -29,20 +32,22 @@ function emptyFood(): FoodRow {
     return {id: uid(), name: "", quantity: "1", unit: "g"};
 }
 
-const MEAL_TYPES: MealType[] = ["Breakfast", "Lunch", "Dinner", "Snack", "Other"];
 const UNITS = ["g", "ml", "oz", "cup", "tbsp", "tsp", "piece", "slice", "serving", "whole", "large", "medium", "small"];
 
 // ─── Manual Form ─────────────────────────────────────────────────────────────
 
 
+type MealFormSchema = z.infer<typeof mealSchema>;
+
 export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSuccess?: () => void }) {
-    const form = useForm<MealFormValues>({
+    const form = useForm<MealFormSchema>({
+        resolver: zodResolver(mealSchema),
         defaultValues: {
             title: prefill?.title ?? "",
             date: prefill?.date
                 ? new Date(prefill.date).toISOString().slice(0, 16)
                 : new Date().toISOString().slice(0, 16),
-            mealType: prefill?.type ?? "Lunch",
+            mealType: prefill?.type ?? EMealType.LUNCH,
             foods: prefill?.foods?.map((f) => ({...f, id: uid(), quantity: String(f.quantity)})) ?? [emptyFood()],
             nutrition: {
                 calories: String(prefill?.nutrition?.calories ?? ""),
@@ -54,7 +59,7 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
             energy: prefill?.metrics?.energy ?? 3,
             digestion: prefill?.metrics?.digestion ?? 3,
             notes: prefill?.metrics?.notes ?? "",
-        }
+        }now 
     })
     const {register, control, handleSubmit, reset, formState: {errors}} = form
     const {fields: foods, append: addFood, remove: removeFood} = useFieldArray({
@@ -65,7 +70,7 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
     /********************************************* MUTATIONS ************************************************/
     const {mutate} = useMutation({
         mutationKey: ["log-meal"],
-        mutationFn: async (data: MealFormValues) => {
+        mutationFn: async (data: MealFormSchema) => {
             return logMeal(data)
         },
         onSuccess: () => {
@@ -84,7 +89,7 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
     })
 
     /********************************************* HANDLERS ************************************************/
-    function handleSave(data: MealFormValues) {
+    function handleSave(data: MealFormSchema) {
         console.log("handleSave", data)
         mutate(data)
     }
@@ -103,7 +108,7 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
                                 id="title"
                                 placeholder="e.g. Avocado Toast & Eggs"
                                 className={errors.title ? "border-destructive" : ""}
-                                {...register("title", {required: "Meal title is required"})}
+                                {...register("title")}
                             />
                             {errors.title && <p className="text-xs text-destructive">{errors.title.message}</p>}
                         </div>
@@ -113,7 +118,7 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
                                 id="date"
                                 type="datetime-local"
                                 className={errors.date ? "border-destructive" : ""}
-                                {...register("date", {required: "Date is required"})}
+                                {...register("date")}
                             />
                             {errors.date && <p className="text-xs text-destructive">{errors.date.message}</p>}
                         </div>
@@ -122,7 +127,6 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
                             <Controller
                                 control={control}
                                 name="mealType"
-                                rules={{required: "Meal type is required"}}
                                 render={({field}) => (
                                     <Select onValueChange={field.onChange} value={field.value}>
                                         <SelectTrigger>
@@ -150,14 +154,16 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
                                 <Plus className="h-3 w-3"/> Add food
                             </Button>
                         </div>
-                        {errors.foods && <p className="text-xs text-destructive">All food items need a name</p>}
+                        {errors.foods && <p className="text-xs text-destructive">
+                            {errors.foods.root?.message || (Array.isArray(errors.foods) && errors.foods.some(f => f?.name) ? "All food items need a name" : "")}
+                        </p>}
                         <div className="space-y-2">
                             {foods.map((food, index) => (
                                 <div key={food.id} className="flex gap-2 items-center">
                                     <Input
                                         placeholder="Food name"
                                         className="flex-1"
-                                        {...register(`foods.${index}.name` as const, {required: true})}
+                                        {...register(`foods.${index}.name` as const)}
                                     />
                                     <Input
                                         placeholder="Qty"

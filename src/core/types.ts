@@ -34,7 +34,7 @@ export type NutritionSummary = {
 export type Meal = {
     id: string;
     title: string;
-    type: MealType;
+    type: EMealType;
     date: string; // ISO string
     foods: FoodItem[];
     notes?: string;

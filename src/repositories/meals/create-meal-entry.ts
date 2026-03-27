@@ -4,17 +4,15 @@ import prisma from "@/lib/prisma/prisma";
 
 export async function createMealEntryRepository(meal: MealFormValues, userId: string) {
     return prisma.meal.create({
-
         data: {
             userId,
             title: meal.title,
-            type: "DINNER",
+            type: meal.mealType,
             notes: meal.notes,
-            mood: Math.round(Number(meal.mood)) || 0,
-            energy: Math.round(Number(meal.energy)) || 0,
-            digestion: Math.round(Number(meal.digestion)) || 0,
+            mood: meal.mood || 0,
+            energy: meal.energy || 0,
+            digestion: meal.digestion || 0,
             foodTime: new Date(meal.date),
-
             items: {
                 create: (meal.foods || []).map(food => {
                     const isUUID = food.id && food.id.length === 36;
