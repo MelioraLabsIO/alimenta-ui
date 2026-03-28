@@ -15,7 +15,7 @@ export async function createMealEntryRepository(meal: MealFormValues, userId: st
             foodTime: new Date(meal.date),
             items: {
                 create: (meal.foods || []).map(food => {
-                    const isUUID = food.id && food.id.length === 36;
+                    const isUUID = food.id && food.id.length === 36 && !food.id.includes("-") === false; // Basic check for UUID
                     const catalogFoodData: any = isUUID ? {
                         connect: { id: food.id }
                     } : {

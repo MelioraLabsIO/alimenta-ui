@@ -82,7 +82,6 @@ export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {
                     onSuccess={onSuccess}
                     prefill={{
                         title: parsed.title,
-                        foods: parsed.foods,
                         nutrition: parsed.nutrition,
                     }}
                 />

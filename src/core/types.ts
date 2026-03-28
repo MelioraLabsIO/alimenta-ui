@@ -1,7 +1,5 @@
 // src/core/types.ts
 
-export type MealType = "Breakfast" | "Lunch" | "Dinner" | "Snack" | "Other";
-
 export enum EMealType {
     BREAKFAST = "BREAKFAST",
     LUNCH = "LUNCH",
@@ -10,18 +8,40 @@ export enum EMealType {
     OTHER = "OTHER"
 }
 
-export type FoodItem = {
+export type CatalogFood = {
     id: string;
     name: string;
-    quantity: number;
-    unit: string;
+    calories: number | null;
+    protein: number | null;
+    carbs: number | null;
+    fat: number | null;
 };
 
-export type MoodMetrics = {
-    mood: number; // 1–5
-    energy: number; // 1–5
-    digestion: number; // 1–5
-    notes?: string;
+export type MealItem = {
+    id: string;
+    mealId: string;
+    catalogFoodId: string;
+    quantity: number;
+    unit: string;
+    catalogFood: CatalogFood;
+};
+
+export type Meal = {
+    id: string;
+    userId?: string;
+    title: string;
+    type: EMealType;
+    foodTime?: string | Date;
+    notes?: string | null;
+    mood?: number;
+    energy?: number;
+    digestion?: number;
+    items?: MealItem[];
+    createdAt?: string | Date | null;
+    updatedAt?: string | Date | null;
+
+    // Optional UI-specific convenience fields (can be calculated)
+    nutrition?: NutritionSummary;
 };
 
 export type NutritionSummary = {
@@ -31,19 +51,16 @@ export type NutritionSummary = {
     fat: number;
 };
 
-export type Meal = {
+// --- Legacy / Derived Types ---
+// Keeping FoodItem for now if needed by other components, but marking as derived
+export type FoodItem = {
     id: string;
-    title: string;
-    type: EMealType;
-    date: string; // ISO string
-    foods: FoodItem[];
-    notes?: string;
-    mood?: number;
-    nutrition?: NutritionSummary;
-    metrics?: MoodMetrics;
-    createdAt: string;
-    updatedAt: string;
+    name: string;
+    quantity: number;
+    unit: string;
+    catalogFood?: CatalogFood;
 };
+
 
 export type ParsedMeal = {
     title: string;

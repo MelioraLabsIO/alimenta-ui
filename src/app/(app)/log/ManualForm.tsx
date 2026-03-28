@@ -44,21 +44,26 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
         resolver: zodResolver(mealSchema),
         defaultValues: {
             title: prefill?.title ?? "",
-            date: prefill?.date
-                ? new Date(prefill.date).toISOString().slice(0, 16)
+            date: prefill?.foodTime
+                ? new Date(prefill.foodTime).toISOString().slice(0, 16)
                 : new Date().toISOString().slice(0, 16),
             mealType: prefill?.type ?? EMealType.LUNCH,
-            foods: prefill?.foods?.map((f) => ({...f, id: uid(), quantity: String(f.quantity)})) ?? [emptyFood()],
+            foods: ((prefill?.items as any) || [])?.map((f: any) => ({
+                id: f.catalogFoodId,
+                name: f.catalogFood.name,
+                quantity: String(f.quantity),
+                unit: f.unit
+            })) ?? [{...emptyFood(), id: ""}],
             nutrition: {
                 calories: String(prefill?.nutrition?.calories ?? ""),
                 protein: String(prefill?.nutrition?.protein ?? ""),
                 carbs: String(prefill?.nutrition?.carbs ?? ""),
                 fat: String(prefill?.nutrition?.fat ?? ""),
             },
-            mood: prefill?.metrics?.mood ?? 3,
-            energy: prefill?.metrics?.energy ?? 3,
-            digestion: prefill?.metrics?.digestion ?? 3,
-            notes: prefill?.metrics?.notes ?? "",
+            mood: prefill?.mood ?? 3,
+            energy: prefill?.energy ?? 3,
+            digestion: prefill?.digestion ?? 3,
+            notes: prefill?.notes ?? "",
         }
     })
     const {register, control, handleSubmit, reset, formState: {errors, isSubmitting}} = form
@@ -89,7 +94,7 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
     })
 
     /********************************************* HANDLERS ************************************************/
-    function handleSave(data: MealFormValues) {
+    function handleSave(data: MealFormSchema) {
         mutate(data)
     }
 
@@ -149,7 +154,7 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
                             <Label>Foods <span className="text-destructive">*</span></Label>
-                            <Button variant="outline" size="sm" onClick={() => addFood(emptyFood())}
+                            <Button variant="outline" size="sm" onClick={() => addFood({...emptyFood(), id: ""})}
                                     className="gap-1.5 h-7 text-xs" type="button">
                                 <Plus className="h-3 w-3"/> Add food
                             </Button>
@@ -219,7 +224,7 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
                                         type="number"
                                         min={0}
                                         placeholder="—"
-                                        {...register(name as `nutrition.${keyof MealFormValues["nutrition"]}`)}
+                                        {...register(name as `nutrition.${Extract<keyof MealFormValues["nutrition"], string>}`)}
                                     />
                                 </div>
                             ))}
@@ -273,9 +278,9 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
                         </div>
                     </div>
                     {
-                        <Button type={"submit"} className="w-full sm:w-auto" disabled={isPending}>
+                        <Button type={"submit"} className="w-full sm:w-auto" disabled={isSubmitting || isPending}>
                             {
-                                isPending ? (
+                                isSubmitting || isPending ? (
                                     <Loader2 className="h-4 w-4 mr-2 animate-spin"/>
                                 ) : (
                                     <span>

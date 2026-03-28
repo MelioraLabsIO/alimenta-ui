@@ -9,5 +9,12 @@ export function getMeals(userId?: string, from?: Date, to?: Date) {
                 lte: to,
             },
         },
+        include: {
+            items: {
+                include: {
+                    catalogFood: true,
+                },
+            },
+        },
     });
 }

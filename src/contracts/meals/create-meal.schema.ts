@@ -1,11 +1,11 @@
 import {EMealType} from "@/core/types";
 import {z} from "zod";
 
-export const MEAL_TYPES: EMealType[] = [EMealType.BREAKFAST, EMealType.LUNCH, EMealType.DINNER, EMealType.SNACK, EMealType.OTHER];
+export const MEAL_TYPES = [EMealType.BREAKFAST, EMealType.LUNCH, EMealType.DINNER, EMealType.SNACK, EMealType.OTHER] as const;
 export const mealSchema = z.object({
     title: z.string().min(1, "Meal title is required"),
     date: z.string().min(1, "Date is required"),
-    mealType: z.enum(MEAL_TYPES),
+    mealType: z.nativeEnum(EMealType),
     foods: z.array(z.object({
         id: z.string(),
         name: z.string().min(1, "Food name is required"),
