@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {ParsedMeal} from "@/core/types";
+import {EMealType, ParsedMeal} from "@/core/types";
 import {analyzeMeal} from "@/core/analyze/analyzeMeal";
 import {logMeal} from "@/services/meal/mutations";
 import {toast} from "sonner";
@@ -43,7 +43,7 @@ export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {
         try {
             await logMeal({
                 title: parsed.title,
-                mealType: "Other",
+                mealType: EMealType.OTHER,
                 date: new Date().toISOString(),
                 foods: parsed.foods.map(f => ({ ...f, quantity: String(f.quantity) })),
                 nutrition: {
