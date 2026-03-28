@@ -7,10 +7,9 @@ export const dynamic = "force-dynamic";
 
 export async function DELETE(
     _request: NextRequest,
-    ctx: RouteContext<'/api/v1/meals/[id]'>
+    ctx: { params: Promise<{ id: string }> }
 ) {
-    const result = await ctx.params;
-    const id = result.id
+    const { id } = await ctx.params;
 
     if (!id) {
         return NextResponse.json({error: "Meal ID is required"}, {status: 400});

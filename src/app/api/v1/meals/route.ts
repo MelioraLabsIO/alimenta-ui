@@ -33,7 +33,6 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
     const body = await request.json();
-    console.log("body:", body)
 
     const mealSaved = await createMealEntry(body)
     if (!mealSaved) {
@@ -46,13 +45,11 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
     const {searchParams} = new URL(request.url)
     const id = searchParams.get("id")
-    console.log("id", id)
     if (!id) {
         return NextResponse.json({ error: "Meal ID is required" }, { status: 400 });
     }
 
     const deletedMeal = await deleteMealEntry(id)
-    console.log("deletedMeal:", deletedMeal)
     if (!deletedMeal) {
         return NextResponse.json({ error: "Meal not found" }, { status: 404 });
     }

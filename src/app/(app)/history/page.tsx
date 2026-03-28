@@ -200,13 +200,12 @@ function MealDetailDialog({
 export default function HistoryPage() {
     const queryClient = useQueryClient();
 
-    const [allMeals, setAllMeals] = useState<Meal[]>(() => mealsRepo.list());
     const [viewState, dispatch] = useReducer(historyViewReducer, initialHistoryViewState);
     const {search, typeFilter, dateFrom, dateTo, displayMode} = viewState;
     const [selected, setSelected] = useState<Meal | null>(null);
 
     /********************************************* QUERIES ************************************************/
-    const {data, isLoading} = useQuery({
+    const {data: allMeals, isLoading} = useQuery({
         queryKey: ["meals"],
         queryFn: () => getAllMeals(),
     })
@@ -228,9 +227,8 @@ export default function HistoryPage() {
         }
     })
 
-    console.log("data", data)
-
     const filtered = useMemo(() => {
+        if (!allMeals) return []
         return allMeals.filter((m) => {
             if (search && !m.title.toLowerCase().includes(search.toLowerCase()) &&
                 !m.foods.some((f) => f.name.toLowerCase().includes(search.toLowerCase()))) return false;
@@ -242,7 +240,7 @@ export default function HistoryPage() {
     }, [allMeals, search, typeFilter, dateFrom, dateTo]);
 
     const itemizedRows = useMemo(
-        () => filtered.flatMap((meal) => meal.foods.map((food) => ({meal, food}))),
+        () => filtered.flatMap((meal) => meal.foods?.map((food) => ({meal, food}))),
         [filtered],
     );
     const tableMaxHeight = `${TABLE_HEADER_HEIGHT_PX + TABLE_MAX_VISIBLE_ROWS * TABLE_ROW_HEIGHT_PX}px`;
@@ -253,9 +251,9 @@ export default function HistoryPage() {
 
     function handleDuplicate(id: string) {
         mealsRepo.duplicate(id);
-        setAllMeals(mealsRepo.list());
         toast.success("Meal duplicated");
     }
+
 
     return (
         <div className="max-w-5xl mx-auto space-y-6">
@@ -373,7 +371,7 @@ export default function HistoryPage() {
                             </TableHeader>
                             <TableBody>
                                 {displayMode === "whole"
-                                    ? data.map((meal: Meal) => (
+                                    ? allMeals?.map((meal: Meal) => (
                                         <TableRow key={meal.id} className="border-border/50 hover:bg-muted/30">
                                             <TableCell className="font-medium text-sm py-3">{meal.title}</TableCell>
                                             <TableCell>
