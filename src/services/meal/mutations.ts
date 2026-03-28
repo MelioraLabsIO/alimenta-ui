@@ -46,3 +46,19 @@ export async function deleteMealById(id: string): Promise<Meal> {
 
     return response.json()
 }
+
+export async function bulkDeleteMeals(ids: string[]): Promise<{ count: number }> {
+    const response = await fetch("/api/v1/meals/bulk-delete", {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ids }),
+    })
+
+    if (!response.ok) {
+        throw new Error("Failed to delete meals")
+    }
+
+    return response.json()
+}

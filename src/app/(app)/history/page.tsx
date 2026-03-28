@@ -13,10 +13,12 @@ import {Switch} from "@/components/ui/switch";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
 import {Copy, Eye, Pencil, Search, Trash2, UtensilsCrossed} from "lucide-react";
+import {Checkbox} from "@/components/ui/checkbox";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {getAllMeals} from "@/services/meal/queries";
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog";
-import {deleteMealById} from "@/services/meal/mutations";
+import {BulkDeleteConfirmDialog} from "@/components/meals/bulk-delete-confirm-dialog";
+import {deleteMealById, bulkDeleteMeals} from "@/services/meal/mutations";
 import {LogMealDialog} from "@/components/meals/log-meal-dialog";
 
 const MEAL_TYPE_COLORS: Record<string, string> = {
@@ -212,6 +214,7 @@ export default function HistoryPage() {
     const [selected, setSelected] = useState<Meal | null>(null);
     const [editingMeal, setEditingMeal] = useState<Meal | null>(null);
     const [editDialogOpen, setEditDialogOpen] = useState(false);
+    const [selectedMealIds, setSelectedMealIds] = useState<Set<string>>(new Set());
 
     /********************************************* QUERIES ************************************************/
     const {data: allMeals, isLoading} = useQuery({
@@ -236,6 +239,23 @@ export default function HistoryPage() {
         }
     })
 
+    const {mutate: bulkDelete} = useMutation({
+        mutationKey: ["bulkDeleteMeals"],
+        mutationFn: (ids: string[]) => bulkDeleteMeals(ids),
+        onSuccess: (result: { count: number }) => {
+            toast.success(`${result.count} meal${result.count !== 1 ? 's' : ''} deleted`);
+            queryClient.setQueryData(["meals"], (cachedData: Meal[]) => {
+                if (!cachedData) return cachedData;
+
+                return cachedData?.filter((meal) => !selectedMealIds.has(meal.id))
+            });
+            setSelectedMealIds(new Set());
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        }
+    })
+
     const filtered = useMemo(() => {
         if (!allMeals) return []
         return allMeals.filter((m) => {
@@ -249,7 +269,15 @@ export default function HistoryPage() {
     }, [allMeals, search, typeFilter, dateFrom, dateTo]);
 
     const itemizedRows = useMemo(
-        () => filtered.flatMap((meal) => (meal.items || []).map((item) => ({meal, food: {id: item.id, name: item.catalogFood.name, quantity: item.quantity, unit: item.unit, catalogFood: item.catalogFood}}))).filter(Boolean),
+        () => filtered.flatMap((meal) => (meal.items || []).map((item) => ({meal,
+            food: {
+                id: item.id,
+                name: item.catalogFood.name,
+                quantity: item.quantity,
+                unit: item.unit,
+                catalogFood: item.catalogFood
+            }
+        }))).filter(Boolean),
         [filtered],
     );
     const tableMaxHeight = `${TABLE_HEADER_HEIGHT_PX + TABLE_MAX_VISIBLE_ROWS * TABLE_ROW_HEIGHT_PX}px`;
@@ -268,6 +296,38 @@ export default function HistoryPage() {
         setEditDialogOpen(true);
     }
 
+    function toggleMealSelection(mealId: string) {
+        const newSelected = new Set(selectedMealIds);
+        if (newSelected.has(mealId)) {
+            newSelected.delete(mealId);
+        } else {
+            newSelected.add(mealId);
+        }
+        setSelectedMealIds(newSelected);
+    }
+
+    const [bulkDeleteConfirmOpen, setBulkDeleteConfirmOpen] = useState(false);
+
+    function handleBulkDelete() {
+        if (selectedMealIds.size === 0) return;
+        setBulkDeleteConfirmOpen(true);
+    }
+
+    function confirmBulkDelete() {
+        bulkDelete(Array.from(selectedMealIds));
+        setBulkDeleteConfirmOpen(false);
+    }
+
+    function toggleSelectAll() {
+        if (selectedMealIds.size === filtered.length && filtered.length > 0) {
+            setSelectedMealIds(new Set());
+        } else {
+            setSelectedMealIds(new Set(filtered.map((m) => m.id)));
+        }
+    }
+
+
+    const bulkDeleteCount = selectedMealIds.size;
 
     return (
         <div className="max-w-5xl mx-auto space-y-6">
@@ -275,6 +335,13 @@ export default function HistoryPage() {
                 <h1 className="text-2xl font-bold tracking-tight">History</h1>
                 <p className="text-sm text-muted-foreground mt-0.5">Browse and manage all your logged meals.</p>
             </div>
+
+            <BulkDeleteConfirmDialog
+                open={bulkDeleteConfirmOpen}
+                onOpenChange={setBulkDeleteConfirmOpen}
+                count={bulkDeleteCount}
+                onConfirm={confirmBulkDelete}
+            />
 
             {/* Filters */}
             <Card className="border-border/50 bg-card/60">
@@ -334,27 +401,41 @@ export default function HistoryPage() {
             <Card className="border-border/50 bg-card/60">
                 <CardHeader className="pb-2 flex flex-row items-center justify-between gap-3">
                     <CardTitle className="text-sm font-semibold">
-                        {displayMode === "whole"
-                            ? `${filtered.length} meal${filtered.length !== 1 ? "s" : ""}`
-                            : `${itemizedRows.length} item${itemizedRows.length !== 1 ? "s" : ""}`}
+                        {selectedMealIds.size > 0
+                            ? `${selectedMealIds.size} meal${selectedMealIds.size !== 1 ? "s" : ""} selected`
+                            : displayMode === "whole"
+                                ? `${filtered.length} meal${filtered.length !== 1 ? "s" : ""}`
+                                : `${itemizedRows.length} item${itemizedRows.length !== 1 ? "s" : ""}`}
                     </CardTitle>
-                    <div
-                        className="inline-flex items-center gap-2 rounded-full border border-border/50 bg-background/60 px-3 py-1.5">
-            <span
-                className={`text-xs transition-colors ${displayMode === "whole" ? "text-foreground" : "text-muted-foreground"}`}>
-              Whole meal
-            </span>
-                        <Switch
-                            aria-label="Toggle display mode"
-                            checked={displayMode === "itemized"}
-                            onCheckedChange={(checked) =>
-                                dispatch({type: "SET_DISPLAY_MODE", payload: checked ? "itemized" : "whole"})
-                            }
-                        />
-                        <span
-                            className={`text-xs transition-colors ${displayMode === "itemized" ? "text-foreground" : "text-muted-foreground"}`}>
-              Itemized
-            </span>
+                    <div className="flex items-center gap-2">
+                        {selectedMealIds.size > 0 && (
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                className="gap-1.5"
+                                onClick={handleBulkDelete}
+                            >
+                                <Trash2 className="h-3.5 w-3.5"/> Delete Selected
+                            </Button>
+                        )}
+                        <div
+                            className="inline-flex items-center gap-2 rounded-full border border-border/50 bg-background/60 px-3 py-1.5">
+                <span
+                    className={`text-xs transition-colors ${displayMode === "whole" ? "text-foreground" : "text-muted-foreground"}`}>
+                  Whole meal
+                </span>
+                            <Switch
+                                aria-label="Toggle display mode"
+                                checked={displayMode === "itemized"}
+                                onCheckedChange={(checked) =>
+                                    dispatch({type: "SET_DISPLAY_MODE", payload: checked ? "itemized" : "whole"})
+                                }
+                            />
+                            <span
+                                className={`text-xs transition-colors ${displayMode === "itemized" ? "text-foreground" : "text-muted-foreground"}`}>
+                  Itemized
+                </span>
+                        </div>
                     </div>
                 </CardHeader>
                 <CardContent className="p-0 overflow-y-auto overflow-x-auto" style={{maxHeight: tableMaxHeight}}>
@@ -374,6 +455,15 @@ export default function HistoryPage() {
                         <Table>
                             <TableHeader>
                                 <TableRow className="border-border/50 hover:bg-transparent">
+                                    <TableHead className="w-10">
+                                        {displayMode === "whole" && (
+                                            <Checkbox
+                                                checked={filtered.length > 0 && selectedMealIds.size === filtered.length}
+                                                onCheckedChange={toggleSelectAll}
+                                                aria-label="Select all"
+                                            />
+                                        )}
+                                    </TableHead>
                                     <TableHead className="text-xs">Meal</TableHead>
                                     {displayMode === "itemized" && <TableHead className="text-xs">Food</TableHead>}
                                     <TableHead className="text-xs">Type</TableHead>
@@ -387,6 +477,13 @@ export default function HistoryPage() {
                                 {displayMode === "whole"
                                     ? allMeals?.map((meal: Meal) => (
                                         <TableRow key={meal.id} className="border-border/50 hover:bg-muted/30">
+                                            <TableCell className="w-10">
+                                                <Checkbox
+                                                    checked={selectedMealIds.has(meal.id)}
+                                                    onCheckedChange={() => toggleMealSelection(meal.id)}
+                                                    aria-label="Select meal"
+                                                />
+                                            </TableCell>
                                             <TableCell className="font-medium text-sm py-3">{meal.title}</TableCell>
                                             <TableCell>
                                                 <Badge
@@ -441,6 +538,7 @@ export default function HistoryPage() {
                                     : itemizedRows.map(({meal, food}) => (
                                         <TableRow key={`${meal.id}-${food.id}`}
                                                   className="border-border/50 hover:bg-muted/30">
+                                            <TableCell className="w-10"/>
                                             <TableCell className="font-medium text-sm py-3">{meal.title}</TableCell>
                                             <TableCell
                                                 className="text-xs text-muted-foreground max-w-60 sm:max-w-[320px] wrap-break-word">
