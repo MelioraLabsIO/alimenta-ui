@@ -2,7 +2,7 @@
 
 import {useMemo, useReducer, useState} from "react";
 import {mealsRepo} from "@/core/meals/mealsRepo";
-import {Meal, MealType} from "@/core/types";
+import {EMealType, Meal} from "@/core/types";
 import {toast} from "sonner";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
@@ -10,22 +10,9 @@ import {Input} from "@/components/ui/input";
 import {Badge} from "@/components/ui/badge";
 import {Skeleton} from "@/components/ui/skeleton";
 import {Switch} from "@/components/ui/switch";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import {Search, Copy, Eye, Trash2, UtensilsCrossed, Pencil} from "lucide-react";
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
+import {Copy, Eye, Pencil, Search, Trash2, UtensilsCrossed} from "lucide-react";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {getAllMeals} from "@/services/meal/queries";
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog";
@@ -298,7 +285,7 @@ export default function HistoryPage() {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">All types</SelectItem>
-                                {(["Breakfast", "Lunch", "Dinner", "Snack", "Other"] as MealType[]).map((t) => (
+                                {[EMealType.BREAKFAST, EMealType.LUNCH, EMealType.DINNER, EMealType.SNACK, EMealType.OTHER].map((t) => (
                                     <SelectItem key={t} value={t} className="capitalize">{t}</SelectItem>
                                 ))}
                             </SelectContent>
