@@ -56,3 +56,4 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json(deletedMeal, { status: 200 })
 }
+

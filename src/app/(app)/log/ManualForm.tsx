@@ -16,7 +16,7 @@ import {Controller, useFieldArray, useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {toast} from "sonner";
 import {useMutation} from "@tanstack/react-query";
-import {logMeal} from "@/services/meal/mutations";
+import {logMeal, updateMeal} from "@/services/meal/mutations";
 import {FoodRow, MealFormValues} from "@/core/meals/types";
 import {z} from "zod";
 import {MEAL_TYPES, mealSchema} from "@/contracts/meals/create-meal.schema";
@@ -76,10 +76,17 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
     const {mutate, isPending} = useMutation({
         mutationKey: ["log-meal"],
         mutationFn: async (data: MealFormSchema) => {
-            return logMeal(data)
+            if (prefill?.id) {
+                // Update existing meal
+                return updateMeal(prefill.id, data)
+            } else {
+                // Create new meal
+                return logMeal(data)
+            }
         },
         onSuccess: () => {
-            toast.success("Meal logged successfully!");
+            const isEditing = !!prefill?.id;
+            toast.success(isEditing ? "Meal updated successfully!" : "Meal logged successfully!");
             if (onSuccess) {
                 onSuccess();
             } else {
@@ -88,8 +95,8 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
             reset()
         },
         onError: (error) => {
-            console.error("Error logging meal:", error);
-            toast.error("Failed to log meal. Please try again.");
+            console.error("Error saving meal:", error);
+            toast.error("Failed to save meal. Please try again.");
         },
     })
 

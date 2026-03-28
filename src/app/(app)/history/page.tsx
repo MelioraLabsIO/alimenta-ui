@@ -17,6 +17,7 @@ import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {getAllMeals} from "@/services/meal/queries";
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {deleteMealById} from "@/services/meal/mutations";
+import {LogMealDialog} from "@/components/meals/log-meal-dialog";
 
 const MEAL_TYPE_COLORS: Record<string, string> = {
     BREAKFAST: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
@@ -81,12 +82,14 @@ function MealDetailDialog({
                               onClose,
                               onDelete,
                               onDuplicate,
+                              onEdit,
                           }: {
     meal: Meal | null;
     open: boolean;
     onClose: () => void;
     onDelete: (id: string) => void;
     onDuplicate: (id: string) => void;
+    onEdit: (meal: Meal) => void;
 }) {
     if (!meal) return null;
     const mealData = meal as Meal;
@@ -177,7 +180,10 @@ function MealDetailDialog({
                         >
                             <Copy className="h-3.5 w-3.5"/> Duplicate
                         </Button>
-                        <Button variant="outline" size="sm" className="gap-1.5">
+                        <Button variant="outline" size="sm" className="gap-1.5" onClick={() => {
+                            onEdit(mealData);
+                            onClose();
+                        }}>
                             <Pencil className="h-3.5 w-3.5"/> Edit
                         </Button>
                         <Button
@@ -204,6 +210,8 @@ export default function HistoryPage() {
     const [viewState, dispatch] = useReducer(historyViewReducer, initialHistoryViewState);
     const {search, typeFilter, dateFrom, dateTo, displayMode} = viewState;
     const [selected, setSelected] = useState<Meal | null>(null);
+    const [editingMeal, setEditingMeal] = useState<Meal | null>(null);
+    const [editDialogOpen, setEditDialogOpen] = useState(false);
 
     /********************************************* QUERIES ************************************************/
     const {data: allMeals, isLoading} = useQuery({
@@ -253,6 +261,11 @@ export default function HistoryPage() {
     function handleDuplicate(id: string) {
         mealsRepo.duplicate(id);
         toast.success("Meal duplicated");
+    }
+
+    function handleEdit(meal: Meal) {
+        setEditingMeal(meal);
+        setEditDialogOpen(true);
     }
 
 
@@ -404,6 +417,12 @@ export default function HistoryPage() {
                                                     </Button>
                                                     <Button
                                                         variant="ghost" size="icon" className="h-7 w-7"
+                                                        onClick={() => handleEdit(meal)}
+                                                    >
+                                                        <Pencil className="h-3.5 w-3.5"/>
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost" size="icon" className="h-7 w-7"
                                                         onClick={() => handleDuplicate(meal.id)}
                                                     >
                                                         <Copy className="h-3.5 w-3.5"/>
@@ -452,6 +471,12 @@ export default function HistoryPage() {
                                                         <Copy className="h-3.5 w-3.5"/>
                                                     </Button>
                                                     <Button
+                                                        variant="ghost" size="icon" className="h-7 w-7"
+                                                        onClick={() => handleEdit(meal)}
+                                                    >
+                                                        <Pencil className="h-3.5 w-3.5"/>
+                                                    </Button>
+                                                    <Button
                                                         variant="ghost" size="icon"
                                                         className="h-7 w-7 text-muted-foreground hover:text-destructive"
                                                         onClick={() => handleDelete(meal.id)}
@@ -474,7 +499,20 @@ export default function HistoryPage() {
                 onClose={() => setSelected(null)}
                 onDelete={handleDelete}
                 onDuplicate={handleDuplicate}
+                onEdit={handleEdit}
             />
+
+            {editDialogOpen && (
+                <LogMealDialog
+                    mealToEdit={editingMeal}
+                    onOpenChange={(open) => {
+                        if (!open) {
+                            setEditDialogOpen(false);
+                            setEditingMeal(null);
+                        }
+                    }}
+                />
+            )}
         </div>
     );
 }
