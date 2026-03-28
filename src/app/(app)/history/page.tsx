@@ -89,15 +89,16 @@ function MealDetailDialog({
     onDuplicate: (id: string) => void;
 }) {
     if (!meal) return null;
+    const mealData = meal as Meal;
     const moodLabel = (v: number) => ["", "Poor", "Fair", "Okay", "Good", "Great"][v] ?? "";
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
             <DialogContent className="max-w-lg">
                 <DialogHeader>
-                    <DialogTitle className="text-base">{meal.title}</DialogTitle>
+                    <DialogTitle className="text-base">{mealData.title}</DialogTitle>
                     <DialogDescription className="text-xs">
-                        {new Date(meal.date).toLocaleString("en-US", {
+                        {mealData.foodTime && new Date(mealData.foodTime).toLocaleString("en-US", {
                             weekday: "long", year: "numeric", month: "long", day: "numeric",
                             hour: "numeric", minute: "2-digit",
                         })}
@@ -109,10 +110,10 @@ function MealDetailDialog({
                     <div>
                         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Foods</p>
                         <div className="space-y-1">
-                            {meal?.foods?.map((f) => (
+                            {((mealData?.items as any) || [])?.map((f: any) => (
                                 <div key={f.id} className="flex items-center gap-2 text-sm">
                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"/>
-                                    <span className="flex-1">{f.name}</span>
+                                    <span className="flex-1">{f.catalogFood.name}</span>
                                     <span className="text-muted-foreground text-xs">{f.quantity} {f.unit}</span>
                                 </div>
                             ))}
@@ -120,15 +121,15 @@ function MealDetailDialog({
                     </div>
 
                     {/* Nutrition */}
-                    {meal.nutrition && (
+                    {mealData.nutrition && (
                         <div>
                             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Nutrition</p>
                             <div className="grid grid-cols-4 gap-2">
                                 {[
-                                    {label: "Cal", value: meal.nutrition.calories, unit: "kcal"},
-                                    {label: "Protein", value: meal.nutrition.protein, unit: "g"},
-                                    {label: "Carbs", value: meal.nutrition.carbs, unit: "g"},
-                                    {label: "Fat", value: meal.nutrition.fat, unit: "g"},
+                                    {label: "Cal", value: mealData.nutrition.calories, unit: "kcal"},
+                                    {label: "Protein", value: mealData.nutrition.protein, unit: "g"},
+                                    {label: "Carbs", value: mealData.nutrition.carbs, unit: "g"},
+                                    {label: "Fat", value: mealData.nutrition.fat, unit: "g"},
                                 ].map(({label, value, unit}) => (
                                     <div key={label} className="rounded-lg bg-muted/50 p-2 text-center">
                                         <p className="text-[10px] text-muted-foreground">{label}</p>
@@ -141,24 +142,24 @@ function MealDetailDialog({
                     )}
 
                     {/* Metrics */}
-                    {meal.metrics && (
+                    {mealData && (
                         <div>
                             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Wellness</p>
                             <div className="grid grid-cols-3 gap-2">
                                 {[
-                                    {label: "Mood", value: meal.metrics.mood},
-                                    {label: "Energy", value: meal.metrics.energy},
-                                    {label: "Digestion", value: meal.metrics.digestion},
+                                    {label: "Mood", value: mealData.mood},
+                                    {label: "Energy", value: mealData.energy},
+                                    {label: "Digestion", value: mealData.digestion},
                                 ].map(({label, value}) => (
                                     <div key={label} className="rounded-lg bg-muted/50 p-2 text-center">
                                         <p className="text-[10px] text-muted-foreground">{label}</p>
                                         <p className="text-sm font-semibold">{value}/5</p>
-                                        <p className="text-[10px] text-muted-foreground">{moodLabel(value)}</p>
+                                        <p className="text-[10px] text-muted-foreground">{moodLabel(value ?? 0)}</p>
                                     </div>
                                 ))}
                             </div>
-                            {meal.notes && (
-                                <p className="text-xs text-muted-foreground mt-2 italic">&#34;{meal.metrics.notes}&#34;</p>
+                            {mealData.notes && (
+                                <p className="text-xs text-muted-foreground mt-2 italic">&#34;{mealData.notes}&#34;</p>
                             )}
                         </div>
                     )}
@@ -170,7 +171,7 @@ function MealDetailDialog({
                             size="sm"
                             className="gap-1.5"
                             onClick={() => {
-                                onDuplicate(meal.id);
+                                onDuplicate(mealData.id);
                                 onClose();
                             }}
                         >
@@ -184,7 +185,7 @@ function MealDetailDialog({
                             size="sm"
                             className="gap-1.5 text-destructive hover:text-destructive ml-auto"
                             onClick={() => {
-                                onDelete(meal.id);
+                                onDelete(mealData.id);
                                 onClose();
                             }}
                         >
@@ -231,16 +232,16 @@ export default function HistoryPage() {
         if (!allMeals) return []
         return allMeals.filter((m) => {
             if (search && !m.title.toLowerCase().includes(search.toLowerCase()) &&
-                !m.foods.some((f) => f.name.toLowerCase().includes(search.toLowerCase()))) return false;
+                !m.items?.some((f) => f.catalogFood.name.toLowerCase().includes(search.toLowerCase()))) return false;
             if (typeFilter !== "all" && m.type !== typeFilter) return false;
-            if (dateFrom && new Date(m.date) < new Date(dateFrom)) return false;
-            return !(dateTo && new Date(m.date) > new Date(dateTo + "T23:59:59"));
+            if (dateFrom && m.foodTime && new Date(m.foodTime) < new Date(dateFrom)) return false;
+            return !(dateTo && m.foodTime && new Date(m.foodTime) > new Date(dateTo + "T23:59:59"));
 
         });
     }, [allMeals, search, typeFilter, dateFrom, dateTo]);
 
     const itemizedRows = useMemo(
-        () => filtered.flatMap((meal) => meal.foods?.map((food) => ({meal, food}))),
+        () => filtered.flatMap((meal) => (meal.items || []).map((item) => ({meal, food: {id: item.id, name: item.catalogFood.name, quantity: item.quantity, unit: item.unit, catalogFood: item.catalogFood}}))).filter(Boolean),
         [filtered],
     );
     const tableMaxHeight = `${TABLE_HEADER_HEIGHT_PX + TABLE_MAX_VISIBLE_ROWS * TABLE_ROW_HEIGHT_PX}px`;
@@ -383,7 +384,7 @@ export default function HistoryPage() {
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="text-xs text-muted-foreground">
-                                                {new Date(meal.createdAt).toLocaleDateString("en-US", {
+                                                {meal.foodTime && new Date(meal.foodTime).toLocaleDateString("en-US", {
                                                     month: "short", day: "numeric", year: "numeric",
                                                 })}
                                             </TableCell>
@@ -435,7 +436,7 @@ export default function HistoryPage() {
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="text-xs text-muted-foreground">
-                                                {new Date(meal.date).toLocaleDateString("en-US", {
+                                                {meal.foodTime && new Date(meal.foodTime).toLocaleDateString("en-US", {
                                                     month: "short", day: "numeric", year: "numeric",
                                                 })}
                                             </TableCell>
