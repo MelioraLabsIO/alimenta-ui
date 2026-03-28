@@ -11,7 +11,7 @@ import {Label} from "@/components/ui/label";
 import {Slider} from "@/components/ui/slider";
 import {Separator} from "@/components/ui/separator";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
-import {Plus, Trash2} from "lucide-react";
+import {Loader2, Plus, Trash2} from "lucide-react";
 import {Controller, useFieldArray, useForm} from "react-hook-form";
 import {toast} from "sonner";
 import {useMutation} from "@tanstack/react-query";
@@ -56,20 +56,20 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
             notes: prefill?.metrics?.notes ?? "",
         }
     })
-    const {register, control, handleSubmit, reset, formState: {errors}} = form
+    const {register, control, handleSubmit, reset, formState: {errors, isSubmitting}} = form
     const {fields: foods, append: addFood, remove: removeFood} = useFieldArray({
         control,
         name: "foods"
     })
 
     /********************************************* MUTATIONS ************************************************/
-    const {mutate} = useMutation({
+    const {mutate, isPending} = useMutation({
         mutationKey: ["log-meal"],
         mutationFn: async (data: MealFormValues) => {
             return logMeal(data)
         },
         onSuccess: () => {
-            toast.success("Meal logged successfully!" );
+            toast.success("Meal logged successfully!");
             if (onSuccess) {
                 onSuccess();
             } else {
@@ -145,7 +145,8 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
                             <Label>Foods <span className="text-destructive">*</span></Label>
-                            <Button variant="outline" size="sm" onClick={() => addFood(emptyFood())} className="gap-1.5 h-7 text-xs" type="button">
+                            <Button variant="outline" size="sm" onClick={() => addFood(emptyFood())}
+                                    className="gap-1.5 h-7 text-xs" type="button">
                                 <Plus className="h-3 w-3"/> Add food
                             </Button>
                         </div>
@@ -236,10 +237,11 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
                                     name={name}
                                     render={({field}) => (
                                         <>
-                                            
+
                                             <div className="flex items-center justify-between">
                                                 <Label className="text-sm">{label}</Label>
-                                                <span className="text-xs text-muted-foreground">{sliderLabel(field.value)}</span>
+                                                <span
+                                                    className="text-xs text-muted-foreground">{sliderLabel(field.value)}</span>
                                             </div>
                                             <Slider
                                                 min={1} max={5} step={1}
@@ -264,10 +266,19 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
                             />
                         </div>
                     </div>
-
-                    <Button type={"submit"} className="w-full sm:w-auto">
-                        Save Meal
-                    </Button>
+                    {
+                        <Button type={"submit"} className="w-full sm:w-auto" disabled={isPending}>
+                            {
+                                isPending ? (
+                                    <Loader2 className="h-4 w-4 mr-2 animate-spin"/>
+                                ) : (
+                                    <span>
+                                            Save Meal
+                                        </span>
+                                )
+                            }
+                        </Button>
+                    }
                 </div>
             </form>
             <DevTool control={control}/>
