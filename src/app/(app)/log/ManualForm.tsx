@@ -73,20 +73,13 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
     })
 
     /********************************************* MUTATIONS ************************************************/
-    const {mutate, isPending} = useMutation({
+    const {mutate: mutateCreate, isPending: isCreatingPending} = useMutation({
         mutationKey: ["log-meal"],
         mutationFn: async (data: MealFormSchema) => {
-            if (prefill?.id) {
-                // Update existing meal
-                return updateMeal(prefill.id, data)
-            } else {
-                // Create new meal
-                return logMeal(data)
-            }
+            return logMeal(data)
         },
         onSuccess: () => {
-            const isEditing = !!prefill?.id;
-            toast.success(isEditing ? "Meal updated successfully!" : "Meal logged successfully!");
+            toast.success("Meal logged successfully!");
             if (onSuccess) {
                 onSuccess();
             } else {
@@ -95,14 +88,51 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
             reset()
         },
         onError: (error) => {
-            console.error("Error saving meal:", error);
-            toast.error("Failed to save meal. Please try again.");
+            console.error("Error logging meal:", error);
+            toast.error("Failed to log meal. Please try again.");
         },
     })
 
+    const {mutate: mutateEdit, isPending: isEditingPending} = useMutation({
+        mutationKey: ["edit-meal"],
+        mutationFn: async (data: MealFormSchema) => {
+            if (!prefill?.id) {
+                throw new Error("Meal ID is required for editing");
+            }
+            return updateMeal(prefill.id, data)
+        },
+        onSuccess: () => {
+            toast.success("Meal updated successfully!");
+            if (onSuccess) {
+                onSuccess();
+            } else {
+                redirect("/history")
+            }
+            reset()
+        },
+        onError: (error) => {
+            console.error("Error updating meal:", error);
+            toast.error("Failed to update meal. Please try again.");
+        },
+    })
+
+    const isPending = isCreatingPending || isEditingPending;
+
     /********************************************* HANDLERS ************************************************/
+    function handleCreate(data: MealFormSchema) {
+        mutateCreate(data)
+    }
+
+    function handleEdit(data: MealFormSchema) {
+        mutateEdit(data)
+    }
+
     function handleSave(data: MealFormSchema) {
-        mutate(data)
+        if (prefill?.id) {
+            handleEdit(data)
+        } else {
+            handleCreate(data)
+        }
     }
 
     const sliderLabel = (v: number) => ["", "Poor", "Fair", "Okay", "Good", "Great"][v] ?? "";
