@@ -2,7 +2,7 @@
 
 import {useMemo, useReducer, useState} from "react";
 import {mealsRepo} from "@/core/meals/mealsRepo";
-import {Meal, MealType} from "@/core/types";
+import {EMealType, Meal} from "@/core/types";
 import {toast} from "sonner";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
@@ -283,7 +283,7 @@ export default function HistoryPage() {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">All types</SelectItem>
-                                {(["Breakfast", "Lunch", "Dinner", "Snack", "Other"] as MealType[]).map((t) => (
+                                {[EMealType.BREAKFAST, EMealType.LUNCH, EMealType.DINNER, EMealType.SNACK, EMealType.OTHER].map((t) => (
                                     <SelectItem key={t} value={t} className="capitalize">{t}</SelectItem>
                                 ))}
                             </SelectContent>
