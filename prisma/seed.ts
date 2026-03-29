@@ -1,4 +1,4 @@
-import {PrismaClient} from "../src/generated/prisma/client.js";
+import {PrismaClient, MealType} from "../src/generated/prisma/client.js";
 import {PrismaPg} from "@prisma/adapter-pg";
 import dotenv from "dotenv";
 
@@ -91,7 +91,7 @@ async function main() {
         // --- 30 days ago ---
         {
             title: "Oatmeal with Berries",
-            type: "BREAKFAST", mood: 4, energy: 4, digestion: 5,
+            type: MealType.BREAKFAST, mood: 4, energy: 4, digestion: 5,
             foodTime: daysAgo(30),
             items: [
                 { name: "Oats",         quantity: 80,  unit: "g" },
@@ -101,7 +101,7 @@ async function main() {
         },
         {
             title: "Grilled Chicken & Rice",
-            type: "LUNCH", mood: 5, energy: 5, digestion: 4,
+            type: MealType.LUNCH, mood: 5, energy: 5, digestion: 4,
             foodTime: daysAgo(30),
             items: [
                 { name: "Chicken Breast", quantity: 180, unit: "g" },
@@ -111,7 +111,7 @@ async function main() {
         },
         {
             title: "Salmon with Sweet Potato",
-            type: "DINNER", mood: 5, energy: 4, digestion: 5,
+            type: MealType.DINNER, mood: 5, energy: 4, digestion: 5,
             foodTime: daysAgo(30),
             items: [
                 { name: "Salmon",        quantity: 200, unit: "g" },
@@ -123,7 +123,7 @@ async function main() {
         // --- 27 days ago ---
         {
             title: "Scrambled Eggs & Toast",
-            type: "BREAKFAST", mood: 3, energy: 3, digestion: 4,
+            type: MealType.BREAKFAST, mood: 3, energy: 3, digestion: 4,
             foodTime: daysAgo(27),
             items: [
                 { name: "Egg",                quantity: 3,   unit: "piece" },
@@ -133,7 +133,7 @@ async function main() {
         },
         {
             title: "Tuna Pasta",
-            type: "LUNCH", mood: 4, energy: 4, digestion: 3,
+            type: MealType.LUNCH, mood: 4, energy: 4, digestion: 3,
             foodTime: daysAgo(27),
             items: [
                 { name: "Pasta",         quantity: 200, unit: "g" },
@@ -144,7 +144,7 @@ async function main() {
         },
         {
             title: "Afternoon Apple",
-            type: "SNACK", mood: 4, energy: 3, digestion: 5,
+            type: MealType.SNACK, mood: 4, energy: 3, digestion: 5,
             foodTime: daysAgo(27),
             items: [
                 { name: "Apple",         quantity: 1,   unit: "piece" },
@@ -153,7 +153,7 @@ async function main() {
         },
         {
             title: "Beef & Quinoa Bowl",
-            type: "DINNER", mood: 4, energy: 4, digestion: 4,
+            type: MealType.DINNER, mood: 4, energy: 4, digestion: 4,
             foodTime: daysAgo(27),
             items: [
                 { name: "Ground Beef (lean)", quantity: 150, unit: "g" },
@@ -166,7 +166,7 @@ async function main() {
         // --- 24 days ago ---
         {
             title: "Greek Yogurt Parfait",
-            type: "BREAKFAST", mood: 5, energy: 5, digestion: 5,
+            type: MealType.BREAKFAST, mood: 5, energy: 5, digestion: 5,
             foodTime: daysAgo(24),
             items: [
                 { name: "Greek Yogurt",  quantity: 200, unit: "g" },
@@ -176,7 +176,7 @@ async function main() {
         },
         {
             title: "Lentil Soup",
-            type: "LUNCH", mood: 4, energy: 3, digestion: 4,
+            type: MealType.LUNCH, mood: 4, energy: 3, digestion: 4,
             foodTime: daysAgo(24),
             items: [
                 { name: "Lentils",   quantity: 200, unit: "g" },
@@ -187,7 +187,7 @@ async function main() {
         },
         {
             title: "Cheese & Crackers",
-            type: "SNACK", mood: 3, energy: 3, digestion: 3,
+            type: MealType.SNACK, mood: 3, energy: 3, digestion: 3,
             foodTime: daysAgo(24),
             items: [
                 { name: "Cheddar Cheese",    quantity: 40,  unit: "g" },
@@ -198,7 +198,7 @@ async function main() {
         // --- 21 days ago ---
         {
             title: "Banana Oat Smoothie",
-            type: "BREAKFAST", mood: 4, energy: 4, digestion: 5,
+            type: MealType.BREAKFAST, mood: 4, energy: 4, digestion: 5,
             foodTime: daysAgo(21),
             items: [
                 { name: "Banana",       quantity: 1,   unit: "piece" },
@@ -209,7 +209,7 @@ async function main() {
         },
         {
             title: "Chicken & Avocado Wrap",
-            type: "LUNCH", mood: 5, energy: 5, digestion: 4,
+            type: MealType.LUNCH, mood: 5, energy: 5, digestion: 4,
             foodTime: daysAgo(21),
             items: [
                 { name: "Chicken Breast",    quantity: 150, unit: "g" },
@@ -220,7 +220,7 @@ async function main() {
         },
         {
             title: "Salmon & White Rice",
-            type: "DINNER", mood: 5, energy: 4, digestion: 5,
+            type: MealType.DINNER, mood: 5, energy: 4, digestion: 5,
             foodTime: daysAgo(21),
             items: [
                 { name: "Salmon",      quantity: 180, unit: "g" },
@@ -232,7 +232,7 @@ async function main() {
         // --- 18 days ago ---
         {
             title: "Eggs & Avocado Toast",
-            type: "BREAKFAST", mood: 5, energy: 5, digestion: 5,
+            type: MealType.BREAKFAST, mood: 5, energy: 5, digestion: 5,
             foodTime: daysAgo(18),
             items: [
                 { name: "Egg",               quantity: 2,   unit: "piece" },
@@ -242,7 +242,7 @@ async function main() {
         },
         {
             title: "Black Bean Bowl",
-            type: "LUNCH", mood: 4, energy: 4, digestion: 4,
+            type: MealType.LUNCH, mood: 4, energy: 4, digestion: 4,
             foodTime: daysAgo(18),
             items: [
                 { name: "Black Beans",   quantity: 200, unit: "g" },
@@ -253,7 +253,7 @@ async function main() {
         },
         {
             title: "Strawberry Yogurt",
-            type: "SNACK", mood: 4, energy: 3, digestion: 5,
+            type: MealType.SNACK, mood: 4, energy: 3, digestion: 5,
             foodTime: daysAgo(18),
             items: [
                 { name: "Greek Yogurt",  quantity: 150, unit: "g" },
@@ -262,7 +262,7 @@ async function main() {
         },
         {
             title: "Beef Stir Fry",
-            type: "DINNER", mood: 4, energy: 4, digestion: 3,
+            type: MealType.DINNER, mood: 4, energy: 4, digestion: 3,
             foodTime: daysAgo(18),
             items: [
                 { name: "Ground Beef (lean)", quantity: 180, unit: "g" },
@@ -275,7 +275,7 @@ async function main() {
         // --- 14 days ago ---
         {
             title: "Cottage Cheese & Fruit",
-            type: "BREAKFAST", mood: 3, energy: 3, digestion: 4,
+            type: MealType.BREAKFAST, mood: 3, energy: 3, digestion: 4,
             foodTime: daysAgo(14),
             items: [
                 { name: "Cottage Cheese", quantity: 200, unit: "g" },
@@ -285,7 +285,7 @@ async function main() {
         },
         {
             title: "Quinoa Salad",
-            type: "LUNCH", mood: 4, energy: 4, digestion: 5,
+            type: MealType.LUNCH, mood: 4, energy: 4, digestion: 5,
             foodTime: daysAgo(14),
             items: [
                 { name: "Quinoa",    quantity: 200, unit: "g" },
@@ -297,7 +297,7 @@ async function main() {
         },
         {
             title: "Almond Snack",
-            type: "SNACK", mood: 4, energy: 4, digestion: 5,
+            type: MealType.SNACK, mood: 4, energy: 4, digestion: 5,
             foodTime: daysAgo(14),
             items: [
                 { name: "Almonds", quantity: 30, unit: "g" },
@@ -306,7 +306,7 @@ async function main() {
         },
         {
             title: "Tuna & Sweet Potato",
-            type: "DINNER", mood: 5, energy: 5, digestion: 5,
+            type: MealType.DINNER, mood: 5, energy: 5, digestion: 5,
             foodTime: daysAgo(14),
             items: [
                 { name: "Tuna (canned)", quantity: 150, unit: "g" },
@@ -318,7 +318,7 @@ async function main() {
         // --- 10 days ago ---
         {
             title: "Peanut Butter Oats",
-            type: "BREAKFAST", mood: 4, energy: 5, digestion: 4,
+            type: MealType.BREAKFAST, mood: 4, energy: 5, digestion: 4,
             foodTime: daysAgo(10),
             items: [
                 { name: "Oats",          quantity: 90,  unit: "g" },
@@ -329,7 +329,7 @@ async function main() {
         },
         {
             title: "Chicken & Lentil Soup",
-            type: "LUNCH", mood: 4, energy: 4, digestion: 4,
+            type: MealType.LUNCH, mood: 4, energy: 4, digestion: 4,
             foodTime: daysAgo(10),
             items: [
                 { name: "Chicken Breast", quantity: 150, unit: "g" },
@@ -340,7 +340,7 @@ async function main() {
         },
         {
             title: "Cheese Toast",
-            type: "SNACK", mood: 3, energy: 3, digestion: 3,
+            type: MealType.SNACK, mood: 3, energy: 3, digestion: 3,
             foodTime: daysAgo(10),
             items: [
                 { name: "Whole Wheat Bread", quantity: 60,  unit: "g" },
@@ -349,7 +349,7 @@ async function main() {
         },
         {
             title: "Pasta Bolognese",
-            type: "DINNER", mood: 5, energy: 4, digestion: 3,
+            type: MealType.DINNER, mood: 5, energy: 4, digestion: 3,
             foodTime: daysAgo(10),
             items: [
                 { name: "Pasta",              quantity: 200, unit: "g" },
@@ -362,7 +362,7 @@ async function main() {
         // --- 7 days ago ---
         {
             title: "Egg & Spinach Omelette",
-            type: "BREAKFAST", mood: 5, energy: 5, digestion: 5,
+            type: MealType.BREAKFAST, mood: 5, energy: 5, digestion: 5,
             foodTime: daysAgo(7),
             items: [
                 { name: "Egg",     quantity: 3,  unit: "piece" },
@@ -372,7 +372,7 @@ async function main() {
         },
         {
             title: "Salmon Quinoa Bowl",
-            type: "LUNCH", mood: 5, energy: 5, digestion: 5,
+            type: MealType.LUNCH, mood: 5, energy: 5, digestion: 5,
             foodTime: daysAgo(7),
             items: [
                 { name: "Salmon",    quantity: 180, unit: "g" },
@@ -383,7 +383,7 @@ async function main() {
         },
         {
             title: "Banana & Almonds",
-            type: "SNACK", mood: 4, energy: 4, digestion: 5,
+            type: MealType.SNACK, mood: 4, energy: 4, digestion: 5,
             foodTime: daysAgo(7),
             items: [
                 { name: "Banana",  quantity: 1,  unit: "piece" },
@@ -392,7 +392,7 @@ async function main() {
         },
         {
             title: "Chicken Sweet Potato Bake",
-            type: "DINNER", mood: 5, energy: 5, digestion: 4,
+            type: MealType.DINNER, mood: 5, energy: 5, digestion: 4,
             foodTime: daysAgo(7),
             items: [
                 { name: "Chicken Breast", quantity: 200, unit: "g" },
@@ -405,7 +405,7 @@ async function main() {
         // --- 4 days ago ---
         {
             title: "Yogurt & Strawberries",
-            type: "BREAKFAST", mood: 4, energy: 4, digestion: 5,
+            type: MealType.BREAKFAST, mood: 4, energy: 4, digestion: 5,
             foodTime: daysAgo(4),
             items: [
                 { name: "Greek Yogurt",  quantity: 200, unit: "g" },
@@ -415,7 +415,7 @@ async function main() {
         },
         {
             title: "Black Bean & Rice",
-            type: "LUNCH", mood: 4, energy: 4, digestion: 4,
+            type: MealType.LUNCH, mood: 4, energy: 4, digestion: 4,
             foodTime: daysAgo(4),
             items: [
                 { name: "Black Beans",  quantity: 180, unit: "g" },
@@ -426,7 +426,7 @@ async function main() {
         },
         {
             title: "Cottage Cheese Snack",
-            type: "SNACK", mood: 3, energy: 3, digestion: 4,
+            type: MealType.SNACK, mood: 3, energy: 3, digestion: 4,
             foodTime: daysAgo(4),
             items: [
                 { name: "Cottage Cheese", quantity: 150, unit: "g" },
@@ -435,7 +435,7 @@ async function main() {
         },
         {
             title: "Beef & Broccoli",
-            type: "DINNER", mood: 4, energy: 4, digestion: 4,
+            type: MealType.DINNER, mood: 4, energy: 4, digestion: 4,
             foodTime: daysAgo(4),
             items: [
                 { name: "Ground Beef (lean)", quantity: 180, unit: "g" },
@@ -448,7 +448,7 @@ async function main() {
         // --- 2 days ago ---
         {
             title: "Oats & Banana",
-            type: "BREAKFAST", mood: 4, energy: 4, digestion: 5,
+            type: MealType.BREAKFAST, mood: 4, energy: 4, digestion: 5,
             foodTime: daysAgo(2),
             items: [
                 { name: "Oats",       quantity: 80,  unit: "g" },
@@ -458,7 +458,7 @@ async function main() {
         },
         {
             title: "Tuna Salad",
-            type: "LUNCH", mood: 4, energy: 4, digestion: 5,
+            type: MealType.LUNCH, mood: 4, energy: 4, digestion: 5,
             foodTime: daysAgo(2),
             items: [
                 { name: "Tuna (canned)", quantity: 150, unit: "g" },
@@ -470,7 +470,7 @@ async function main() {
         },
         {
             title: "Orange & Peanut Butter",
-            type: "SNACK", mood: 4, energy: 3, digestion: 5,
+            type: MealType.SNACK, mood: 4, energy: 3, digestion: 5,
             foodTime: daysAgo(2),
             items: [
                 { name: "Orange",        quantity: 1,  unit: "piece" },
@@ -479,7 +479,7 @@ async function main() {
         },
         {
             title: "Lentil & Chicken Stew",
-            type: "DINNER", mood: 5, energy: 5, digestion: 4,
+            type: MealType.DINNER, mood: 5, energy: 5, digestion: 4,
             foodTime: daysAgo(2),
             items: [
                 { name: "Lentils",        quantity: 200, unit: "g" },
@@ -493,7 +493,7 @@ async function main() {
         // --- Today ---
         {
             title: "Scrambled Eggs & Avocado",
-            type: "BREAKFAST", mood: 5, energy: 5, digestion: 5,
+            type: MealType.BREAKFAST, mood: 5, energy: 5, digestion: 5,
             foodTime: daysAgo(0),
             items: [
                 { name: "Egg",     quantity: 3,   unit: "piece" },
@@ -503,7 +503,7 @@ async function main() {
         },
         {
             title: "Healthy Lunch",
-            type: "LUNCH", mood: 4, energy: 4, digestion: 5,
+            type: MealType.LUNCH, mood: 4, energy: 4, digestion: 5,
             foodTime: daysAgo(0),
             items: [
                 { name: "Chicken Breast", quantity: 150, unit: "g" },
@@ -513,7 +513,7 @@ async function main() {
         },
         {
             title: "Quick Snack",
-            type: "SNACK", mood: 5, energy: 3, digestion: 5,
+            type: MealType.SNACK, mood: 5, energy: 3, digestion: 5,
             foodTime: daysAgo(0),
             items: [
                 { name: "Apple",         quantity: 1,  unit: "piece" },
