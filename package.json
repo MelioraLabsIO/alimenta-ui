@@ -9,8 +9,7 @@
         "start": "next start",
         "lint": "eslint",
         "postinstall": "prisma generate",
-        "typecheck": "tsc --noEmit",
-        "validate": "tsc --noEmit"
+        "typecheck": "tsc --noEmit"
     },
     "dependencies": {
         "@hookform/resolvers": "^5.2.2",
