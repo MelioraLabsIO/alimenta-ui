@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "deploy-db": "prisma migrate deploy",
     "postinstall": "prisma generate",
     "typecheck": "tsc --noEmit",
     "validate": "tsc --noEmit"
