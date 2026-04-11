@@ -71,10 +71,10 @@ async function main() {
         update: {},
         create: {
             id: profileId,
-            firstName: "John",
-            lastName: "Doe",
-            email: "john.doe@example.com",
-            username: "johndoe",
+            firstName: "Eric",
+            lastName: "Hernandez",
+            email: "eric@melioralabs.io",
+            username: "eric",
             preferences: {
                 create: {
                     units: "metric",
@@ -94,6 +94,7 @@ async function main() {
             type: MealType.BREAKFAST, mood: 4, energy: 4, digestion: 5,
             foodTime: daysAgo(30),
             items: [
+
                 { name: "Oats",         quantity: 80,  unit: "g" },
                 { name: "Blueberries",  quantity: 100, unit: "g" },
                 { name: "Whole Milk",   quantity: 200, unit: "ml" },

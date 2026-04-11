@@ -52,6 +52,7 @@ export default function SettingsPage() {
         queryFn: async () => getUserProfile(),
     });
 
+    console.log("data", data);
     /********************************************* MUTATIONS ************************************************/
     const {mutate: mutateUserProfile} = useMutation({
         mutationKey: ["update-user-profile"],

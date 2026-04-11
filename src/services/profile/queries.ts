@@ -1,11 +1,23 @@
-async function getUserProfile() {
-    const response = await fetch("/api/v1/user-profile");
+import {apiFetch} from "@/apiClient/client";
+import {createClient} from "@/lib/supabase/client";
 
-    if (!response.ok) {
+
+async function getUserProfile() {
+    const {data: {session}} = await createClient().auth.getSession();
+
+    const response = await apiFetch("/api/v1/profile", {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${session?.access_token}`,
+        },
+
+    });
+
+    if (!response) {
         throw new Error("Failed to fetch user profile");
     }
 
-    return response.json();
+    return response
 }
 
-export { getUserProfile };
+export {getUserProfile};
