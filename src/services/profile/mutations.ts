@@ -1,20 +1,21 @@
+import {apiFetch} from "@/apiClient/client";
+import {getSession} from "@/lib/supabase/session";
+
 interface UpdateProfileInput {
     firstName: string;
     lastName: string;
 }
-async function updateProfile( data: Partial<UpdateProfileInput>) {
-    const response = await fetch("/api/v1/user-profile", {
+
+async function updateProfile(data: Partial<UpdateProfileInput>) {
+    const session = await getSession();
+
+    return await apiFetch("/api/v1/profile", {
         method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-        },
         body: JSON.stringify(data),
+        headers: {
+            "Authorization": `Bearer ${session.access_token}`,
+        },
     });
-    if (!response.ok) {
-        throw new Error("Failed to update user profile");
-    }
-    const result = await response.json()
-    return result?.data;
 }
 
-export { updateProfile };
+export {updateProfile};
