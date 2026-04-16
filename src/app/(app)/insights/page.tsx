@@ -1,5 +1,4 @@
 "use client";
-
 import {useMemo} from "react";
 import {mealsRepo} from "@/core/meals/mealsRepo";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
