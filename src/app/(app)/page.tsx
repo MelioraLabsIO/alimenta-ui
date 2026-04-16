@@ -1,8 +1,10 @@
 "use client";
 
 import {useMemo} from "react";
+import {useQuery} from "@tanstack/react-query";
 import Link from "next/link";
 import {mealsRepo} from "@/core/meals/mealsRepo";
+import {getTopFood} from "@/services/insights/queries";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
@@ -74,7 +76,8 @@ export default function DashboardPage() {
     const weeklyCalories = useMemo(() => mealsRepo.weeklyCalories(), []);
     const weeklyMacros = useMemo(() => mealsRepo.weeklyMacros(), []);
     const moodData = useMemo(() => mealsRepo.moodEnergyData(), []);
-    const topFoods = useMemo(() => mealsRepo.topFoods(3), []);
+    const {data: topFoodData} = useQuery({queryKey: ["top-food"], queryFn: getTopFood});
+    console.log("topFoodData", topFoodData)
 
     const thisWeekMeals = useMemo(() => {
         const from = new Date();
@@ -143,9 +146,9 @@ export default function DashboardPage() {
                     },
                     {
                         label: "Top food",
-                        value: topFoods[0]?.food ?? "—",
+                        value: topFoodData?.title ?? "—",
                         icon: <TrendingUp className="h-4 w-4 text-blue-400"/>,
-                        sub: topFoods[0] ? `${topFoods[0].count}× logged` : "",
+                        sub: topFoodData?.foodCount ? `${topFoodData.foodCount} times` : "",
                     },
                     {
                         label: "Streak",

@@ -115,7 +115,7 @@ function MealDetailDialog({
                     <div>
                         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Foods</p>
                         <div className="space-y-1">
-                            {((mealData?.items as any) || [])?.map((f: any) => (
+                            {((mealData?.items) || [])?.map((f) => (
                                 <div key={f.id} className="flex items-center gap-2 text-sm">
                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"/>
                                     <span className="flex-1">{f.catalogFood.name}</span>
