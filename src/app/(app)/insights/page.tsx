@@ -1,6 +1,6 @@
 "use client";
 import {useMemo} from "react";
-import {mealsRepo} from "@/core/meals/mealsRepo";
+import {mealsRepo} from "@/services/meal/mealsRepo";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Badge} from "@/components/ui/badge";
 import {TopFoodsChart} from "@/components/charts/top-foods-chart";

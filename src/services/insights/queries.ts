@@ -1,5 +1,6 @@
 import {apiFetch} from "@/apiClient/client";
 import {getSession} from "@/lib/supabase/session";
+import {getMealsByRange} from "@/services/meal/queries";
 
 async function getTopFood(): Promise<{ title: string; foodCount: number }>{
     const session = await getSession();
@@ -15,4 +16,16 @@ async function getTopFood(): Promise<{ title: string; foodCount: number }>{
     return response;
 }
 
-export {getTopFood};
+async function getAvgCaloriesPerTimeFrame() {
+    return getMealsByRange("this-week");
+}
+
+async function getMealsThisWeek() {
+    return getMealsByRange("this-week");
+}
+
+async function getAverageCalories() {
+    return apiFetch("/api/v1/insights/average-calories");
+}
+
+export {getTopFood, getAverageCalories, getAvgCaloriesPerTimeFrame, getMealsThisWeek}

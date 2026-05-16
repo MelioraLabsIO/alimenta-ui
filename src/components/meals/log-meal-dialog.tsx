@@ -14,7 +14,7 @@ import {ManualForm} from "@/app/(app)/log/ManualForm";
 import {NaturalLanguageForm} from "@/app/(app)/log/NaturalLanguageForm";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {useQueryClient} from "@tanstack/react-query";
-import {Meal} from "@/core/types";
+import {Meal} from "@/core/types/meal";
 
 interface LogMealDialogProps {
     mealToEdit?: Meal | null;

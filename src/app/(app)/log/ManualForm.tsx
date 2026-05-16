@@ -3,7 +3,7 @@
 import {DevTool} from "@hookform/devtools";
 
 import {redirect} from "next/navigation";
-import {EMealType, Meal} from "@/core/types";
+import {EMealType, Meal} from "@/core/types/meal";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {Textarea} from "@/components/ui/textarea";
@@ -17,7 +17,7 @@ import {zodResolver} from "@hookform/resolvers/zod";
 import {toast} from "sonner";
 import {useMutation} from "@tanstack/react-query";
 import {logMeal, updateMeal} from "@/services/meal/mutations";
-import {FoodRow, MealFormValues} from "@/core/meals/types";
+import {FoodRow, MealFormValues} from "@/services/meal/types";
 import {z} from "zod";
 import {MEAL_TYPES, mealSchema} from "@/contracts/meals/create-meal.schema";
 
@@ -40,6 +40,13 @@ const UNITS = ["g", "ml", "oz", "cup", "tbsp", "tsp", "piece", "slice", "serving
 type MealFormSchema = z.infer<typeof mealSchema>;
 
 export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSuccess?: () => void }) {
+    const prefillFoods = prefill?.items?.map((f) => ({
+        id: f.catalogFoodId,
+        name: f.catalogFood.name,
+        quantity: String(f.quantity),
+        unit: f.unit
+    })) ?? [];
+
     const form = useForm<MealFormSchema>({
         resolver: zodResolver(mealSchema),
         defaultValues: {
@@ -48,12 +55,7 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
                 ? new Date(prefill.foodTime).toISOString().slice(0, 16)
                 : new Date().toISOString().slice(0, 16),
             mealType: prefill?.type ?? EMealType.LUNCH,
-            foods: ((prefill?.items as any) || [])?.map((f: any) => ({
-                id: f.catalogFoodId,
-                name: f.catalogFood.name,
-                quantity: String(f.quantity),
-                unit: f.unit
-            })) ?? [{...emptyFood(), id: ""}],
+            foods: prefillFoods.length > 0 ? prefillFoods : [{...emptyFood(), id: ""}],
             nutrition: {
                 calories: String(prefill?.nutrition?.calories ?? ""),
                 protein: String(prefill?.nutrition?.protein ?? ""),
@@ -63,6 +65,7 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
             mood: prefill?.mood ?? 3,
             energy: prefill?.energy ?? 3,
             digestion: prefill?.digestion ?? 3,
+            likeness: prefill?.likeness ?? 3,
             notes: prefill?.notes ?? "",
         }
     })
@@ -278,6 +281,7 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
                             {label: "Mood", name: "mood"},
                             {label: "Energy", name: "energy"},
                             {label: "Digestion", name: "digestion"},
+                            {label: "Likeness", name: "likeness"},
                         ] as const).map(({label, name}) => (
                             <div key={label} className="space-y-2">
                                 <Controller

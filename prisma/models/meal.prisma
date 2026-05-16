@@ -20,6 +20,7 @@ model Meal {
   mood      Int
   energy    Int
   digestion Int
+  likeness  Int       @default(3)
   foodTime  DateTime  @map("food_time")
   createdAt DateTime? @default(now()) @map("created_at")
   updatedAt DateTime? @updatedAt @map("updated_at")

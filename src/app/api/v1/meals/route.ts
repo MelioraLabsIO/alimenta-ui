@@ -1,40 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAllMealsService } from "@/domain/meals/get-meal-entries";
-import {createMealEntry} from "@/domain/meals/create-meal-entry";
-import {deleteMealEntry} from "@/domain/meals/delete-meal-entry";
+import {createMealEntryRepository as createMealEntry} from "@/repositories/meals/create-meal-entry";
+import {deleteMealEntryRepository as deleteMealEntry} from "@/repositories/meals/delete-meal-entry";
+import {createClient} from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function GET(request: NextRequest) {
-    const searchParams = request.nextUrl.searchParams;
-    const range = searchParams.get("range");
+export async function POST(request: NextRequest) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    let from: Date | undefined;
-    let to: Date | undefined;
-
-    if (range === "this-week") {
-        const now = new Date();
-        const dayOfWeek = now.getDay(); // 0 is Sunday, 1 is Monday, etc.
-        const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Adjust when day is Sunday
-        
-        from = new Date(now.setDate(diff));
-        from.setHours(0, 0, 0, 0);
-
-        to = new Date();
-        to.setHours(23, 59, 59, 999);
+    if (!user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const meals = await getAllMealsService(from, to);
-
-    return NextResponse.json(meals, { status: 200 });
-}
-
-
-export async function POST(request: NextRequest) {
     const body = await request.json();
 
-    const mealSaved = await createMealEntry(body)
+    const mealSaved = await createMealEntry(body, user.id)
     if (!mealSaved) {
         return NextResponse.json({ error: "Failed to create meal entry" }, { status: 500 })
     }

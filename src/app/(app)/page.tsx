@@ -3,8 +3,9 @@
 import {useMemo} from "react";
 import {useQuery} from "@tanstack/react-query";
 import Link from "next/link";
-import {mealsRepo} from "@/core/meals/mealsRepo";
+import {mealsRepo} from "@/services/meal/mealsRepo";
 import {getTopFood} from "@/services/insights/queries";
+import {getRecentMeals} from "@/services/meal/queries";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
@@ -22,7 +23,7 @@ import {
     Sparkles,
 } from "lucide-react";
 import {toast} from "sonner";
-import {Meal} from "@/core/types";
+import {Meal} from "@/core/types/meal";
 import {LogMealDialog} from "@/components/meals/log-meal-dialog";
 
 const MEAL_TYPE_COLORS: Record<string, string> = {
@@ -42,7 +43,7 @@ function MealRow({meal, onDuplicate}: { meal: Meal; onDuplicate: (id: string) =>
                     {meal.foodTime && new Date(meal.foodTime).toLocaleString("en-US", {
                         month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
                     })}
-                    {meal.nutrition?.calories ? ` · ${meal.nutrition.calories} kcal` : ""}
+                    {meal.nutrition?.calories ? ` · ${Math.round(meal.nutrition.calories)} kcal` : ""}
                 </p>
             </div>
             <Badge
@@ -53,7 +54,7 @@ function MealRow({meal, onDuplicate}: { meal: Meal; onDuplicate: (id: string) =>
             </Badge>
             <div className="flex gap-1 shrink-0">
                 <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
-                    <Link href={`/app/history`}><Eye className="h-3.5 w-3.5"/></Link>
+                    <Link href="/history"><Eye className="h-3.5 w-3.5"/></Link>
                 </Button>
                 <Button
                     variant="ghost"
@@ -64,7 +65,7 @@ function MealRow({meal, onDuplicate}: { meal: Meal; onDuplicate: (id: string) =>
                     <Copy className="h-3.5 w-3.5"/>
                 </Button>
                 <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
-                    <Link href={`/app/log`}><Pencil className="h-3.5 w-3.5"/></Link>
+                    <Link href="/log"><Pencil className="h-3.5 w-3.5"/></Link>
                 </Button>
             </div>
         </div>
@@ -73,6 +74,7 @@ function MealRow({meal, onDuplicate}: { meal: Meal; onDuplicate: (id: string) =>
 
 export default function DashboardPage() {
     const meals = useMemo(() => mealsRepo.list(), []);
+    const {data: recentMeals = []} = useQuery({queryKey: ["recent-meals"], queryFn: getRecentMeals});
     const weeklyCalories = useMemo(() => mealsRepo.weeklyCalories(), []);
     const weeklyMacros = useMemo(() => mealsRepo.weeklyMacros(), []);
     const moodData = useMemo(() => mealsRepo.moodEnergyData(), []);
@@ -114,7 +116,6 @@ export default function DashboardPage() {
         toast.success("Meal duplicated!");
     }
 
-    const recentMeals = meals.slice(0, 5);
 
     return (
         <div className="max-w-6xl mx-auto space-y-6">

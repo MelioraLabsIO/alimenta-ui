@@ -1,6 +1,6 @@
 import {useState} from "react";
-import {EMealType, ParsedMeal} from "@/core/types";
-import {analyzeMeal} from "@/core/analyze/analyzeMeal";
+import {EMealType, ParsedMeal} from "@/core/types/meal";
+import {analyzeMeal} from "@/services/meal/mutations";
 import {logMeal} from "@/services/meal/mutations";
 import {toast} from "sonner";
 import {Button} from "@/components/ui/button";
@@ -55,6 +55,7 @@ export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {
                 mood: 3,
                 energy: 3,
                 digestion: 3,
+                likeness: 3,
                 notes: "",
             });
             toast.success("Meal saved!", {description: parsed.title});

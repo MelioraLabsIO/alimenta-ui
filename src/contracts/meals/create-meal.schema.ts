@@ -1,4 +1,4 @@
-import {EMealType} from "@/core/types";
+import {EMealType} from "@/core/types/meal";
 import {z} from "zod";
 
 export const MEAL_TYPES = [EMealType.BREAKFAST, EMealType.LUNCH, EMealType.DINNER, EMealType.SNACK, EMealType.OTHER] as const;
@@ -21,5 +21,6 @@ export const mealSchema = z.object({
     mood: z.number().min(1).max(5),
     energy: z.number().min(1).max(5),
     digestion: z.number().min(1).max(5),
+    likeness: z.number().min(1).max(5),
     notes: z.string(),
 });

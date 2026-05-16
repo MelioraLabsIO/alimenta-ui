@@ -8,7 +8,7 @@ export const aiClient = {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${apiKey}`,
             },
-            body: JSON.stringify({ text }),
+            body: JSON.stringify({text}),
         });
 
         if (!response.ok) {

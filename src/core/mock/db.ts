@@ -1,6 +1,6 @@
 // src/core/mock/db.ts
 
-import {EMealType, Meal} from "@/core/types";
+import {EMealType, Meal} from "@/core/types/meal";
 
 function uid() {
     return Math.random().toString(36).slice(2, 10);
