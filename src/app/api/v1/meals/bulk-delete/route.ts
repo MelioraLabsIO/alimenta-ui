@@ -1,5 +1,5 @@
 import {NextRequest, NextResponse} from "next/server";
-import {bulkDeleteMealEntries} from "@/domain/meals/bulk-delete-meal-entries";
+import {bulkDeleteMealEntriesRepository as bulkDeleteMealEntries} from "@/repositories/meals/bulk-delete-meal-entries";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

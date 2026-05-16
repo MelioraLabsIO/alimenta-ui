@@ -55,6 +55,7 @@ export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {
                 mood: 3,
                 energy: 3,
                 digestion: 3,
+                likeness: 3,
                 notes: "",
             });
             toast.success("Meal saved!", {description: parsed.title});

@@ -27,6 +27,7 @@ export type Meal = {
     mood?: number;
     energy?: number;
     digestion?: number;
+    likeness?: number;
     items?: MealItem[];
     createdAt?: string | Date | null;
     updatedAt?: string | Date | null;

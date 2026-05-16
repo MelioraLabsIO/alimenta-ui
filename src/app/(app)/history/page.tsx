@@ -150,11 +150,12 @@ function MealDetailDialog({
                     {mealData && (
                         <div>
                             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Wellness</p>
-                            <div className="grid grid-cols-3 gap-2">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                                 {[
                                     {label: "Mood", value: mealData.mood},
                                     {label: "Energy", value: mealData.energy},
                                     {label: "Digestion", value: mealData.digestion},
+                                    {label: "Likeness", value: mealData.likeness},
                                 ].map(({label, value}) => (
                                     <div key={label} className="rounded-lg bg-muted/50 p-2 text-center">
                                         <p className="text-[10px] text-muted-foreground">{label}</p>

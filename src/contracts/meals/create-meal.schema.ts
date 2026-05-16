@@ -21,5 +21,6 @@ export const mealSchema = z.object({
     mood: z.number().min(1).max(5),
     energy: z.number().min(1).max(5),
     digestion: z.number().min(1).max(5),
+    likeness: z.number().min(1).max(5),
     notes: z.string(),
 });
