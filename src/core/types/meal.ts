@@ -1,4 +1,4 @@
-// src/core/types.ts
+import { NutritionSummary } from "./nutrition";
 
 export enum EMealType {
     BREAKFAST = "BREAKFAST",
@@ -8,22 +8,13 @@ export enum EMealType {
     OTHER = "OTHER"
 }
 
-export type CatalogFood = {
-    id: string;
-    name: string;
-    calories: number | null;
-    protein: number | null;
-    carbs: number | null;
-    fat: number | null;
-};
-
 export type MealItem = {
     id: string;
     mealId: string;
     catalogFoodId: string;
     quantity: number;
     unit: string;
-    catalogFood: CatalogFood;
+    catalogFood: import("./food").CatalogFood;
 };
 
 export type Meal = {
@@ -44,23 +35,13 @@ export type Meal = {
     nutrition?: NutritionSummary;
 };
 
-export type NutritionSummary = {
-    calories: number;
-    protein: number;
-    carbs: number;
-    fat: number;
-};
-
-// --- Legacy / Derived Types ---
-// Keeping FoodItem for now if needed by other components, but marking as derived
 export type FoodItem = {
     id: string;
     name: string;
     quantity: number;
     unit: string;
-    catalogFood?: CatalogFood;
+    catalogFood?: import("./food").CatalogFood;
 };
-
 
 export type ParsedMeal = {
     title: string;
@@ -69,3 +50,10 @@ export type ParsedMeal = {
     confidence: number; // 0–1
     rawText: string;
 };
+
+export type MealRange = "this-week" | "this-month" | "last-week" | "last-month";
+
+export interface CaloriesAverageResponse {
+    average: number;
+    period: MealRange;
+}

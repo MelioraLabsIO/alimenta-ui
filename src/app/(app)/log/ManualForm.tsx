@@ -3,7 +3,7 @@
 import {DevTool} from "@hookform/devtools";
 
 import {redirect} from "next/navigation";
-import {EMealType, Meal} from "@/core/types";
+import {EMealType, Meal} from "@/core/types/meal";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {Textarea} from "@/components/ui/textarea";
@@ -17,7 +17,7 @@ import {zodResolver} from "@hookform/resolvers/zod";
 import {toast} from "sonner";
 import {useMutation} from "@tanstack/react-query";
 import {logMeal, updateMeal} from "@/services/meal/mutations";
-import {FoodRow, MealFormValues} from "@/core/meals/types";
+import {FoodRow, MealFormValues} from "@/services/meal/types";
 import {z} from "zod";
 import {MEAL_TYPES, mealSchema} from "@/contracts/meals/create-meal.schema";
 

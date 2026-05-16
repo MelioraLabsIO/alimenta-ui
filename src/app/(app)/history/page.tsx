@@ -1,8 +1,8 @@
 "use client";
 
 import {useMemo, useReducer, useState} from "react";
-import {mealsRepo} from "@/core/meals/mealsRepo";
-import {EMealType, Meal} from "@/core/types";
+import {mealsRepo} from "@/services/meal/mealsRepo";
+import {EMealType, Meal} from "@/core/types/meal";
 import {toast} from "sonner";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";

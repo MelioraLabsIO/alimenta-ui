@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import {analyzeMeal} from "@/core/analyze";
+import {analyzeMeal} from "@/services/meal/mutations";
 
 export async function POST(req: Request) {
     const baseUrl = process.env.ALIMENTA_AI_SERVICE_URL;   // https://xxxxx.up.railway.app || http://localhost:8000

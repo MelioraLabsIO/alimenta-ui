@@ -1,4 +1,4 @@
-import {MealFormValues} from "@/core/meals/types";
+import {MealFormValues} from "@/services/meal/types";
 import prisma from "@/lib/prisma/prisma";
 
 export async function updateMealEntryRepository(mealId: string, meal: MealFormValues, userId: string) {
