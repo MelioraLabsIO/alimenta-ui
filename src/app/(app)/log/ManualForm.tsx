@@ -199,48 +199,55 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
                                 <Plus className="h-3 w-3"/> Add food
                             </Button>
                         </div>
-                        {errors.foods && <p className="text-xs text-destructive">
-                            {errors.foods.root?.message || (Array.isArray(errors.foods) && errors.foods.some(f => f?.name) ? "All food items need a name" : "")}
-                        </p>}
+                        {errors.foods && (
+                            <p className="text-xs text-destructive">
+                                {errors.foods.root?.message || (Array.isArray(errors.foods) && errors.foods.some(f => f?.name) ? "All food items need a name" : "")}
+                            </p>
+                        )}
                         <div className="space-y-2">
                             {foods.map((food, index) => (
-                                <div key={food.id} className="flex gap-2 items-center">
-                                    <Input
-                                        placeholder="Food name"
-                                        className="flex-1"
-                                        {...register(`foods.${index}.name` as const)}
-                                    />
-                                    <Input
-                                        placeholder="Qty"
-                                        className="w-20"
-                                        type="number"
-                                        min={0}
-                                        {...register(`foods.${index}.quantity` as const)}
-                                    />
-                                    <Controller
-                                        control={control}
-                                        name={`foods.${index}.unit` as const}
-                                        render={({field}) => (
-                                            <Select value={field.value} onValueChange={field.onChange}>
-                                                <SelectTrigger className="w-24">
-                                                    <SelectValue/>
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {UNITS.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}
-                                                </SelectContent>
-                                            </Select>
-                                        )}
-                                    />
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0"
-                                        onClick={() => removeFood(index)}
-                                        disabled={foods.length === 1}
-                                        type="button"
-                                    >
-                                        <Trash2 className="h-3.5 w-3.5"/>
-                                    </Button>
+                                <div key={food.id} className="space-y-1">
+                                    <div className="flex gap-2 items-center">
+                                        <Input
+                                            placeholder="Food name"
+                                            className={`flex-1 ${errors.foods?.[index]?.name ? "border-destructive" : ""}`}
+                                            {...register(`foods.${index}.name` as const)}
+                                        />
+                                        <Input
+                                            placeholder="Qty"
+                                            className="w-20"
+                                            type="number"
+                                            min={0}
+                                            {...register(`foods.${index}.quantity` as const)}
+                                        />
+                                        <Controller
+                                            control={control}
+                                            name={`foods.${index}.unit` as const}
+                                            render={({field}) => (
+                                                <Select value={field.value} onValueChange={field.onChange}>
+                                                    <SelectTrigger className="w-24">
+                                                        <SelectValue/>
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {UNITS.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}
+                                                    </SelectContent>
+                                                </Select>
+                                            )}
+                                        />
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0"
+                                            onClick={() => removeFood(index)}
+                                            disabled={foods.length === 1}
+                                            type="button"
+                                        >
+                                            <Trash2 className="h-3.5 w-3.5"/>
+                                        </Button>
+                                    </div>
+                                    {errors.foods?.[index]?.name && (
+                                        <p className="text-[10px] text-destructive px-1">{errors.foods[index].name.message}</p>
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -264,8 +271,14 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
                                         type="number"
                                         min={0}
                                         placeholder="—"
+                                        className={errors.nutrition?.[name.split(".")[1] as keyof MealFormValues["nutrition"]] ? "border-destructive" : ""}
                                         {...register(name as `nutrition.${Extract<keyof MealFormValues["nutrition"], string>}`)}
                                     />
+                                    {errors.nutrition?.[name.split(".")[1] as keyof MealFormValues["nutrition"]] && (
+                                        <p className="text-[10px] text-destructive">
+                                            {errors.nutrition?.[name.split(".")[1] as keyof MealFormValues["nutrition"]]?.message}
+                                        </p>
+                                    )}
                                 </div>
                             ))}
                         </div>

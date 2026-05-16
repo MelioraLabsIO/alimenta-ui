@@ -28,6 +28,8 @@ export async function apiFetch(path: string, options?: RequestInit, config: ApiF
         cache: "no-store",
     });
 
+    routeDebug(`Request to ${path} returned status ${response.status}`)
+
     if (!response.ok) {
         throw new Error(`API error ${response.status}`);
     }
