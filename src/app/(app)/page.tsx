@@ -3,8 +3,7 @@
 import {useMemo} from "react";
 import {useQuery} from "@tanstack/react-query";
 import Link from "next/link";
-import {mealsRepo} from "@/services/meal/mealsRepo";
-import {getRecentMeals} from "@/services/meal/queries";
+import {mealsRepo} from "@/core/meals/mealsRepo";
 import {getTopFood} from "@/services/insights/queries";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Badge} from "@/components/ui/badge";

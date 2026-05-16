@@ -2,16 +2,19 @@ import {apiFetch} from "@/apiClient/client";
 import {getSession} from "@/lib/supabase/session";
 import {getMealsByRange} from "@/services/meal/queries";
 
-async function getTopFood(): Promise<{ title: string; foodCount: number }> {
+async function getTopFood(): Promise<{ title: string; foodCount: number }>{
     const session = await getSession();
-    console.log("session", session, "fetching top food");
-    const response = await apiFetch("/api/v1/insights/top-food")
+    const response = await apiFetch("/api/v1/insights/top-food", {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${session.access_token}`,
+        },
+    });
     if (!response) {
         throw new Error("Failed to fetch top food");
     }
     return response;
 }
-
 
 async function getAvgCaloriesPerTimeFrame() {
     return getMealsByRange("this-week");
