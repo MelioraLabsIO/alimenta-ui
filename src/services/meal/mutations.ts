@@ -8,6 +8,14 @@ export type AnalyzeInput = {
     userId?: string;
 };
 
+export type DeleteMealResponse = {
+    id: string;
+};
+
+export type BulkDeleteMealsResponse = {
+    ids: string[];
+};
+
 /**
  * Analyzes a meal description using the AI service.
  */
@@ -59,7 +67,7 @@ export async function updateMeal(
     return result?.data;
 }
 
-export async function deleteMealById(id: string): Promise<Meal> {
+export async function deleteMealById(id: string): Promise<DeleteMealResponse> {
     return apiFetch(`/api/v1/meals/${id}`, {
         method: "DELETE",
     });
@@ -67,9 +75,9 @@ export async function deleteMealById(id: string): Promise<Meal> {
 
 export async function bulkDeleteMeals(
     ids: string[]
-): Promise<{ count: number }> {
+): Promise<BulkDeleteMealsResponse> {
     return apiFetch("/api/v1/meals/bulk-delete", {
-        method: "DELETE",
+        method: "POST",
         body: JSON.stringify({ids}),
     });
 }

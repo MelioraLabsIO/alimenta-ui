@@ -18,7 +18,7 @@ import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {getAllMeals} from "@/services/meal/queries";
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {BulkDeleteConfirmDialog} from "@/components/meals/bulk-delete-confirm-dialog";
-import {deleteMealById, bulkDeleteMeals} from "@/services/meal/mutations";
+import {deleteMealById, bulkDeleteMeals, BulkDeleteMealsResponse} from "@/services/meal/mutations";
 import {LogMealDialog} from "@/components/meals/log-meal-dialog";
 
 const MEAL_TYPE_COLORS: Record<string, string> = {
@@ -243,12 +243,12 @@ export default function HistoryPage() {
     const {mutate: bulkDelete} = useMutation({
         mutationKey: ["bulkDeleteMeals"],
         mutationFn: (ids: string[]) => bulkDeleteMeals(ids),
-        onSuccess: (result: { count: number }) => {
-            toast.success(`${result.count} meal${result.count !== 1 ? 's' : ''} deleted`);
+        onSuccess: (result: BulkDeleteMealsResponse) => {
+            toast.success(`${result.ids.length} meal${result.ids.length !== 1 ? 's' : ''} deleted`);
             queryClient.setQueryData(["meals"], (cachedData: Meal[]) => {
                 if (!cachedData) return cachedData;
 
-                return cachedData?.filter((meal) => !selectedMealIds.has(meal.id))
+                return cachedData?.filter((meal) => !result.ids.includes(meal.id))
             });
             setSelectedMealIds(new Set());
         },
