@@ -1,26 +1,21 @@
-import {EMealType} from "@/core/types/meal";
+import {EMealType, EMealUnit} from "@/core/types/models/meal";
 import {z} from "zod";
 
 export const MEAL_TYPES = [EMealType.BREAKFAST, EMealType.LUNCH, EMealType.DINNER, EMealType.SNACK, EMealType.OTHER] as const;
 export const mealSchema = z.object({
     title: z.string().min(1, "Meal title is required"),
-    date: z.string().min(1, "Date is required"),
-    mealType: z.nativeEnum(EMealType),
-    foods: z.array(z.object({
-        id: z.string(),
-        name: z.string().min(1, "Food name is required"),
-        quantity: z.string(),
-        unit: z.string(),
+    mealTime: z.coerce.date({ message: "Date is required" }),
+    type: z.enum(EMealType),
+    items: z.array(z.object({
+        foodSourceId: z.string().min(1, "Food source ID is required"),
+        foodSource: z.string().min(1, "Food source is required"),
+        foodName: z.string().min(1, "Food name is required"),
+        quantity: z.coerce.number().min(0, "Quantity must be greater than 0"),
+        unit: z.enum(EMealUnit).default(EMealUnit.GRAM),
     })).min(1, "At least one food item is required"),
-    nutrition: z.object({
-        calories: z.string().refine(v => v === "" || (!isNaN(Number(v)) && Number(v) >= 0 && Number(v) <= 10000), "0-10000 kcal"),
-        protein: z.string().refine(v => v === "" || (!isNaN(Number(v)) && Number(v) >= 0 && Number(v) <= 1000), "0-1000g"),
-        carbs: z.string().refine(v => v === "" || (!isNaN(Number(v)) && Number(v) >= 0 && Number(v) <= 1000), "0-1000g"),
-        fat: z.string().refine(v => v === "" || (!isNaN(Number(v)) && Number(v) >= 0 && Number(v) <= 1000), "0-1000g"),
-    }),
-    mood: z.number().min(1).max(5),
-    energy: z.number().min(1).max(5),
-    digestion: z.number().min(1).max(5),
-    likeness: z.number().min(1).max(5),
-    notes: z.string(),
+    mood: z.number().min(1).max(5).optional(),
+    energy: z.number().min(1).max(5).optional(),
+    digestion: z.number().min(1).max(5).optional(),
+    likeness: z.number().min(1).max(5).optional(),
+    notes: z.string().optional(),
 });

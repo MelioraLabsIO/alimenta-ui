@@ -1,11 +1,12 @@
-import {Meal, MealRange, CaloriesAverageResponse} from "@/core/types/meal";
+import {Meal, MealRange, CaloriesAverageResponse} from "@/core/types/models/meal";
 import {apiFetch} from "@/apiClient/client";
+import {MealResponse} from "@/core/types/dto";
 
 export async function getRecentMeals(): Promise<Meal[]> {
     return apiFetch("/api/v1/meals?limit=5");
 }
 
-export async function getAllMeals(): Promise<Meal[]> {
+export async function getAllMeals(): Promise<MealResponse[]> {
     return apiFetch("/api/v1/meals");
 }
 

@@ -1,6 +1,40 @@
 // src/core/mock/db.ts
 
-import {EMealType, Meal} from "@/core/types/meal";
+import {EMealType, EMealUnit, Meal, MealItem} from "@/core/types/models/meal";
+import {NutritionSummary} from "@/core/types/models/nutrition";
+
+type SeedFood = NutritionSummary & {
+    id: string;
+    name: string;
+};
+
+type SeedMealItem = {
+    id: string;
+    mealId: string;
+    catalogFoodId: string;
+    quantity: number;
+    unit: string;
+    catalogFood: SeedFood;
+};
+
+type SeedMeal = Omit<Meal, "userId" | "items" | "mealTime" | "createdAt" | "updatedAt"> & {
+    foodTime: string;
+    items: SeedMealItem[];
+    createdAt: string;
+    updatedAt: string;
+};
+
+const DEFAULT_USER_ID = "mock-user";
+
+const mealUnitByValue: Record<string, EMealUnit> = Object.values(EMealUnit).reduce(
+    (acc, unit) => ({...acc, [unit]: unit}),
+    {} as Record<string, EMealUnit>
+);
+
+function toMealUnit(unit: string): EMealUnit {
+    if (unit === "slices") return EMealUnit.SLICE;
+    return mealUnitByValue[unit] ?? EMealUnit.UNIT;
+}
 
 function uid() {
     return Math.random().toString(36).slice(2, 10);
@@ -13,7 +47,50 @@ function iso(daysAgo: number, hour = 12): string {
     return d.toISOString();
 }
 
-const seed: Meal[] = [
+function toMealItem(item: SeedMealItem, createdAt: Date, updatedAt: Date): MealItem {
+    return {
+        id: item.id,
+        mealId: item.mealId,
+        foodSource: "catalog",
+        foodSourceId: item.catalogFoodId,
+        foodName: item.catalogFood.name,
+        quantity: item.quantity,
+        unit: toMealUnit(item.unit),
+        nutrition: {
+            calories: item.catalogFood.calories,
+            protein: item.catalogFood.protein,
+            carbs: item.catalogFood.carbs,
+            fat: item.catalogFood.fat,
+        },
+        createdAt,
+        updatedAt,
+    };
+}
+
+function toMeal(meal: SeedMeal): Meal {
+    const mealTime = new Date(meal.foodTime);
+    const createdAt = new Date(meal.createdAt);
+    const updatedAt = new Date(meal.updatedAt);
+
+    return {
+        id: meal.id,
+        userId: DEFAULT_USER_ID,
+        title: meal.title,
+        type: meal.type,
+        notes: meal.notes,
+        mood: meal.mood,
+        energy: meal.energy,
+        digestion: meal.digestion,
+        likeness: meal.likeness,
+        items: meal.items.map((item) => toMealItem(item, createdAt, updatedAt)),
+        mealTime,
+        createdAt,
+        updatedAt,
+        nutrition: meal.nutrition,
+    };
+}
+
+const seed: SeedMeal[] = [
     {
         id: "m1",
         title: "Avocado Toast & Eggs",
@@ -231,11 +308,11 @@ const seed: Meal[] = [
 ];
 
 // In-memory store
-let store: Meal[] = [...seed];
+let store: Meal[] = seed.map(toMeal);
 
 export function listMeals(): Meal[] {
     return [...store].sort(
-        (a, b) => new Date(b.foodTime!).getTime() - new Date(a.foodTime!).getTime()
+        (a, b) => b.mealTime.getTime() - a.mealTime.getTime()
     );
 }
 
@@ -244,7 +321,7 @@ export function getMeal(id: string): Meal | undefined {
 }
 
 export function createMeal(meal: Omit<Meal, "id" | "createdAt" | "updatedAt">): Meal {
-    const now = new Date().toISOString();
+    const now = new Date();
     const newMeal: Meal = {...meal, id: uid(), createdAt: now, updatedAt: now};
     store = [newMeal, ...store];
     return newMeal;
@@ -253,7 +330,7 @@ export function createMeal(meal: Omit<Meal, "id" | "createdAt" | "updatedAt">): 
 export function updateMeal(id: string, patch: Partial<Omit<Meal, "id" | "createdAt">>): Meal {
     const idx = store.findIndex((m) => m.id === id);
     if (idx === -1) throw new Error(`Meal ${id} not found`);
-    const updated: Meal = {...store[idx], ...patch, updatedAt: new Date().toISOString()};
+    const updated: Meal = {...store[idx], ...patch, updatedAt: new Date()};
     store = store.map((m) => (m.id === id ? updated : m));
     return updated;
 }
@@ -265,14 +342,22 @@ export function deleteMeal(id: string): void {
 export function duplicateMeal(id: string): Meal {
     const original = getMeal(id);
     if (!original) throw new Error(`Meal ${id} not found`);
-    const now = new Date().toISOString();
+    const now = new Date();
+    const mealId = uid();
     const copy: Meal = {
         ...original,
-        id: uid(),
+        id: mealId,
         title: `${original.title} (copy)`,
-        foodTime: now,
+        mealTime: now,
         createdAt: now,
         updatedAt: now,
+        items: original.items.map((item) => ({
+            ...item,
+            id: uid(),
+            mealId,
+            createdAt: now,
+            updatedAt: now,
+        })),
     };
     store = [copy, ...store];
     return copy;
@@ -281,7 +366,7 @@ export function duplicateMeal(id: string): Meal {
 // Helpers for analytics
 export function getMealsByDateRange(from: Date, to: Date): Meal[] {
     return store.filter((m) => {
-        const d = new Date(m.foodTime || new Date());
+        const d = new Date(m.mealTime);
         return d >= from && d <= to;
     });
 }
@@ -295,7 +380,7 @@ export function getWeeklyCalories(): DailyCalories[] {
         d.setDate(d.getDate() - i);
         const label = d.toLocaleDateString("en-US", {weekday: "short"});
         const dayMeals = store.filter((m) => {
-            const md = new Date(m.foodTime || new Date());
+            const md = new Date(m.mealTime);
             return (
                 md.getFullYear() === d.getFullYear() &&
                 md.getMonth() === d.getMonth() &&
@@ -349,7 +434,7 @@ export function getTopFoods(limit = 8): FoodFrequency[] {
     const freq: Record<string, number> = {};
     store.forEach((m) => {
         (m.items || []).forEach((item) => {
-            const foodName = item.catalogFood.name;
+            const foodName = item.foodName;
             freq[foodName] = (freq[foodName] ?? 0) + 1;
         });
     });
@@ -366,7 +451,7 @@ export function getFoodsCorrelatedWithDigestion(limit = 6): DigestCorrelation[] 
     store.forEach((m) => {
         if (m.digestion === undefined) return;
         (m.items || []).forEach((item) => {
-            const foodName = item.catalogFood.name;
+            const foodName = item.foodName;
             if (!map[foodName]) map[foodName] = [];
             map[foodName].push(m.digestion!);
         });
@@ -390,7 +475,7 @@ export function getMoodTrend(): MoodTrend[] {
         d.setDate(d.getDate() - i);
         const label = d.toLocaleDateString("en-US", {weekday: "short"});
         const dayMeals = store.filter((m) => {
-            const md = new Date(m.foodTime || new Date());
+            const md = new Date(m.mealTime);
             return (
                 md.getFullYear() === d.getFullYear() &&
                 md.getMonth() === d.getMonth() &&

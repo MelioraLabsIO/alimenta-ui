@@ -21,7 +21,7 @@ export const aiClient = {
 };
 
 export type AIResponse = {
-    foods: string[];
+    items: string[];
     calories: number;
     sentiment: string;
 };
