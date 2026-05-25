@@ -26,7 +26,6 @@ export async function analyzeMeal(input: AnalyzeInput): Promise<ParsedMeal> {
 
     // Call external AI service
     const aiResponse = await aiClient.analyzeText(input.text);
-    console.log("aiResponse: ", aiResponse);
 
     // Transform the AI response to ParsedMeal structure
     return {

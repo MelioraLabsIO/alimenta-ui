@@ -89,14 +89,12 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
         control,
         name: "items"
     })
-    console.log("isSubmitting", isSubmitting)
     const devToolControl = control as unknown as Control<MealFormInput>;
 
     /********************************************* MUTATIONS ************************************************/
     const {mutate: mutateCreate, isPending: isCreatingPending} = useMutation({
         mutationKey: ["save-meal"],
         mutationFn: async (data: SaveMealDTO) => {
-            console.log("Creating meal with data:", data);
             return saveMeal(data)
         },
         onSuccess: () => {
