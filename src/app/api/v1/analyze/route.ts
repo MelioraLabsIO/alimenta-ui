@@ -26,8 +26,7 @@ export async function POST(req: Request) {
         cache: "no-store",
     });
 
-    const anotherResponse = await analyzeMeal(body)
-    console.log("anotherResponse: ", anotherResponse)
+    // const anotherResponse = await analyzeMeal(body)
 
     const text = await upstream.text();
     return new NextResponse(text, {
