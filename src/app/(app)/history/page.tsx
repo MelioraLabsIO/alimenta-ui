@@ -2,7 +2,7 @@
 
 import {useMemo, useReducer, useState} from "react";
 import {mealsRepo} from "@/services/meal/mealsRepo";
-import {EMealType, Meal} from "@/core/types/meal";
+import {EMealType, Meal} from "@/core/types/models/meal";
 import {toast} from "sonner";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
@@ -20,6 +20,7 @@ import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} fro
 import {BulkDeleteConfirmDialog} from "@/components/meals/bulk-delete-confirm-dialog";
 import {deleteMealById, bulkDeleteMeals, BulkDeleteMealsResponse} from "@/services/meal/mutations";
 import {LogMealDialog} from "@/components/meals/log-meal-dialog";
+import {MealResponse} from "@/core/types/dto";
 
 const MEAL_TYPE_COLORS: Record<string, string> = {
     BREAKFAST: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
@@ -103,7 +104,7 @@ function MealDetailDialog({
                 <DialogHeader>
                     <DialogTitle className="text-base">{mealData.title}</DialogTitle>
                     <DialogDescription className="text-xs">
-                        {mealData.foodTime && new Date(mealData.foodTime).toLocaleString("en-US", {
+                        {mealData.mealTime && new Date(mealData.mealTime).toLocaleString("en-US", {
                             weekday: "long", year: "numeric", month: "long", day: "numeric",
                             hour: "numeric", minute: "2-digit",
                         })}
@@ -118,7 +119,7 @@ function MealDetailDialog({
                             {((mealData?.items) || [])?.map((f) => (
                                 <div key={f.id} className="flex items-center gap-2 text-sm">
                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"/>
-                                    <span className="flex-1">{f.catalogFood.name}</span>
+                                    <span className="flex-1">{f.foodName}</span>
                                     <span className="text-muted-foreground text-xs">{f.quantity} {f.unit}</span>
                                 </div>
                             ))}
@@ -261,10 +262,10 @@ export default function HistoryPage() {
         if (!allMeals) return []
         return allMeals.filter((m) => {
             if (search && !m.title.toLowerCase().includes(search.toLowerCase()) &&
-                !m.items?.some((f) => f.catalogFood.name.toLowerCase().includes(search.toLowerCase()))) return false;
+                !m.items?.some((f) => f.foodName.toLowerCase().includes(search.toLowerCase()))) return false;
             if (typeFilter !== "all" && m.type !== typeFilter) return false;
-            if (dateFrom && m.foodTime && new Date(m.foodTime) < new Date(dateFrom)) return false;
-            return !(dateTo && m.foodTime && new Date(m.foodTime) > new Date(dateTo + "T23:59:59"));
+            if (dateFrom && m.mealTime && new Date(m.mealTime) < new Date(dateFrom)) return false;
+            return !(dateTo && m.mealTime && new Date(m.mealTime) > new Date(dateTo + "T23:59:59"));
 
         });
     }, [allMeals, search, typeFilter, dateFrom, dateTo]);
@@ -273,10 +274,9 @@ export default function HistoryPage() {
         () => filtered.flatMap((meal) => (meal.items || []).map((item) => ({meal,
             food: {
                 id: item.id,
-                name: item.catalogFood.name,
+                name: item.foodName,
                 quantity: item.quantity,
                 unit: item.unit,
-                catalogFood: item.catalogFood
             }
         }))).filter(Boolean),
         [filtered],
@@ -292,7 +292,7 @@ export default function HistoryPage() {
         toast.success("Meal duplicated");
     }
 
-    function handleEdit(meal: Meal) {
+    function handleEdit(meal: MealResponse) {
         setEditingMeal(meal);
         setEditDialogOpen(true);
     }
@@ -476,7 +476,7 @@ export default function HistoryPage() {
                             </TableHeader>
                             <TableBody>
                                 {displayMode === "whole"
-                                    ? allMeals?.map((meal: Meal) => (
+                                    ? allMeals?.map((meal: MealResponse) => (
                                         <TableRow key={meal.id} className="border-border/50 hover:bg-muted/30">
                                             <TableCell className="w-10">
                                                 <Checkbox
@@ -495,7 +495,7 @@ export default function HistoryPage() {
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="text-xs text-muted-foreground">
-                                                {meal.foodTime && new Date(meal.foodTime).toLocaleDateString("en-US", {
+                                                {meal.mealTime && new Date(meal.mealTime).toLocaleDateString("en-US", {
                                                     month: "short", day: "numeric", year: "numeric",
                                                 })}
                                             </TableCell>
@@ -554,7 +554,7 @@ export default function HistoryPage() {
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="text-xs text-muted-foreground">
-                                                {meal.foodTime && new Date(meal.foodTime).toLocaleDateString("en-US", {
+                                                {meal.mealTime && new Date(meal.mealTime).toLocaleDateString("en-US", {
                                                     month: "short", day: "numeric", year: "numeric",
                                                 })}
                                             </TableCell>

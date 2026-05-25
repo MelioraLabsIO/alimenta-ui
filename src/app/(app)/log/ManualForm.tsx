@@ -3,23 +3,22 @@
 import {DevTool} from "@hookform/devtools";
 
 import {redirect} from "next/navigation";
-import {EMealType, Meal} from "@/core/types/meal";
+import {EMealType, EMealUnit, Meal} from "@/core/types/models/meal";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
-import {Textarea} from "@/components/ui/textarea";
 import {Label} from "@/components/ui/label";
-import {Slider} from "@/components/ui/slider";
 import {Separator} from "@/components/ui/separator";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
 import {Loader2, Plus, Trash2} from "lucide-react";
-import {Controller, useFieldArray, useForm} from "react-hook-form";
+import {type Control, Controller, useFieldArray, useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {toast} from "sonner";
 import {useMutation} from "@tanstack/react-query";
-import {logMeal, updateMeal} from "@/services/meal/mutations";
-import {FoodRow, MealFormValues} from "@/services/meal/types";
+import {saveMeal, updateMeal} from "@/services/meal/mutations";
+import {FoodRow} from "@/services/meal/types";
 import {z} from "zod";
 import {MEAL_TYPES, mealSchema} from "@/contracts/meals/create-meal.schema";
+import {SaveMealDTO} from "@/core/types/dto";
 
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -29,57 +28,76 @@ function uid() {
 }
 
 function emptyFood(): FoodRow {
-    return {id: uid(), name: "", quantity: "1", unit: "g"};
+    return {foodSourceId: uid(), foodSource: "catalog", foodName: "", quantity: 1, unit: EMealUnit.GRAM};
 }
 
-const UNITS = ["g", "ml", "oz", "cup", "tbsp", "tsp", "piece", "slice", "serving", "whole", "large", "medium", "small"];
+const UNITS: EMealUnit[] = [
+    EMealUnit.KG,
+    EMealUnit.LB,
+    EMealUnit.ML,
+    EMealUnit.UNIT,
+    EMealUnit.GRAM,
+    EMealUnit.OZ,
+    EMealUnit.CUP,
+    EMealUnit.TABLESPOON,
+    EMealUnit.TEASPOON,
+    EMealUnit.PIECE,
+    EMealUnit.SLICE,
+    EMealUnit.SERVING,
+    EMealUnit.WHOLE,
+    EMealUnit.LARGE,
+    EMealUnit.MEDIUM,
+    EMealUnit.SMALL,
+];
 
 // ─── Manual Form ─────────────────────────────────────────────────────────────
 
 
-type MealFormSchema = z.infer<typeof mealSchema>;
+type MealFormInput = z.input<typeof mealSchema>;
+type MealFormSchema = z.output<typeof mealSchema>;
+
+function formatDateTimeLocal(value: string | Date): string {
+    const date = value instanceof Date ? value : new Date(value);
+    const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+    return localDate.toISOString().slice(0, 16);
+}
+
 
 export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSuccess?: () => void }) {
-    const prefillFoods = prefill?.items?.map((f) => ({
-        id: f.catalogFoodId,
-        name: f.catalogFood.name,
-        quantity: String(f.quantity),
-        unit: f.unit
+    const prefillFoods: FoodRow[] = prefill?.items?.map((f) => ({
+        foodSourceId: f.id,
+        foodSource: "catalog",
+        foodName: f.foodName,
+        quantity: f.quantity,
+        unit: f.unit ?? EMealUnit.GRAM,
     })) ?? [];
 
-    const form = useForm<MealFormSchema>({
+    const form = useForm<MealFormInput, unknown, MealFormSchema>({
         resolver: zodResolver(mealSchema),
         defaultValues: {
             title: prefill?.title ?? "",
-            date: prefill?.foodTime
-                ? new Date(prefill.foodTime).toISOString().slice(0, 16)
-                : new Date().toISOString().slice(0, 16),
-            mealType: prefill?.type ?? EMealType.LUNCH,
-            foods: prefillFoods.length > 0 ? prefillFoods : [{...emptyFood(), id: ""}],
-            nutrition: {
-                calories: String(prefill?.nutrition?.calories ?? ""),
-                protein: String(prefill?.nutrition?.protein ?? ""),
-                carbs: String(prefill?.nutrition?.carbs ?? ""),
-                fat: String(prefill?.nutrition?.fat ?? ""),
-            },
-            mood: prefill?.mood ?? 3,
-            energy: prefill?.energy ?? 3,
-            digestion: prefill?.digestion ?? 3,
-            likeness: prefill?.likeness ?? 3,
-            notes: prefill?.notes ?? "",
+            mealTime: prefill?.mealTime
+                ? formatDateTimeLocal(prefill.mealTime)
+                : formatDateTimeLocal(new Date()),
+            type: prefill?.type ?? EMealType.LUNCH,
+            items: prefillFoods.length > 0 ? prefillFoods : [emptyFood()],
         }
     })
+
     const {register, control, handleSubmit, reset, formState: {errors, isSubmitting}} = form
-    const {fields: foods, append: addFood, remove: removeFood} = useFieldArray({
+    const {fields: items, append: addItem, remove: removeItem} = useFieldArray({
         control,
-        name: "foods"
+        name: "items"
     })
+    console.log("isSubmitting", isSubmitting)
+    const devToolControl = control as unknown as Control<MealFormInput>;
 
     /********************************************* MUTATIONS ************************************************/
     const {mutate: mutateCreate, isPending: isCreatingPending} = useMutation({
-        mutationKey: ["log-meal"],
-        mutationFn: async (data: MealFormSchema) => {
-            return logMeal(data)
+        mutationKey: ["save-meal"],
+        mutationFn: async (data: SaveMealDTO) => {
+            console.log("Creating meal with data:", data);
+            return saveMeal(data)
         },
         onSuccess: () => {
             toast.success("Meal logged successfully!");
@@ -98,11 +116,14 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
 
     const {mutate: mutateEdit, isPending: isEditingPending} = useMutation({
         mutationKey: ["edit-meal"],
-        mutationFn: async (data: MealFormSchema) => {
+        mutationFn: async (data: SaveMealDTO) => {
             if (!prefill?.id) {
                 throw new Error("Meal ID is required for editing");
             }
-            return updateMeal(prefill.id, data)
+            return updateMeal(prefill.id, {
+                ...data,
+                mealTime: new Date(data.mealTime),
+            })
         },
         onSuccess: () => {
             toast.success("Meal updated successfully!");
@@ -122,23 +143,24 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
     const isPending = isCreatingPending || isEditingPending;
 
     /********************************************* HANDLERS ************************************************/
-    function handleCreate(data: MealFormSchema) {
+    function handleCreate(data: SaveMealDTO) {
         mutateCreate(data)
     }
 
-    function handleEdit(data: MealFormSchema) {
+    function handleEdit(data: SaveMealDTO) {
         mutateEdit(data)
     }
 
-    function handleSave(data: MealFormSchema) {
+    function handleSave(meal: SaveMealDTO) {
+
         if (prefill?.id) {
-            handleEdit(data)
+            handleEdit(meal)
         } else {
-            handleCreate(data)
+            handleCreate(meal)
         }
     }
 
-    const sliderLabel = (v: number) => ["", "Poor", "Fair", "Okay", "Good", "Great"][v] ?? "";
+    // const sliderLabel = (v: number) => ["", "Poor", "Fair", "Okay", "Good", "Great"][v] ?? "";
 
     return (
         <>
@@ -161,16 +183,16 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
                             <Input
                                 id="date"
                                 type="datetime-local"
-                                className={errors.date ? "border-destructive" : ""}
-                                {...register("date")}
+                                className={errors.mealTime ? "border-destructive" : ""}
+                                {...register("mealTime")}
                             />
-                            {errors.date && <p className="text-xs text-destructive">{errors.date.message}</p>}
+                            {errors.mealTime && <p className="text-xs text-destructive">{errors.mealTime.message}</p>}
                         </div>
                         <div className="space-y-1.5">
                             <Label>Meal type</Label>
                             <Controller
                                 control={control}
-                                name="mealType"
+                                name="type"
                                 render={({field}) => (
                                     <Select onValueChange={field.onChange} value={field.value}>
                                         <SelectTrigger>
@@ -184,7 +206,7 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
                                     </Select>
                                 )}
                             />
-                            {errors.mealType && <p className="text-xs text-destructive">{errors.mealType.message}</p>}
+                            {errors.type && <p className="text-xs text-destructive">{errors.type.message}</p>}
                         </div>
                     </div>
 
@@ -194,35 +216,35 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
                             <Label>Foods <span className="text-destructive">*</span></Label>
-                            <Button variant="outline" size="sm" onClick={() => addFood({...emptyFood(), id: ""})}
+                            <Button variant="outline" size="sm" onClick={() => addItem({...emptyFood() })}
                                     className="gap-1.5 h-7 text-xs" type="button">
                                 <Plus className="h-3 w-3"/> Add food
                             </Button>
                         </div>
-                        {errors.foods && (
+                        {errors.items && (
                             <p className="text-xs text-destructive">
-                                {errors.foods.root?.message || (Array.isArray(errors.foods) && errors.foods.some(f => f?.name) ? "All food items need a name" : "")}
+                                {errors.items.root?.message || (Array.isArray(errors.items) && errors.items.some(f => f?.name) ? "All food items need a name" : "")}
                             </p>
                         )}
                         <div className="space-y-2">
-                            {foods.map((food, index) => (
+                            {items.map((food, index) => (
                                 <div key={food.id} className="space-y-1">
                                     <div className="flex gap-2 items-center">
                                         <Input
                                             placeholder="Food name"
-                                            className={`flex-1 ${errors.foods?.[index]?.name ? "border-destructive" : ""}`}
-                                            {...register(`foods.${index}.name` as const)}
+                                            className={`flex-1 ${errors.items?.[index]?.foodName ? "border-destructive" : ""}`}
+                                            {...register(`items.${index}.foodName` as const)}
                                         />
                                         <Input
                                             placeholder="Qty"
                                             className="w-20"
                                             type="number"
                                             min={0}
-                                            {...register(`foods.${index}.quantity` as const)}
+                                            {...register(`items.${index}.quantity` as const)}
                                         />
                                         <Controller
                                             control={control}
-                                            name={`foods.${index}.unit` as const}
+                                            name={`items.${index}.unit` as const}
                                             render={({field}) => (
                                                 <Select value={field.value} onValueChange={field.onChange}>
                                                     <SelectTrigger className="w-24">
@@ -238,15 +260,15 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
                                             variant="ghost"
                                             size="icon"
                                             className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0"
-                                            onClick={() => removeFood(index)}
-                                            disabled={foods.length === 1}
+                                            onClick={() => removeItem(index)}
+                                            disabled={items.length === 1}
                                             type="button"
                                         >
                                             <Trash2 className="h-3.5 w-3.5"/>
                                         </Button>
                                     </div>
-                                    {errors.foods?.[index]?.name && (
-                                        <p className="text-[10px] text-destructive px-1">{errors.foods[index].name.message}</p>
+                                    {errors.items?.[index]?.foodName && (
+                                        <p className="text-[10px] text-destructive px-1">{errors.items[index].foodName.message}</p>
                                     )}
                                 </div>
                             ))}
@@ -256,81 +278,81 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
                     <Separator className="my-4"/>
 
                     {/* Macros */}
-                    <div className="space-y-5">
-                        <Label className="text-muted-foreground text-xs uppercase tracking-wide">Optional macros</Label>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            {[
-                                {label: "Calories (kcal)", name: "nutrition.calories"},
-                                {label: "Protein (g)", name: "nutrition.protein"},
-                                {label: "Carbs (g)", name: "nutrition.carbs"},
-                                {label: "Fat (g)", name: "nutrition.fat"},
-                            ].map(({label, name}) => (
-                                <div key={label} className="space-y-1.5">
-                                    <Label className="text-xs">{label}</Label>
-                                    <Input
-                                        type="number"
-                                        min={0}
-                                        placeholder="—"
-                                        className={errors.nutrition?.[name.split(".")[1] as keyof MealFormValues["nutrition"]] ? "border-destructive" : ""}
-                                        {...register(name as `nutrition.${Extract<keyof MealFormValues["nutrition"], string>}`)}
-                                    />
-                                    {errors.nutrition?.[name.split(".")[1] as keyof MealFormValues["nutrition"]] && (
-                                        <p className="text-[10px] text-destructive">
-                                            {errors.nutrition?.[name.split(".")[1] as keyof MealFormValues["nutrition"]]?.message}
-                                        </p>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                    {/*<div className="space-y-5">*/}
+                    {/*    <Label className="text-muted-foreground text-xs uppercase tracking-wide">Optional macros</Label>*/}
+                    {/*    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">*/}
+                    {/*        {[*/}
+                    {/*            {label: "Calories (kcal)", name: "nutrition.calories"},*/}
+                    {/*            {label: "Protein (g)", name: "nutrition.protein"},*/}
+                    {/*            {label: "Carbs (g)", name: "nutrition.carbs"},*/}
+                    {/*            {label: "Fat (g)", name: "nutrition.fat"},*/}
+                    {/*        ].map(({label, name}) => (*/}
+                    {/*            <div key={label} className="space-y-1.5">*/}
+                    {/*                <Label className="text-xs">{label}</Label>*/}
+                    {/*                <Input*/}
+                    {/*                    type="number"*/}
+                    {/*                    min={0}*/}
+                    {/*                    placeholder="—"*/}
+                    {/*                    className={errors.nutrition?.[name] ? "border-destructive" : ""}*/}
+                    {/*                    {...register(`nutrition.${name}`)}*/}
+                    {/*                />*/}
+                    {/*                {errors.nutrition?.[name] && (*/}
+                    {/*                    <p className="text-[10px] text-destructive">*/}
+                    {/*                        {errors.nutrition?.[name]?.message}*/}
+                    {/*                    </p>*/}
+                    {/*                )}*/}
+                    {/*            </div>*/}
+                    {/*        ))}*/}
+                    {/*    </div>*/}
+                    {/*</div>*/}
 
                     <Separator className="my-4"/>
 
                     {/* Journal */}
-                    <div className="space-y-4">
-                        <Label className="text-muted-foreground text-xs uppercase tracking-wide">How did you
-                            feel?</Label>
-                        {([
-                            {label: "Mood", name: "mood"},
-                            {label: "Energy", name: "energy"},
-                            {label: "Digestion", name: "digestion"},
-                            {label: "Likeness", name: "likeness"},
-                        ] as const).map(({label, name}) => (
-                            <div key={label} className="space-y-2">
-                                <Controller
-                                    control={control}
-                                    name={name}
-                                    render={({field}) => (
-                                        <>
+                    {/*<div className="space-y-4">*/}
+                    {/*    <Label className="text-muted-foreground text-xs uppercase tracking-wide">How did you*/}
+                    {/*        feel?</Label>*/}
+                    {/*    {([*/}
+                    {/*        {label: "Mood", name: "mood"},*/}
+                    {/*        {label: "Energy", name: "energy"},*/}
+                    {/*        {label: "Digestion", name: "digestion"},*/}
+                    {/*        {label: "Likeness", name: "likeness"},*/}
+                    {/*    ] as const).map(({label, name}) => (*/}
+                    {/*        <div key={label} className="space-y-2">*/}
+                    {/*            <Controller*/}
+                    {/*                control={control}*/}
+                    {/*                name={name}*/}
+                    {/*                render={({field}) => (*/}
+                    {/*                    <>*/}
 
-                                            <div className="flex items-center justify-between">
-                                                <Label className="text-sm">{label}</Label>
-                                                <span
-                                                    className="text-xs text-muted-foreground">{sliderLabel(field.value)}</span>
-                                            </div>
-                                            <Slider
-                                                min={1} max={5} step={1}
-                                                value={[field.value]}
-                                                onValueChange={([v]) => field.onChange(v)}
-                                                className="w-full"
-                                            />
-                                        </>
-                                    )}
-                                />
-                                <div className="flex justify-between text-[10px] text-muted-foreground px-0.5">
-                                    {[1, 2, 3, 4, 5].map((n) => <span key={n}>{n}</span>)}
-                                </div>
-                            </div>
-                        ))}
-                        <div className="space-y-1.5 mb-6">
-                            <Label className="text-sm">Notes</Label>
-                            <Textarea
-                                placeholder="How did this meal make you feel? Any observations…"
-                                rows={3}
-                                {...register("notes")}
-                            />
-                        </div>
-                    </div>
+                    {/*                        <div className="flex items-center justify-between">*/}
+                    {/*                            <Label className="text-sm">{label}</Label>*/}
+                    {/*                            <span*/}
+                    {/*                                className="text-xs text-muted-foreground">{sliderLabel(field.value)}</span>*/}
+                    {/*                        </div>*/}
+                    {/*                        <Slider*/}
+                    {/*                            min={1} max={5} step={1}*/}
+                    {/*                            value={[field.value]}*/}
+                    {/*                            onValueChange={([v]) => field.onChange(v)}*/}
+                    {/*                            className="w-full"*/}
+                    {/*                        />*/}
+                    {/*                    </>*/}
+                    {/*                )}*/}
+                    {/*            />*/}
+                    {/*            <div className="flex justify-between text-[10px] text-muted-foreground px-0.5">*/}
+                    {/*                {[1, 2, 3, 4, 5].map((n) => <span key={n}>{n}</span>)}*/}
+                    {/*            </div>*/}
+                    {/*        </div>*/}
+                    {/*    ))}*/}
+                    {/*    <div className="space-y-1.5 mb-6">*/}
+                    {/*        <Label className="text-sm">Notes</Label>*/}
+                    {/*        <Textarea*/}
+                    {/*            placeholder="How did this meal make you feel? Any observations…"*/}
+                    {/*            rows={3}*/}
+                    {/*            {...register("notes")}*/}
+                    {/*        />*/}
+                    {/*    </div>*/}
+                    {/*</div>*/}
                     {
                         <Button type={"submit"} className="w-full sm:w-auto" disabled={isSubmitting || isPending}>
                             {
@@ -346,7 +368,7 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
                     }
                 </div>
             </form>
-            <DevTool control={control}/>
+            <DevTool control={devToolControl}/>
         </>
     );
 }

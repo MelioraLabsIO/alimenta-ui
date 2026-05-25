@@ -23,7 +23,7 @@ import {
     Sparkles,
 } from "lucide-react";
 import {toast} from "sonner";
-import {Meal} from "@/core/types/meal";
+import {Meal} from "@/core/types/models/meal";
 import {LogMealDialog} from "@/components/meals/log-meal-dialog";
 
 const MEAL_TYPE_COLORS: Record<string, string> = {
@@ -40,7 +40,7 @@ function MealRow({meal, onDuplicate}: { meal: Meal; onDuplicate: (id: string) =>
             <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{meal.title}</p>
                 <p className="text-xs text-muted-foreground">
-                    {meal.foodTime && new Date(meal.foodTime).toLocaleString("en-US", {
+                    {meal.mealTime && new Date(meal.mealTime).toLocaleString("en-US", {
                         month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
                     })}
                     {meal.nutrition?.calories ? ` · ${Math.round(meal.nutrition.calories)} kcal` : ""}
@@ -85,7 +85,7 @@ export default function DashboardPage() {
         const from = new Date();
         from.setDate(from.getDate() - 6);
         from.setHours(0, 0, 0, 0);
-        return meals.filter((m) => m.foodTime && new Date(m.foodTime) >= from);
+        return meals.filter((m) => m.mealTime && new Date(m.mealTime) >= from);
     }, [meals]);
 
     const avgCalories = useMemo(() => {
@@ -100,7 +100,7 @@ export default function DashboardPage() {
             const d = new Date();
             d.setDate(d.getDate() - i);
             const hasMeal = meals.some((m) => {
-                const md = m.foodTime ? new Date(m.foodTime) : null;
+                const md = m.mealTime ? new Date(m.mealTime) : null;
                 return md && md.getFullYear() === d.getFullYear() &&
                     md.getMonth() === d.getMonth() &&
                     md.getDate() === d.getDate();

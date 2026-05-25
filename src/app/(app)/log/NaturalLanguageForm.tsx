@@ -1,7 +1,6 @@
 import {useState} from "react";
-import {EMealType, ParsedMeal} from "@/core/types/meal";
-import {analyzeMeal} from "@/services/meal/mutations";
-import {logMeal} from "@/services/meal/mutations";
+import {EMealType, ParsedMeal} from "@/core/types/models/meal";
+import {analyzeMeal, saveMeal} from "@/services/meal/mutations";
 import {toast} from "sonner";
 import {Button} from "@/components/ui/button";
 import {Label} from "@/components/ui/label";
@@ -41,17 +40,11 @@ export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {
     async function handleConfirm() {
         if (!parsed) return;
         try {
-            await logMeal({
+            await saveMeal({
                 title: parsed.title,
-                mealType: EMealType.OTHER,
-                date: new Date().toISOString(),
-                foods: parsed.foods.map(f => ({ ...f, quantity: String(f.quantity) })),
-                nutrition: {
-                    calories: String(parsed.nutrition.calories),
-                    protein: String(parsed.nutrition.protein),
-                    carbs: String(parsed.nutrition.carbs),
-                    fat: String(parsed.nutrition.fat),
-                },
+                type: EMealType.OTHER,
+                mealTime: new Date(),
+                items: [], // parsed.items.map(f => ({ ...f, quantity: f.quantity })),
                 mood: 3,
                 energy: 3,
                 digestion: 3,
@@ -146,10 +139,10 @@ export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {
                         <div>
                             <p className="text-xs text-muted-foreground mb-2">Foods detected</p>
                             <div className="space-y-1">
-                                {parsed.foods.map((f) => (
+                                {parsed.items.map((f) => (
                                     <div key={f.id} className="flex items-center gap-2 text-sm">
                                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"/>
-                                        <span>{f.name}</span>
+                                        <span>{f.catalogFood?.name}</span>
                                         <span className="text-muted-foreground">{f.quantity} {f.unit}</span>
                                     </div>
                                 ))}
