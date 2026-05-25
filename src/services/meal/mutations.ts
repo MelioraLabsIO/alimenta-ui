@@ -1,7 +1,7 @@
-import {MealFormValues} from "./types";
-import {Meal, ParsedMeal} from "@/core/types/meal";
+import {EMealUnit, Meal, ParsedMeal} from "@/core/types/models/meal";
 import {apiFetch} from "@/apiClient/client";
 import {aiClient} from "@/domain/ai/aiClient";
+import {SaveMealDTO} from "@/core/types/dto/save-meal.dto";
 
 export type AnalyzeInput = {
     text: string;
@@ -31,11 +31,11 @@ export async function analyzeMeal(input: AnalyzeInput): Promise<ParsedMeal> {
     // Transform the AI response to ParsedMeal structure
     return {
         title: input.text.slice(0, 30),
-        foods: aiResponse.foods.map((foodName: string) => ({
+        items: aiResponse.items.map((foodName: string) => ({
             id: Math.random().toString(36).substring(2, 9),
             name: foodName,
             quantity: 1,
-            unit: "unit",
+        unit: EMealUnit.GRAM,
         })),
         nutrition: {
             calories: aiResponse.calories || 0,
@@ -48,7 +48,7 @@ export async function analyzeMeal(input: AnalyzeInput): Promise<ParsedMeal> {
     };
 }
 
-export async function logMeal(meal: MealFormValues): Promise<Meal> {
+export async function saveMeal(meal: SaveMealDTO): Promise<Meal> {
     const result = await apiFetch("/api/v1/meals", {
         method: "POST",
         body: JSON.stringify(meal),
@@ -58,7 +58,7 @@ export async function logMeal(meal: MealFormValues): Promise<Meal> {
 
 export async function updateMeal(
     mealId: string,
-    meal: MealFormValues
+    meal: SaveMealDTO
 ): Promise<Meal> {
     const result = await apiFetch(`/api/v1/meals/${mealId}`, {
         method: "PUT",

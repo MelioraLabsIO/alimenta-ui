@@ -1,7 +1,7 @@
 // Repository abstraction — swap mock DB for real API/Supabase here later.
 
 import * as db from "@/core/mock/db";
-import { Meal } from "@/core/types/meal";
+import { Meal } from "@/core/types/models/meal";
 
 export const mealsRepo = {
   list: (): Meal[] => db.listMeals(),
