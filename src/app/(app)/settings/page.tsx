@@ -52,14 +52,12 @@ export default function SettingsPage() {
         queryFn: async () => getUserProfile(),
     });
 
-    console.log("data", data);
     /********************************************* MUTATIONS ************************************************/
     const {mutate: mutateUserProfile} = useMutation({
         mutationKey: ["update-user-profile"],
         mutationFn: async (data: Partial<UserProfileResponse>) => updateProfile(data),
         onSuccess: (updatedProfile) => {
             queryClient.setQueryData(["user-profile"], (oldData) => {
-                console.log("Updating user profile with new data:", updatedProfile);
                 if (!oldData) {
                     return oldData;
                 }

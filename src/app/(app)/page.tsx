@@ -79,7 +79,6 @@ export default function DashboardPage() {
     const weeklyMacros = useMemo(() => mealsRepo.weeklyMacros(), []);
     const moodData = useMemo(() => mealsRepo.moodEnergyData(), []);
     const {data: topFoodData} = useQuery({queryKey: ["top-food"], queryFn: getTopFood});
-    console.log("topFoodData", topFoodData)
 
     const thisWeekMeals = useMemo(() => {
         const from = new Date();
