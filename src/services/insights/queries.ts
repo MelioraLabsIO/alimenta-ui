@@ -4,7 +4,7 @@ import {getMealsByRange} from "@/services/meal/queries";
 
 async function getTopFood(): Promise<{ title: string; foodCount: number }>{
     const session = await getSession();
-    const response = await apiFetch("/api/v1/insights/top-food", {
+    const response = await apiFetch<{ title: string; foodCount: number }>("/api/v1/insights/top-food", {
         method: "GET",
         headers: {
             Authorization: `Bearer ${session.access_token}`,

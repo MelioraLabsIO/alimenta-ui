@@ -3,12 +3,12 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/lib/notifications";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/mantine/ui";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/mantine/ui";
+import { Input } from "@/components/mantine/ui";
+import { Label } from "@/components/mantine/ui";
 
 export default function ResetPasswordPage() {
   const router = useRouter();

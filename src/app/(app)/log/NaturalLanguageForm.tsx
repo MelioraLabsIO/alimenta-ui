@@ -1,13 +1,13 @@
 import {useState} from "react";
 import {EMealType, ParsedMeal} from "@/core/types/models/meal";
 import {analyzeMeal, saveMeal} from "@/services/meal/mutations";
-import {toast} from "sonner";
-import {Button} from "@/components/ui/button";
-import {Label} from "@/components/ui/label";
-import {Textarea} from "@/components/ui/textarea";
+import {toast} from "@/lib/notifications";
+import {Button} from "@/components/mantine/ui";
+import {Label} from "@/components/mantine/ui";
+import {Textarea} from "@/components/mantine/ui";
 import {CheckCircle2, Loader2, Pencil, Sparkles} from "lucide-react";
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Badge} from "@/components/ui/badge";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/mantine/ui";
+import {Badge} from "@/components/mantine/ui";
 import {ManualForm} from "@/app/(app)/log/ManualForm";
 
 export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {

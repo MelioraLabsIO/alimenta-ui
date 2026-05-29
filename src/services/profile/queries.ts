@@ -1,10 +1,18 @@
 import {apiFetch} from "@/apiClient/client";
 import {getSession} from "@/lib/supabase/session";
 
+export type UserProfileResponse = {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    fullName: string;
+};
+
 async function getUserProfile() {
     const session = await getSession();
 
-    const response = await apiFetch("/api/v1/profile", {
+    const response = await apiFetch<UserProfileResponse>("/api/v1/profile", {
         method: "GET",
         headers: {
             Authorization: `Bearer ${session.access_token}`,

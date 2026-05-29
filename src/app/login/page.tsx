@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { forgotPassword, login, signup } from "./actions";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "sonner";
+import { Button } from "@/components/mantine/ui";
+import { Input } from "@/components/mantine/ui";
+import { Label } from "@/components/mantine/ui";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/mantine/ui";
+import { toast } from "@/lib/notifications";
 import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {

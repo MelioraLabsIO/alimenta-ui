@@ -9,7 +9,7 @@ interface UpdateProfileInput {
 async function updateProfile(data: Partial<UpdateProfileInput>) {
     const session = await getSession();
 
-    return await apiFetch("/api/v1/profile", {
+    return await apiFetch<Partial<UpdateProfileInput>>("/api/v1/profile", {
         method: "PUT",
         body: JSON.stringify(data),
         headers: {

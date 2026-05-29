@@ -48,7 +48,7 @@ export async function analyzeMeal(input: AnalyzeInput): Promise<ParsedMeal> {
 }
 
 export async function saveMeal(meal: SaveMealDTO): Promise<Meal> {
-    const result = await apiFetch("/api/v1/meals", {
+    const result = await apiFetch<{data: Meal}>("/api/v1/meals", {
         method: "POST",
         body: JSON.stringify(meal),
     });
@@ -59,7 +59,7 @@ export async function updateMeal(
     mealId: string,
     meal: SaveMealDTO
 ): Promise<Meal> {
-    const result = await apiFetch(`/api/v1/meals/${mealId}`, {
+    const result = await apiFetch<{data: Meal}>(`/api/v1/meals/${mealId}`, {
         method: "PUT",
         body: JSON.stringify(meal),
     });

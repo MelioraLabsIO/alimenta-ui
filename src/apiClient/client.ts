@@ -9,9 +9,9 @@ interface ApiFetchConfig {
     useSession?: boolean;
 }
 
-export async function apiFetch(path: string, options?: RequestInit): Promise<any>;
-export async function apiFetch(path: string, options: RequestInit | undefined, config: ApiFetchConfig): Promise<any>;
-export async function apiFetch(path: string, options?: RequestInit, config: ApiFetchConfig = {}) {
+export async function apiFetch<T = unknown>(path: string, options?: RequestInit): Promise<T>;
+export async function apiFetch<T = unknown>(path: string, options: RequestInit | undefined, config: ApiFetchConfig): Promise<T>;
+export async function apiFetch<T = unknown>(path: string, options?: RequestInit, config: ApiFetchConfig = {}): Promise<T> {
     const {useSession = true} = config;
     const session = useSession ? await getSession() : null;
 
@@ -34,5 +34,5 @@ export async function apiFetch(path: string, options?: RequestInit, config: ApiF
         throw new Error(`API error ${response.status}`);
     }
 
-    return response.json();
+    return response.json() as Promise<T>;
 }

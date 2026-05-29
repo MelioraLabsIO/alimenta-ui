@@ -1,7 +1,7 @@
 // src/app/(marketing)/page.tsx
 import Link from "next/link";
-import {Button} from "@/components/ui/button";
-import {Badge} from "@/components/ui/badge";
+import {Button} from "@/components/mantine/ui";
+import {Badge} from "@/components/mantine/ui";
 import {ArrowRight, BarChart2, Leaf, Zap} from "lucide-react";
 
 export default function LandingPage() {
