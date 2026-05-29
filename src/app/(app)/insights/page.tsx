@@ -109,7 +109,7 @@ export default function InsightsPage() {
                                 }}
                                 labelStyle={{color: "#f4f4f5"}}
                                 itemStyle={{color: "#f4f4f5"}}
-                                formatter={(v: number | undefined, _name: string | undefined) => [v != null ? v.toFixed(1) : "—", "Avg Digestion"]}
+                                // formatter={(v: number | undefined, _name: string | undefined) => [v != null ? v.toFixed(1) : "—", "Avg Digestion"]}
                             />
                             <Bar dataKey="avgDigestion" radius={[4, 4, 0, 0]}>
                                 {digestCorr.map((_, i) => (
