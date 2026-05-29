@@ -3,20 +3,21 @@
 import {useMemo, useReducer, useState} from "react";
 import {mealsRepo} from "@/services/meal/mealsRepo";
 import {EMealType, Meal} from "@/core/types/models/meal";
-import {toast} from "sonner";
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Button} from "@/components/ui/button";
-import {Input} from "@/components/ui/input";
-import {Badge} from "@/components/ui/badge";
-import {Skeleton} from "@/components/ui/skeleton";
-import {Switch} from "@/components/ui/switch";
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
-import {Copy, Eye, Pencil, Search, Trash2, UtensilsCrossed} from "lucide-react";
-import {Checkbox} from "@/components/ui/checkbox";
+import {toast} from "@/lib/notifications";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/mantine/ui";
+import {Button} from "@/components/mantine/ui";
+import {Input} from "@/components/mantine/ui";
+import {Badge} from "@/components/mantine/ui";
+import {Skeleton} from "@/components/mantine/ui";
+import {Switch} from "@/components/mantine/ui";
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/mantine/ui";
+import {Select} from "@mantine/core";
+import {DatePickerInput} from "@mantine/dates";
+import {CalendarDays, Copy, Eye, Pencil, Search, Trash2, UtensilsCrossed} from "lucide-react";
+import {Checkbox} from "@/components/mantine/ui";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {getAllMeals} from "@/services/meal/queries";
-import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog";
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/mantine/ui";
 import {BulkDeleteConfirmDialog} from "@/components/meals/bulk-delete-confirm-dialog";
 import {deleteMealById, bulkDeleteMeals, BulkDeleteMealsResponse} from "@/services/meal/mutations";
 import {LogMealDialog} from "@/components/meals/log-meal-dialog";
@@ -358,31 +359,33 @@ export default function HistoryPage() {
                                 className="pl-8 h-8 text-sm"
                             />
                         </div>
-                        <Select value={typeFilter}
-                                onValueChange={(value) => dispatch({type: "SET_TYPE_FILTER", payload: value})}>
-                            <SelectTrigger className="w-36 h-8 text-sm">
-                                <SelectValue placeholder="Meal type"/>
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All types</SelectItem>
-                                {[EMealType.BREAKFAST, EMealType.LUNCH, EMealType.DINNER, EMealType.SNACK, EMealType.OTHER].map((t) => (
-                                    <SelectItem key={t} value={t} className="capitalize">{t}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <Input
-                            type="date"
-                            value={dateFrom}
-                            onChange={(e) => dispatch({type: "SET_DATE_FROM", payload: e.target.value})}
-                            className="w-36 h-8 text-sm"
-                            placeholder="From"
+                        <Select
+                            value={typeFilter}
+                            onChange={(value) => dispatch({type: "SET_TYPE_FILTER", payload: value ?? "all"})}
+                            data={[
+                                {value: "all", label: "All types"},
+                                ...[EMealType.BREAKFAST, EMealType.LUNCH, EMealType.DINNER, EMealType.SNACK, EMealType.OTHER].map((t) => ({
+                                    value: t,
+                                    label: t,
+                                })),
+                            ]}
+                            className="w-36"
+                            size="xs"
+                            placeholder="Meal type"
                         />
-                        <Input
-                            type="date"
-                            value={dateTo}
-                            onChange={(e) => dispatch({type: "SET_DATE_TO", payload: e.target.value})}
-                            className="w-36 h-8 text-sm"
-                            placeholder="To"
+                        <DatePickerInput
+                            type="range"
+                            value={[dateFrom || null, dateTo || null]}
+                            onChange={([from, to]) => {
+                                dispatch({type: "SET_DATE_FROM", payload: from ?? ""});
+                                dispatch({type: "SET_DATE_TO", payload: to ?? ""});
+                            }}
+                            leftSection={<CalendarDays className="h-3.5 w-3.5 text-muted-foreground"/>}
+                            className="w-64"
+                            size="xs"
+                            valueFormat="MMM D, YYYY"
+                            placeholder="Date range"
+                            clearable
                         />
                         {(search || typeFilter !== "all" || dateFrom || dateTo) && (
                             <Button
@@ -476,7 +479,7 @@ export default function HistoryPage() {
                             </TableHeader>
                             <TableBody>
                                 {displayMode === "whole"
-                                    ? allMeals?.map((meal: MealResponse) => (
+                                    ? filtered.map((meal: MealResponse) => (
                                         <TableRow key={meal.id} className="border-border/50 hover:bg-muted/30">
                                             <TableCell className="w-10">
                                                 <Checkbox

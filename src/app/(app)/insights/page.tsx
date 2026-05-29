@@ -1,8 +1,8 @@
 "use client";
 import {useMemo} from "react";
 import {mealsRepo} from "@/services/meal/mealsRepo";
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Badge} from "@/components/ui/badge";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/mantine/ui";
+import {Badge} from "@/components/mantine/ui";
 import {TopFoodsChart} from "@/components/charts/top-foods-chart";
 import {MoodTrendChart} from "@/components/charts/mood-trend-chart";
 import {CalendarDays, Sparkles, Trophy, Leaf} from "lucide-react";

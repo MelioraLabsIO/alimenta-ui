@@ -1,22 +1,16 @@
 "use client";
 
 import {useEffect, useState} from "react";
-import {toast} from "sonner";
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Button} from "@/components/ui/button";
-import {Input} from "@/components/ui/input";
-import {Label} from "@/components/ui/label";
-import {Switch} from "@/components/ui/switch";
-import {Badge} from "@/components/ui/badge";
-import {Separator} from "@/components/ui/separator";
-import {Avatar, AvatarFallback} from "@/components/ui/avatar";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import {toast} from "@/lib/notifications";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/mantine/ui";
+import {Button} from "@/components/mantine/ui";
+import {Input} from "@/components/mantine/ui";
+import {Label} from "@/components/mantine/ui";
+import {Switch} from "@/components/mantine/ui";
+import {Badge} from "@/components/mantine/ui";
+import {Separator} from "@/components/mantine/ui";
+import {Avatar, AvatarFallback} from "@/components/mantine/ui";
+import {Select} from "@mantine/core";
 import {X, Plus, User, Settings2, Sparkles} from "lucide-react";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {getUserProfile} from "@/services/profile/queries";
@@ -198,28 +192,26 @@ export default function SettingsPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-1.5">
                             <Label>Units</Label>
-                            <Select value={units} onValueChange={setUnits}>
-                                <SelectTrigger>
-                                    <SelectValue/>
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="metric">Metric (g, ml, kg)</SelectItem>
-                                    <SelectItem value="imperial">Imperial (oz, fl oz, lb)</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <Select
+                                value={units}
+                                onChange={(value) => value && setUnits(value)}
+                                data={[
+                                    {value: "metric", label: "Metric (g, ml, kg)"},
+                                    {value: "imperial", label: "Imperial (oz, fl oz, lb)"},
+                                ]}
+                            />
                         </div>
                         <div className="space-y-1.5">
                             <Label>Goal</Label>
-                            <Select value={goal} onValueChange={setGoal}>
-                                <SelectTrigger>
-                                    <SelectValue/>
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="cut">Cut (lose weight)</SelectItem>
-                                    <SelectItem value="maintain">Maintain</SelectItem>
-                                    <SelectItem value="bulk">Bulk (gain muscle)</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <Select
+                                value={goal}
+                                onChange={(value) => value && setGoal(value)}
+                                data={[
+                                    {value: "cut", label: "Cut (lose weight)"},
+                                    {value: "maintain", label: "Maintain"},
+                                    {value: "bulk", label: "Bulk (gain muscle)"},
+                                ]}
+                            />
                         </div>
                     </div>
 

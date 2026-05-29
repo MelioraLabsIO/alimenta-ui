@@ -10,8 +10,7 @@ import {
     CalendarDays,
     Settings,
 } from "lucide-react";
-import {cn} from "@/lib/utils";
-import {Badge} from "@/components/ui/badge";
+import {Badge} from "@/components/mantine/ui";
 
 const navItems = [
     {href: "/", label: "Dashboard", icon: LayoutDashboard},
@@ -34,13 +33,13 @@ export function SidebarNav({onNavigate}: { onNavigate?: () => void }) {
                         key={href}
                         href={soon ? "#" : href}
                         onClick={onNavigate}
-                        className={cn(
-                            "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                        className={[
+                            "nav-link relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                             active
-                                ? "bg-primary/10 text-primary"
+                                ? "is-active bg-primary/10 text-primary"
                                 : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                            soon && "pointer-events-none opacity-50"
-                        )}
+                            soon ? "pointer-events-none opacity-50" : "",
+                        ].join(" ")}
                     >
                         <Icon className="h-4 w-4 shrink-0"/>
                         <span className="flex-1">{label}</span>

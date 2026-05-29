@@ -1,64 +1,31 @@
 "use client";
 
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-} from "recharts";
-
 type Props = { data: { food: string; count: number }[] };
 
-const COLORS = [
-  "#10b981", "#34d399", "#6ee7b7", "#a7f3d0",
-  "#3b82f6", "#60a5fa", "#93c5fd", "#bfdbfe",
-];
+const COLORS = ["#58d1a0", "#60a5fa", "#fbbf24", "#ff91b5", "#8be4bd", "#93c5fd"];
 
-export function TopFoodsChart({ data }: Props) {
-  return (
-    <ResponsiveContainer width="100%" height={220}>
-      <BarChart
-        data={data}
-        layout="vertical"
-        margin={{ top: 4, right: 16, left: 8, bottom: 0 }}
-      >
-        <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" horizontal={false} />
-        <XAxis
-          type="number"
-          tick={{ fontSize: 11, fill: "#a1a1aa" }}
-          axisLine={false}
-          tickLine={false}
-        />
-        <YAxis
-          dataKey="food"
-          type="category"
-          width={110}
-          tick={{ fontSize: 11, fill: "#a1a1aa" }}
-          axisLine={false}
-          tickLine={false}
-        />
-        <Tooltip
-          contentStyle={{
-            background: "#18181b",
-            border: "1px solid #3f3f46",
-            borderRadius: "8px",
-            fontSize: 12,
-            color: "#f4f4f5",
-          }}
-          labelStyle={{ color: "#f4f4f5" }}
-          itemStyle={{ color: "#f4f4f5" }}
-          formatter={(v: number | undefined, _name: string | undefined) => [v != null ? `${v} times` : "—", "Logged"]}
-        />
-        <Bar dataKey="count" radius={[0, 4, 4, 0]}>
-          {data.map((_, i) => (
-            <Cell key={i} fill={COLORS[i % COLORS.length]} />
-          ))}
-        </Bar>
-      </BarChart>
-    </ResponsiveContainer>
-  );
+export function TopFoodsChart({data}: Props) {
+    const max = Math.max(...data.map((item) => item.count), 1);
+
+    return (
+        <div className="flex h-[220px] flex-col justify-center gap-3">
+            {data.length === 0 ? (
+                <p className="text-center text-sm text-muted-foreground">Log meals to see your top foods.</p>
+            ) : data.map((item, index) => (
+                <div key={item.food} className="grid grid-cols-[110px_1fr_28px] items-center gap-3 text-xs">
+                    <span className="truncate text-muted-foreground">{item.food}</span>
+                    <div className="h-2.5 overflow-hidden rounded-full bg-muted">
+                        <div
+                            className="h-full rounded-full"
+                            style={{
+                                width: `${Math.max(8, (item.count / max) * 100)}%`,
+                                background: `linear-gradient(90deg, ${COLORS[index % COLORS.length]}, color-mix(in srgb, ${COLORS[index % COLORS.length]} 42%, transparent))`,
+                            }}
+                        />
+                    </div>
+                    <span className="font-semibold text-foreground">{item.count}</span>
+                </div>
+            ))}
+        </div>
+    );
 }

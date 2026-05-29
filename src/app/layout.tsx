@@ -1,9 +1,12 @@
 // src/app/layout.tsx
 import type {Metadata} from "next";
 import {Geist, Geist_Mono} from "next/font/google";
-// import {QueryProvider} from "@/components/query-provider";
-import {ThemeProvider} from "@/components/theme-provider";
-import {Toaster} from "@/components/ui/sonner";
+import {ColorSchemeScript, MantineProvider} from "@mantine/core";
+import {Notifications} from "@mantine/notifications";
+import {alimentaTheme} from "@/lib/mantine/theme";
+import "@mantine/core/styles.css";
+import "@mantine/dates/styles.css";
+import "@mantine/notifications/styles.css";
 import "./globals.css";
 import ReactQueryProvider from "@/providers/QueryProvider";
 import {ReactQueryDevtools} from "@tanstack/react-query-devtools";
@@ -28,19 +31,17 @@ export default function RootLayout({
                                    }: Readonly<{ children: React.ReactNode }>) {
     return (
         <html lang="en" suppressHydrationWarning>
+        <head>
+            <ColorSchemeScript defaultColorScheme="dark"/>
+        </head>
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem
-            disableTransitionOnChange
-        >
+        <MantineProvider theme={alimentaTheme} defaultColorScheme="dark">
             <ReactQueryProvider>
                 {children}
-                <Toaster richColors position="top-right"/>
+                <Notifications position="top-right"/>
                 <ReactQueryDevtools initialIsOpen={false} />
             </ReactQueryProvider>
-        </ThemeProvider>
+        </MantineProvider>
         </body>
         </html>
     );

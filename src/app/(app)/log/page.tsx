@@ -1,7 +1,7 @@
 "use client";
 
-import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/mantine/ui";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/mantine/ui";
 import {Sparkles} from "lucide-react";
 import {NaturalLanguageForm} from "@/app/(app)/log/NaturalLanguageForm";
 import {ManualForm} from "@/app/(app)/log/ManualForm";
