@@ -3,7 +3,7 @@ import {EMealType, ParsedMeal} from "@/core/types/models/meal";
 import {analyzeMeal, saveMeal} from "@/services/meal/mutations";
 import {toast} from "@/lib/notifications";
 import {Button} from "@/components/mantine/ui";
-import {Label} from "@/components/mantine/ui";
+import {Text} from "@/components/mantine/ui";
 import {Textarea} from "@/components/mantine/ui";
 import {CheckCircle2, Loader2, Pencil, Sparkles} from "lucide-react";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/mantine/ui";
@@ -86,7 +86,7 @@ export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {
     return (
         <div className="space-y-5">
             <div className="space-y-1.5">
-                <Label htmlFor="nl-input">Describe your meal</Label>
+                <Text>Describe your meal</Text>
                 <Textarea
                     id="nl-input"
                     placeholder="e.g. I had a big bowl of oatmeal with banana and almond milk for breakfast, plus a black coffee"

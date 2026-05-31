@@ -4,7 +4,7 @@ import { useState } from "react";
 import { forgotPassword, login, signup } from "./actions";
 import { Button } from "@/components/mantine/ui";
 import { Input } from "@/components/mantine/ui";
-import { Label } from "@/components/mantine/ui";
+import { Text } from "@/components/mantine/ui";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/mantine/ui";
 import { toast } from "@/lib/notifications";
 import { Loader2 } from "lucide-react";
@@ -84,7 +84,7 @@ export default function LoginPage() {
               {isSignUp && !isForgotPassword && (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName" className="text-xs font-medium uppercase tracking-wider text-muted-foreground/80">First name</Label>
+                    <Text className="text-xs font-medium uppercase tracking-wider text-muted-foreground/80">First name</Text>
                     <Input
                       id="firstName"
                       name="firstName"
@@ -95,7 +95,7 @@ export default function LoginPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="lastName" className="text-xs font-medium uppercase tracking-wider text-muted-foreground/80">Last name</Label>
+                    <Text className="text-xs font-medium uppercase tracking-wider text-muted-foreground/80">Last name</Text>
                     <Input
                       id="lastName"
                       name="lastName"
@@ -109,7 +109,7 @@ export default function LoginPage() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-xs font-medium uppercase tracking-wider text-muted-foreground/80">Email</Label>
+                <Text className="text-xs font-medium uppercase tracking-wider text-muted-foreground/80">Email</Text>
                 <Input
                   id="email"
                   name="email"
@@ -123,7 +123,7 @@ export default function LoginPage() {
               {!isForgotPassword && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password" title="Password" className="text-xs font-medium uppercase tracking-wider text-muted-foreground/80">Password</Label>
+                  <Text title="Password" className="text-xs font-medium uppercase tracking-wider text-muted-foreground/80">Password</Text>
                 </div>
                 <Input
                   id="password"

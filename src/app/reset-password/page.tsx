@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/mantine/ui";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/mantine/ui";
 import { Input } from "@/components/mantine/ui";
-import { Label } from "@/components/mantine/ui";
+import { Text } from "@/components/mantine/ui";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -68,9 +68,9 @@ export default function ResetPasswordPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-xs font-medium uppercase tracking-wider text-muted-foreground/80">
+              <Text className="text-xs font-medium uppercase tracking-wider text-muted-foreground/80">
                 New password
-              </Label>
+              </Text>
               <Input
                 id="password"
                 name="password"
@@ -81,9 +81,9 @@ export default function ResetPasswordPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-xs font-medium uppercase tracking-wider text-muted-foreground/80">
+              <Text className="text-xs font-medium uppercase tracking-wider text-muted-foreground/80">
                 Confirm password
-              </Label>
+              </Text>
               <Input
                 id="confirmPassword"
                 name="confirmPassword"
