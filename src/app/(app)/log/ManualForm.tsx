@@ -7,7 +7,7 @@ import {redirect} from "next/navigation";
 import {EMealType, EMealUnit, Meal} from "@/core/types/models/meal";
 import {Button} from "@/components/mantine/ui";
 import {Input} from "@/components/mantine/ui";
-import {Label} from "@/components/mantine/ui";
+import {Text} from "@/components/mantine/ui";
 import {Separator} from "@/components/mantine/ui";
 import {Select} from "@mantine/core";
 import {Loader2, Plus, Trash2} from "lucide-react";
@@ -176,7 +176,7 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
                     {/* Basic info */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-1.5">
-                            <Label htmlFor="title">Meal title <span className="text-destructive">*</span></Label>
+                            <Text>Meal title <span className="text-destructive">*</span></Text>
                             <Input
                                 id="title"
                                 placeholder="e.g. Avocado Toast & Eggs"
@@ -186,7 +186,7 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
                             {errors.title && <p className="text-xs text-destructive">{errors.title.message}</p>}
                         </div>
                         <div className="space-y-1.5">
-                            <Label htmlFor="date">Date & time <span className="text-destructive">*</span></Label>
+                            <Text>Date & time <span className="text-destructive">*</span></Text>
                             <Input
                                 id="date"
                                 type="datetime-local"
@@ -196,7 +196,7 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
                             {errors.mealTime && <p className="text-xs text-destructive">{errors.mealTime.message}</p>}
                         </div>
                         <div className="space-y-1.5">
-                            <Label>Meal type</Label>
+                            <Text>Meal type</Text>
                             <Controller
                                 control={control}
                                 name="type"
@@ -218,7 +218,7 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
                     {/* Foods */}
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                            <Label>Foods <span className="text-destructive">*</span></Label>
+                            <Text>Foods <span className="text-destructive">*</span></Text>
                             <Button variant="outline" size="sm" onClick={() => addItem({...emptyFood() })}
                                     className="gap-1.5 h-7 text-xs" type="button">
                                 <Plus className="h-3 w-3"/> Add food
