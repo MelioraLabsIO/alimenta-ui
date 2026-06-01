@@ -6,7 +6,6 @@ export type UserProfileResponse = {
     firstName: string;
     lastName: string;
     email: string;
-    fullName: string;
 };
 
 async function getUserProfile() {

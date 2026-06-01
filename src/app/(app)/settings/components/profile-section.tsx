@@ -33,12 +33,11 @@ export function ProfileSection() {
         mutationFn: async (profile: Partial<UserProfileResponse>) => updateProfile(profile),
         onSuccess: (updatedProfile) => {
             queryClient.setQueryData(["user-profile"], (oldData: UserProfileResponse | undefined) => {
-                if (!oldData) {
+                if (!updatedProfile) {
                     return oldData;
                 }
 
                 return {
-                    ...oldData,
                     ...updatedProfile,
                 };
             });
