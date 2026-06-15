@@ -88,11 +88,11 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
         }
     })
 
-    const {register, control, handleSubmit, reset, setValue, formState: {errors, isSubmitting}} = form
+    const {register, control, handleSubmit, reset, setValue, formState: {errors, isSubmitting}} = form;
     const {fields: items, append: addItem, remove: removeItem} = useFieldArray({
         control,
-        name: "items"
-    })
+        name: "items",
+    });
     const watchedItems = useWatch({control, name: "items"});
     const devToolControl = control as unknown as Control<MealFormInput>;
 
@@ -219,25 +219,25 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
                             <Text>Foods <span className="text-destructive">*</span></Text>
-                            <Button variant="outline" size="sm" onClick={() => addItem({...emptyFood() })}
+                            <Button variant="outline" size="sm" onClick={() => addItem({...emptyFood()})}
                                     className="gap-1.5 h-7 text-xs" type="button">
                                 <Plus className="h-3 w-3"/> Add food
                             </Button>
                         </div>
                         {errors.items && (
                             <p className="text-xs text-destructive">
-                                {errors.items.root?.message || (Array.isArray(errors.items) && errors.items.some(f => f?.foodName) ? "All food items need a name" : "")}
+                                {errors.items.root?.message || (Array.isArray(errors.items) && errors.items.some((foodError) => foodError?.foodName) ? "All food items need a name" : "")}
                             </p>
                         )}
                         <div className="space-y-2">
                             {items.map((food, index) => (
                                 <div key={food.id} className="space-y-1">
-                                    <div className="flex gap-2 items-center">
+                                    <div className="grid grid-cols-[1fr_auto] gap-2 sm:flex sm:items-center">
                                         <Controller
                                             control={control}
                                             name={`items.${index}.foodName` as const}
                                             render={({field}) => (
-                                                <div className="flex-1">
+                                                <div className="col-span-2 min-w-0 sm:col-span-1 sm:flex-1">
                                                     <Autocomplete
                                                         value={field.value ? {
                                                             id: watchedItems?.[index]?.foodSourceId ?? food.foodSourceId,
@@ -259,30 +259,32 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
                                                 </div>
                                             )}
                                         />
-                                        <Input
-                                            type="number"
-                                            min={0}
-                                            step="0.01"
-                                            className="w-24"
-                                            aria-label={`Quantity for ${watchedItems?.[index]?.foodName || "food"}`}
-                                            {...register(`items.${index}.quantity` as const, {valueAsNumber: true})}
-                                        />
-                                        <Controller
-                                            control={control}
-                                            name={`items.${index}.unit` as const}
-                                            render={({field}) => (
-                                                <Select
-                                                    value={field.value}
-                                                    onChange={(selected) => selected && field.onChange(selected)}
-                                                    data={UNITS.map((u) => ({value: u, label: u}))}
-                                                    className="w-24"
-                                                />
-                                            )}
-                                        />
+                                        <div className="flex gap-2 min-w-0 sm:contents">
+                                            <Input
+                                                type="number"
+                                                min={0}
+                                                step="0.01"
+                                                className="min-w-0 flex-1 sm:w-24 sm:flex-none"
+                                                aria-label={`Quantity for ${watchedItems?.[index]?.foodName || "food"}`}
+                                                {...register(`items.${index}.quantity` as const, {valueAsNumber: true})}
+                                            />
+                                            <Controller
+                                                control={control}
+                                                name={`items.${index}.unit` as const}
+                                                render={({field}) => (
+                                                    <Select
+                                                        value={field.value}
+                                                        onChange={(selected) => selected && field.onChange(selected)}
+                                                        data={UNITS.map((u) => ({value: u, label: u}))}
+                                                        className="min-w-0 flex-1 sm:w-24 sm:flex-none"
+                                                    />
+                                                )}
+                                            />
+                                        </div>
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0"
+                                            className="h-8 w-8 self-center text-muted-foreground hover:text-destructive shrink-0"
                                             onClick={() => removeItem(index)}
                                             disabled={items.length === 1}
                                             type="button"
@@ -379,19 +381,16 @@ export function ManualForm({prefill, onSuccess}: { prefill?: Partial<Meal>, onSu
                     {/*        />*/}
                     {/*    </div>*/}
                     {/*</div>*/}
-                    {
-                        <Button type={"submit"} className="w-full sm:w-auto" disabled={isSubmitting || isPending}>
-                            {
-                                isSubmitting || isPending ? (
-                                    <Loader2 className="h-4 w-4 mr-2 animate-spin"/>
-                                ) : (
-                                    <span>
-                                            Save Meal
-                                        </span>
-                                )
-                            }
-                        </Button>
-                    }
+                    <Button type="submit" className="w-full sm:w-auto" disabled={isSubmitting || isPending}>
+                        {isSubmitting || isPending ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
+                                Saving...
+                            </>
+                        ) : (
+                            "Save Meal"
+                        )}
+                    </Button>
                 </div>
             </form>
             {mounted && process.env.NODE_ENV === "development" && <DevTool control={devToolControl}/>}
