@@ -43,7 +43,7 @@ export function PreferencesSection() {
         <Card className="border-border/50 bg-card/60">
             <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                    <Settings2 className="h-4 w-4 text-muted-foreground" /> Preferences
+                    <Settings2 className="h-4 w-4 text-muted-foreground"/> Preferences
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-5">
@@ -81,23 +81,22 @@ export function PreferencesSection() {
                             placeholder="Search foods to add as a dislike"
                             items={dislikes}
                             selectedFood={selectedDislike}
-                            onSelectedFoodChange={setSelectedDislike}
-                            onAddItem={() =>
+                            onSelectedFoodChangeAction={setSelectedDislike}
+                            onAddItemAction={() =>
                                 addItem(selectedDislike, dislikes, setDislikes, () => setSelectedDislike(null))
                             }
-                            onRemoveItem={(item) => removeItem(item, dislikes, setDislikes)}
+                            onRemoveItemAction={(item) => removeItem(item, dislikes, setDislikes)}
                         />
                         <PreferenceTagInput
                             label="Allergies"
                             placeholder="Search foods to add as an allergy"
                             items={allergies}
                             selectedFood={selectedAllergy}
-                            onSelectedFoodChange={setSelectedAllergy}
-                            onAddItem={() =>
+                            onSelectedFoodChangeAction={setSelectedAllergy}
+                            onAddItemAction={() =>
                                 addItem(selectedAllergy, allergies, setAllergies, () => setSelectedAllergy(null))
                             }
-                            onRemoveItem={(item) => removeItem(item, allergies, setAllergies)}
-                        />
+                            onRemoveItemAction={(item) => removeItem(item, allergies, setAllergies)}/>
                     </div>
                 </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import {X} from "lucide-react";
+import {X   } from "lucide-react";
 import {Badge, Button} from "@/components/mantine/ui";
 import {Autocomplete} from "@/components/foods/autocomplete";
 import type {FoodSearchItem} from "@/services/food/queries";
@@ -11,9 +11,9 @@ type PreferenceTagInputProps = {
     placeholder: string;
     items: string[];
     selectedFood: FoodSearchItem | null;
-    onSelectedFoodChange: (food: FoodSearchItem) => void;
-    onAddItem: () => void;
-    onRemoveItem: (item: string) => void;
+    onSelectedFoodChangeAction: (food: FoodSearchItem) => void;
+    onAddItemAction: () => void;
+    onRemoveItemAction: (item: string) => void;
 };
 
 export function PreferenceTagInput({
@@ -21,9 +21,9 @@ export function PreferenceTagInput({
     placeholder,
     items,
     selectedFood,
-    onSelectedFoodChange,
-    onAddItem,
-    onRemoveItem,
+    onSelectedFoodChangeAction,
+    onAddItemAction,
+    onRemoveItemAction,
 }: PreferenceTagInputProps) {
     return (
         <div className="space-y-2">
@@ -34,11 +34,12 @@ export function PreferenceTagInput({
                         {item}
                         <button
                             type="button"
-                            onClick={() => onRemoveItem(item)}
+                            onClick={() => onRemoveItemAction(item)}
                             className="ml-0.5 rounded-full hover:bg-muted-foreground/20 p-0.5"
                         >
                             <X className="h-2.5 w-2.5" />
                         </button>
+
                     </Badge>
                 ))}
             </div>
@@ -47,13 +48,13 @@ export function PreferenceTagInput({
                     <Autocomplete
                         value={selectedFood}
                         placeholder={placeholder}
-                        onChange={onSelectedFoodChange}
+                        onChange={onSelectedFoodChangeAction}
                     />
                 </div>
                 <Button
                     variant="outline"
                     size="md"
-                    onClick={onAddItem}
+                    onClick={onAddItemAction}
                     disabled={!selectedFood}
                     className="h-auto gap-1 px-3"
                 >
