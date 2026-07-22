@@ -80,3 +80,28 @@ export async function bulkDeleteMeals(
         body: JSON.stringify({ids}),
     });
 }
+
+export interface ExtractedIngredient {
+    name: string;
+    quantity: number | null;
+    unit: string | null;
+    preparation: string | null;
+    quantitySource: string;
+}
+
+export interface MealDraft {
+    mealName: string;
+    mealType: string;
+    ingredients: ExtractedIngredient[];
+    assumptions: string[];
+    clarificationQuestions: string[];
+}
+
+export async function extractMeal(mealDescription: string): Promise<MealDraft> {
+    const result = await apiFetch<MealDraft | {data: MealDraft}>(`/api/v1/meals/extract-meal`, {
+        method: "POST",
+        body: JSON.stringify({description: mealDescription}),
+    })
+
+    return "data" in result ? result.data : result;
+}

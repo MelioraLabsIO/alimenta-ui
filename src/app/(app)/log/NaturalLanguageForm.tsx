@@ -1,6 +1,8 @@
 import {useState} from "react";
-import {EMealType, ParsedMeal} from "@/core/types/models/meal";
-import {analyzeMeal, saveMeal} from "@/services/meal/mutations";
+import {EMealType, EMealUnit} from "@/core/types/models/meal";
+import type {Meal} from "@/core/types/models/meal";
+import {extractMeal, saveMeal} from "@/services/meal/mutations";
+import type {MealDraft} from "@/services/meal/mutations";
 import {toast} from "@/lib/notifications";
 import {Button} from "@/components/mantine/ui";
 import {Text} from "@/components/mantine/ui";
@@ -9,11 +11,90 @@ import {CheckCircle2, Loader2, Pencil, Sparkles} from "lucide-react";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/mantine/ui";
 import {Badge} from "@/components/mantine/ui";
 import {ManualForm} from "@/app/(app)/log/ManualForm";
+import type {SaveMealDTO} from "@/core/types/dto";
+
+type NaturalLanguageMealItem = SaveMealDTO["items"][number] & {
+    foodName: string;
+};
+
+function uid() {
+    return Math.random().toString(36).slice(2, 10);
+}
+
+function toMealType(value: string): EMealType {
+    const normalized = value.trim().toUpperCase();
+    return Object.values(EMealType).find((type) => type === normalized) ?? EMealType.OTHER;
+}
+
+function toMealUnit(value: string | null): EMealUnit {
+    if (!value) {
+        return EMealUnit.UNIT;
+    }
+
+    const normalized = value.trim().toLowerCase();
+    const aliases: Record<string, EMealUnit> = {
+        gram: EMealUnit.GRAM,
+        grams: EMealUnit.GRAM,
+        milliliter: EMealUnit.ML,
+        milliliters: EMealUnit.ML,
+        ounce: EMealUnit.OZ,
+        ounces: EMealUnit.OZ,
+        pound: EMealUnit.LB,
+        pounds: EMealUnit.LB,
+        tablespoon: EMealUnit.TABLESPOON,
+        tablespoons: EMealUnit.TABLESPOON,
+        teaspoon: EMealUnit.TEASPOON,
+        teaspoons: EMealUnit.TEASPOON,
+        pieces: EMealUnit.PIECE,
+        slices: EMealUnit.SLICE,
+        servings: EMealUnit.SERVING,
+    };
+
+    if (aliases[normalized]) {
+        return aliases[normalized];
+    }
+
+    return Object.values(EMealUnit).find((unit) => unit.toLowerCase() === normalized) ?? EMealUnit.UNIT;
+}
+
+function draftItems(draft: MealDraft): NaturalLanguageMealItem[] {
+    return draft.ingredients.map((ingredient) => ({
+        foodSource: "custom",
+        foodSourceId: uid(),
+        foodName: ingredient.name,
+        quantity: ingredient.quantity ?? 1,
+        unit: toMealUnit(ingredient.unit),
+    }));
+}
+
+function draftPrefill(draft: MealDraft): Partial<Meal> {
+    return {
+        title: draft.mealName,
+        type: toMealType(draft.mealType),
+        items: draftItems(draft).map((item) => ({
+            id: item.foodSourceId,
+            mealId: "",
+            foodSource: item.foodSource,
+            foodSourceId: item.foodSourceId,
+            foodName: item.foodName,
+            quantity: item.quantity,
+            unit: item.unit,
+            nutrition: {
+                calories: 0,
+                protein: 0,
+                carbs: 0,
+                fat: 0,
+            },
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        })),
+    };
+}
 
 export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {
     const [text, setText] = useState("");
     const [loading, setLoading] = useState(false);
-    const [parsed, setParsed] = useState<ParsedMeal | null>(null);
+    const [draft, setDraft] = useState<MealDraft | null>(null);
     const [error, setError] = useState("");
     const [saved, setSaved] = useState(false);
     const [editMode, setEditMode] = useState(false);
@@ -25,35 +106,35 @@ export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {
         }
         setError("");
         setLoading(true);
-        setParsed(null);
+        setDraft(null);
         setSaved(false);
         try {
-            const result = await analyzeMeal({text});
-            setParsed(result);
+            const result = await extractMeal(text);
+            setDraft(result);
         } catch (e: unknown) {
-            setError(e instanceof Error ? e.message : "Analysis failed.");
+            setError(e instanceof Error ? e.message : "Extraction failed.");
         } finally {
             setLoading(false);
         }
     }
 
     async function handleConfirm() {
-        if (!parsed) return;
+        if (!draft) return;
         try {
             await saveMeal({
-                title: parsed.title,
-                type: EMealType.OTHER,
+                title: draft.mealName,
+                type: toMealType(draft.mealType),
                 mealTime: new Date(),
-                items: [], // parsed.items.map(f => ({ ...f, quantity: f.quantity })),
+                items: draftItems(draft),
                 mood: 3,
                 energy: 3,
                 digestion: 3,
                 likeness: 3,
-                notes: "",
+                notes: draft.assumptions.join("\n"),
             });
-            toast.success("Meal saved!", {description: parsed.title});
+            toast.success("Meal saved!", {description: draft.mealName});
             setSaved(true);
-            setParsed(null);
+            setDraft(null);
             setText("");
             if (onSuccess) {
                 onSuccess();
@@ -64,7 +145,7 @@ export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {
         }
     }
 
-    if (editMode && parsed) {
+    if (editMode && draft) {
         return (
             <div className="space-y-4">
                 <div className="flex items-center gap-2">
@@ -74,10 +155,7 @@ export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {
                 </div>
                 <ManualForm
                     onSuccess={onSuccess}
-                    prefill={{
-                        title: parsed.title,
-                        nutrition: parsed.nutrition,
-                    }}
+                    prefill={draftPrefill(draft)}
                 />
             </div>
         );
@@ -103,7 +181,7 @@ export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {
 
             <Button onClick={handleAnalyze} disabled={loading} className="gap-2">
                 {loading ? <Loader2 className="h-4 w-4 animate-spin"/> : <Sparkles className="h-4 w-4"/>}
-                {loading ? "Analyzing…" : "Analyze Meal"}
+                {loading ? "Extracting…" : "Extract Meal"}
             </Button>
 
             {saved && (
@@ -112,58 +190,60 @@ export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {
                 </div>
             )}
 
-            {parsed && (
+            {draft && (
                 <Card className="border-emerald-500/20 bg-card/60">
                     <CardHeader className="pb-3">
                         <div className="flex items-center justify-between">
-                            <CardTitle className="text-sm font-semibold">Parsed Result</CardTitle>
+                            <CardTitle className="text-sm font-semibold">Extracted Meal</CardTitle>
                             <Badge
                                 variant="outline"
-                                className={`text-xs ${
-                                    parsed.confidence >= 0.7
-                                        ? "border-emerald-500/30 text-emerald-400"
-                                        : parsed.confidence >= 0.5
-                                            ? "border-yellow-500/30 text-yellow-400"
-                                            : "border-red-500/30 text-red-400"
-                                }`}
+                                className="border-emerald-500/30 text-xs text-emerald-400"
                             >
-                                {Math.round(parsed.confidence * 100)}% confidence
+                                {draft.mealType || "Other"}
                             </Badge>
                         </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div>
                             <p className="text-xs text-muted-foreground mb-1">Title</p>
-                            <p className="text-sm font-medium">{parsed.title}</p>
+                            <p className="text-sm font-medium">{draft.mealName}</p>
                         </div>
                         <div>
-                            <p className="text-xs text-muted-foreground mb-2">Foods detected</p>
+                            <p className="text-xs text-muted-foreground mb-2">Ingredients detected</p>
                             <div className="space-y-1">
-                                {parsed.items.map((f) => (
-                                    <div key={f.id} className="flex items-center gap-2 text-sm">
+                                {draft.ingredients.map((ingredient) => (
+                                    <div
+                                        key={`${ingredient.name}-${ingredient.quantity}-${ingredient.unit}`}
+                                        className="flex items-center gap-2 text-sm"
+                                    >
                                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"/>
-                                        <span>{f.catalogFood?.name}</span>
-                                        <span className="text-muted-foreground">{f.quantity} {f.unit}</span>
+                                        <span>{ingredient.name}</span>
+                                        <span className="text-muted-foreground">
+                                            {ingredient.quantity ?? "unspecified"} {ingredient.unit ?? ""}
+                                        </span>
+                                        {ingredient.preparation && (
+                                            <span className="text-muted-foreground">({ingredient.preparation})</span>
+                                        )}
                                     </div>
                                 ))}
                             </div>
                         </div>
-                        {parsed.nutrition && (
+                        {draft.assumptions.length > 0 && (
                             <div>
-                                <p className="text-xs text-muted-foreground mb-2">Estimated nutrition</p>
-                                <div className="grid grid-cols-4 gap-2">
-                                    {[
-                                        {label: "Calories", value: parsed.nutrition.calories, unit: "kcal"},
-                                        {label: "Protein", value: parsed.nutrition.protein, unit: "g"},
-                                        {label: "Carbs", value: parsed.nutrition.carbs, unit: "g"},
-                                        {label: "Fat", value: parsed.nutrition.fat, unit: "g"},
-                                    ].map(({label, value, unit}) => (
-                                        <div key={label} className="rounded-lg bg-muted/50 p-2 text-center">
-                                            <p className="text-xs text-muted-foreground">{label}</p>
-                                            <p className="text-sm font-semibold">{value ?? "—"}<span
-                                                className="text-xs font-normal text-muted-foreground ml-0.5">{unit}</span>
-                                            </p>
-                                        </div>
+                                <p className="text-xs text-muted-foreground mb-2">Assumptions</p>
+                                <div className="space-y-1">
+                                    {draft.assumptions.map((assumption) => (
+                                        <p key={assumption} className="text-sm text-muted-foreground">{assumption}</p>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        {draft.clarificationQuestions.length > 0 && (
+                            <div>
+                                <p className="text-xs text-muted-foreground mb-2">Clarification questions</p>
+                                <div className="space-y-1">
+                                    {draft.clarificationQuestions.map((question) => (
+                                        <p key={question} className="text-sm text-muted-foreground">{question}</p>
                                     ))}
                                 </div>
                             </div>
