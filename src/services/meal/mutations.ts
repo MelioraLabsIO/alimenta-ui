@@ -97,10 +97,15 @@ export interface MealDraft {
     clarificationQuestions: string[];
 }
 
-export async function extractMeal(mealDescription: string): Promise<MealDraft> {
+export async function extractMeal(mealDescription: string, corrections?: string): Promise<MealDraft> {
+    const body: Record<string, string> = {description: mealDescription};
+    if (corrections) {
+        body.corrections = corrections;
+    }
+
     const result = await apiFetch<MealDraft | {data: MealDraft}>(`/api/v1/meals/extract-meal`, {
         method: "POST",
-        body: JSON.stringify({description: mealDescription}),
+        body: JSON.stringify(body),
     })
 
     return "data" in result ? result.data : result;

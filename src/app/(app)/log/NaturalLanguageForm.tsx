@@ -7,7 +7,8 @@ import {toast} from "@/lib/notifications";
 import {Button} from "@/components/mantine/ui";
 import {Text} from "@/components/mantine/ui";
 import {Textarea} from "@/components/mantine/ui";
-import {CheckCircle2, Loader2, Pencil, Sparkles} from "lucide-react";
+import {Input} from "@/components/mantine/ui";
+import {CheckCircle2, Loader2, Pencil, RefreshCw, Sparkles} from "lucide-react";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/mantine/ui";
 import {Badge} from "@/components/mantine/ui";
 import {ManualForm} from "@/app/(app)/log/ManualForm";
@@ -98,6 +99,8 @@ export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {
     const [error, setError] = useState("");
     const [saved, setSaved] = useState(false);
     const [editMode, setEditMode] = useState(false);
+    const [clarificationAnswers, setClarificationAnswers] = useState<string[]>([]);
+    const [iterationCount, setIterationCount] = useState(0);
 
     async function handleAnalyze() {
         if (text.trim().length < 5) {
@@ -108,11 +111,41 @@ export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {
         setLoading(true);
         setDraft(null);
         setSaved(false);
+        setIterationCount(0);
+        setClarificationAnswers([]);
         try {
             const result = await extractMeal(text);
             setDraft(result);
+            setClarificationAnswers(new Array(result.clarificationQuestions.length).fill(""));
         } catch (e: unknown) {
             setError(e instanceof Error ? e.message : "Extraction failed.");
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    async function handleRefine() {
+        if (!draft) return;
+
+        const corrections = draft.clarificationQuestions
+            .map((question, i) => {
+                const answer = clarificationAnswers[i]?.trim();
+                return answer ? `Q: ${question}\nA: ${answer}` : null;
+            })
+            .filter(Boolean)
+            .join("\n\n");
+
+        if (!corrections) return;
+
+        setError("");
+        setLoading(true);
+        try {
+            const result = await extractMeal(text, corrections);
+            setDraft(result);
+            setClarificationAnswers(new Array(result.clarificationQuestions.length).fill(""));
+            setIterationCount((c) => c + 1);
+        } catch (e: unknown) {
+            setError(e instanceof Error ? e.message : "Refinement failed.");
         } finally {
             setLoading(false);
         }
@@ -136,6 +169,8 @@ export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {
             setSaved(true);
             setDraft(null);
             setText("");
+            setClarificationAnswers([]);
+            setIterationCount(0);
             if (onSuccess) {
                 onSuccess();
             }
@@ -144,6 +179,8 @@ export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {
             toast.error("Failed to save meal. Please try again.");
         }
     }
+
+    const hasAnswers = clarificationAnswers.some((a) => a.trim().length > 0);
 
     if (editMode && draft) {
         return (
@@ -194,7 +231,14 @@ export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {
                 <Card className="border-emerald-500/20 bg-card/60">
                     <CardHeader className="pb-3">
                         <div className="flex items-center justify-between">
-                            <CardTitle className="text-sm font-semibold">Extracted Meal</CardTitle>
+                            <div className="flex items-center gap-2">
+                                <CardTitle className="text-sm font-semibold">Extracted Meal</CardTitle>
+                                {iterationCount > 0 && (
+                                    <Badge variant="outline" className="border-blue-500/30 text-xs text-blue-400">
+                                        Refined ×{iterationCount}
+                                    </Badge>
+                                )}
+                            </div>
                             <Badge
                                 variant="outline"
                                 className="border-emerald-500/30 text-xs text-emerald-400"
@@ -239,17 +283,40 @@ export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {
                             </div>
                         )}
                         {draft.clarificationQuestions.length > 0 && (
-                            <div>
-                                <p className="text-xs text-muted-foreground mb-2">Clarification questions</p>
-                                <div className="space-y-1">
-                                    {draft.clarificationQuestions.map((question) => (
-                                        <p key={question} className="text-sm text-muted-foreground">{question}</p>
+                            <div className="space-y-3 pt-1 border-t border-border/50">
+                                <p className="text-xs font-semibold text-muted-foreground pt-1">Help us refine your meal</p>
+                                <div className="space-y-3">
+                                    {draft.clarificationQuestions.map((question, i) => (
+                                        <div key={question} className="space-y-1.5">
+                                            <p className="text-xs text-muted-foreground">{question}</p>
+                                            <Input
+                                                placeholder="Your answer…"
+                                                value={clarificationAnswers[i] ?? ""}
+                                                onChange={(e) => {
+                                                    const next = [...clarificationAnswers];
+                                                    next[i] = e.target.value;
+                                                    setClarificationAnswers(next);
+                                                }}
+                                            />
+                                        </div>
                                     ))}
                                 </div>
+                                <Button
+                                    variant="outline"
+                                    onClick={handleRefine}
+                                    disabled={loading || !hasAnswers}
+                                    className="gap-2 w-full sm:w-auto"
+                                >
+                                    {loading
+                                        ? <Loader2 className="h-4 w-4 animate-spin"/>
+                                        : <RefreshCw className="h-4 w-4"/>
+                                    }
+                                    Refine extraction
+                                </Button>
                             </div>
                         )}
                         <div className="flex gap-2 pt-1">
-                            <Button onClick={handleConfirm} className="gap-2 flex-1 sm:flex-none">
+                            <Button onClick={handleConfirm} disabled={loading} className="gap-2 flex-1 sm:flex-none">
                                 <CheckCircle2 className="h-4 w-4"/> Confirm & Save
                             </Button>
                             <Button
