@@ -290,6 +290,7 @@ export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {
                                         <div key={question} className="space-y-1.5">
                                             <p className="text-xs text-muted-foreground">{question}</p>
                                             <Input
+                                                aria-label={question}
                                                 placeholder="Your answer…"
                                                 value={clarificationAnswers[i] ?? ""}
                                                 onChange={(e) => {
@@ -316,7 +317,7 @@ export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {
                             </div>
                         )}
                         <div className="flex gap-2 pt-1">
-                            <Button onClick={handleConfirm} disabled={loading} className="gap-2 flex-1 sm:flex-none">
+                            <Button onClick={handleConfirm} disabled={loading || !draft} className="gap-2 flex-1 sm:flex-none">
                                 <CheckCircle2 className="h-4 w-4"/> Confirm & Save
                             </Button>
                             <Button
