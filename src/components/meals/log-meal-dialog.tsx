@@ -10,8 +10,8 @@ import {
 } from "@/components/mantine/ui";
 import {Button} from "@/components/mantine/ui";
 import {Utensils, Sparkles} from "lucide-react";
-import {ManualForm} from "@/app/(app)/log/ManualForm";
-import {NaturalLanguageForm} from "@/app/(app)/log/NaturalLanguageForm";
+import {ManualForm} from "@/app/(app)/log/ManualForm/ManualForm";
+import {NaturalLanguageForm} from "@/app/(app)/log/NaturalLanguageForm/NaturalLanguageForm";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/mantine/ui";
 import {useQueryClient} from "@tanstack/react-query";
 import {Meal} from "@/core/types/models/meal";

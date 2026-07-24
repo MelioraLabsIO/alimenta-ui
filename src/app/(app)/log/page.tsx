@@ -3,21 +3,21 @@
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/mantine/ui";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/mantine/ui";
 import {Sparkles} from "lucide-react";
-import {NaturalLanguageForm} from "@/app/(app)/log/NaturalLanguageForm";
-import {ManualForm} from "@/app/(app)/log/ManualForm";
+import {ManualForm} from "@/app/(app)/log/ManualForm/ManualForm";
+import {NaturalLanguageForm} from "@/app/(app)/log/NaturalLanguageForm/NaturalLanguageForm";
 
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function LogMealPage() {
     return (
-        <div className="max-w-2xl mx-auto space-y-6">
-            <div>
+        <section className="max-w-2xl mx-auto space-y-6">
+            <header>
                 <h1 className="text-2xl font-bold tracking-tight">Log Meal</h1>
                 <p className="text-sm text-muted-foreground mt-0.5">
                     Add a meal manually or describe it in plain language.
                 </p>
-            </div>
+            </header>
 
             <Tabs defaultValue="manual">
                 <TabsList className="w-full sm:w-auto">
@@ -47,6 +47,6 @@ export default function LogMealPage() {
                     </Card>
                 </TabsContent>
             </Tabs>
-        </div>
+        </section>
     );
 }

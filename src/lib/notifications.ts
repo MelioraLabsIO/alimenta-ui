@@ -1,9 +1,10 @@
 "use client";
 
 import {notifications} from "@mantine/notifications";
+import type {ReactNode} from "react";
 
 type ToastOptions = {
-    description?: string;
+    description?: ReactNode;
 };
 
 export const toast = {
