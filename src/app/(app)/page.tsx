@@ -26,6 +26,7 @@ import {
 import {toast} from "@/lib/notifications";
 import {Meal} from "@/core/types/models/meal";
 import {LogMealDialog} from "@/components/meals/log-meal-dialog";
+import {MealPickerDialog} from "@/components/meals/meal-picker-dialog";
 
 const MEAL_TYPE_COLORS: Record<string, string> = {
     Breakfast: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
@@ -130,7 +131,10 @@ export default function DashboardPage() {
                         {new Date().toLocaleDateString("en-US", {weekday: "long", month: "long", day: "numeric"})}
                     </p>
                 </div>
-                <LogMealDialog/>
+                <div className="flex flex-wrap gap-2">
+                    <MealPickerDialog/>
+                    <LogMealDialog/>
+                </div>
             </div>
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
