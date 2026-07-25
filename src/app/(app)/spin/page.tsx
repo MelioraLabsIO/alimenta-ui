@@ -17,6 +17,8 @@ const MAX_WHEEL_SEGMENTS = 10;
 export default function SpinWheelPage() {
     const [segments, setSegments] = useState<WheelSegment[]>([]);
     const [selectedFood, setSelectedFood] = useState<FoodSearchItem | null>(null);
+    const [autocompleteKey, setAutocompleteKey] = useState(0);
+    const [typedInput, setTypedInput] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
 
     const {data: pastMeals = [], isLoading: isLoadingMeals} = useQuery({
@@ -57,6 +59,16 @@ export default function SpinWheelPage() {
     function handleFoodSelect(food: FoodSearchItem) {
         addSegment(food.name);
         setSelectedFood(null);
+        setTypedInput("");
+        setAutocompleteKey((k) => k + 1);
+    }
+
+    function handleAddTyped() {
+        if (!typedInput.trim() || !canAddMore) return;
+        addSegment(typedInput);
+        setTypedInput("");
+        setSelectedFood(null);
+        setAutocompleteKey((k) => k + 1);
     }
 
     const isSegmentAdded = (title: string) =>
@@ -105,11 +117,27 @@ export default function SpinWheelPage() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="pt-0">
-                            <Autocomplete
-                                value={selectedFood}
-                                onChange={handleFoodSelect}
-                                placeholder="Search or type a meal name…"
-                            />
+                            <div className="flex gap-2 items-start">
+                                <div className="flex-1 min-w-0">
+                                    <Autocomplete
+                                        key={autocompleteKey}
+                                        value={selectedFood}
+                                        onChange={handleFoodSelect}
+                                        onInputChange={setTypedInput}
+                                        placeholder="Search or type a meal name…"
+                                    />
+                                </div>
+                                <Button
+                                    onClick={handleAddTyped}
+                                    disabled={!typedInput.trim() || !canAddMore}
+                                    size="sm"
+                                    className="shrink-0 mt-0.5"
+                                    title="Add as custom meal"
+                                >
+                                    <Plus className="h-4 w-4" />
+                                    Add
+                                </Button>
+                            </div>
                             {!canAddMore && (
                                 <p className="mt-1.5 text-xs text-muted-foreground">
                                     Maximum {MAX_WHEEL_SEGMENTS} segments reached.

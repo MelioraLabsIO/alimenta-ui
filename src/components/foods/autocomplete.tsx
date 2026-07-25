@@ -15,6 +15,7 @@ type AutocompleteProps = {
     debounceMs?: number;
     minQueryLength?: number;
     onChange: (food: FoodSearchItem) => void;
+    onInputChange?: (value: string) => void;
 };
 
 function useDebouncedValue(value: string, delay: number) {
@@ -36,6 +37,7 @@ export function Autocomplete({
                                  debounceMs = 350,
                                  minQueryLength = 2,
                                  onChange,
+                                 onInputChange,
                              }: AutocompleteProps) {
     const [search, setSearch] = useState(value?.name ?? "");
     const debouncedSearch = useDebouncedValue(search.trim(), debounceMs);
@@ -84,6 +86,7 @@ export function Autocomplete({
 
                 onChange(food);
                 setSearch(food.name);
+                onInputChange?.("");
                 combobox.closeDropdown();
             }}
         >
@@ -96,6 +99,7 @@ export function Autocomplete({
                     rightSection={isFetching ? <Loader size={16}/> : null}
                     onChange={(event) => {
                         setSearch(event.currentTarget.value);
+                        onInputChange?.(event.currentTarget.value);
                         combobox.openDropdown();
                         combobox.updateSelectedOptionIndex();
                     }}
