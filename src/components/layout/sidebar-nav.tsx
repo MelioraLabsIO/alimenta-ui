@@ -9,12 +9,14 @@ import {
     LineChart,
     CalendarDays,
     Settings,
+    Dices,
 } from "lucide-react";
 import {Badge} from "@/components/mantine/ui";
 
 const navItems = [
     {href: "/", label: "Dashboard", icon: LayoutDashboard},
     {href: "/log", label: "Log Meal", icon: PlusCircle},
+    {href: "/spin", label: "Spin Wheel", icon: Dices},
     {href: "/history", label: "History", icon: History},
     {href: "/insights", label: "Insights", icon: LineChart},
     {href: "/plans", label: "Plans", icon: CalendarDays, soon: true},
