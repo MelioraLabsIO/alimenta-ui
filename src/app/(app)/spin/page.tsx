@@ -1,6 +1,6 @@
 "use client";
 
-import {useState, useRef, useMemo} from "react";
+import {useState, useMemo} from "react";
 import {useQuery} from "@tanstack/react-query";
 import {getAllMeals} from "@/services/meal/queries";
 import {MealPickerWheel, WheelSegment} from "@/components/meals/meal-picker-wheel";
@@ -9,14 +9,15 @@ import {Button} from "@/components/mantine/ui";
 import {Badge} from "@/components/mantine/ui";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/mantine/ui";
 import {Dices, Plus, Search, Trash2, X} from "lucide-react";
+import {Autocomplete} from "@/components/foods/autocomplete";
+import type {FoodSearchItem} from "@/services/food/queries";
 
 const MAX_WHEEL_SEGMENTS = 10;
 
 export default function SpinWheelPage() {
     const [segments, setSegments] = useState<WheelSegment[]>([]);
-    const [manualInput, setManualInput] = useState("");
+    const [selectedFood, setSelectedFood] = useState<FoodSearchItem | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
-    const manualInputRef = useRef<HTMLInputElement>(null);
 
     const {data: pastMeals = [], isLoading: isLoadingMeals} = useQuery({
         queryKey: ["meals-for-wheel"],
@@ -53,17 +54,9 @@ export default function SpinWheelPage() {
         setSegments((prev) => prev.filter((_, i) => i !== index));
     }
 
-    function handleManualAdd() {
-        addSegment(manualInput);
-        setManualInput("");
-        manualInputRef.current?.focus();
-    }
-
-    function handleManualKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            handleManualAdd();
-        }
+    function handleFoodSelect(food: FoodSearchItem) {
+        addSegment(food.name);
+        setSelectedFood(null);
     }
 
     const isSegmentAdded = (title: string) =>
@@ -112,24 +105,11 @@ export default function SpinWheelPage() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="pt-0">
-                            <div className="flex gap-2">
-                                <Input
-                                    ref={manualInputRef}
-                                    placeholder="e.g. Avocado Toast"
-                                    value={manualInput}
-                                    onChange={(e) => setManualInput(e.target.value)}
-                                    onKeyDown={handleManualKeyDown}
-                                    disabled={!canAddMore}
-                                />
-                                <Button
-                                    onClick={handleManualAdd}
-                                    disabled={!manualInput.trim() || !canAddMore}
-                                    size="sm"
-                                    className="shrink-0"
-                                >
-                                    Add
-                                </Button>
-                            </div>
+                            <Autocomplete
+                                value={selectedFood}
+                                onChange={handleFoodSelect}
+                                placeholder="Search or type a meal name…"
+                            />
                             {!canAddMore && (
                                 <p className="mt-1.5 text-xs text-muted-foreground">
                                     Maximum {MAX_WHEEL_SEGMENTS} segments reached.
