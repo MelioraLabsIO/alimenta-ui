@@ -1,6 +1,6 @@
 "use client";
 
-import {useRef, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {Button} from "@/components/mantine/ui";
 import {Dices} from "lucide-react";
 
@@ -46,6 +46,10 @@ function describeSegmentPath(
     return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`;
 }
 
+function truncateLabel(label: string): string {
+    return label.length > MAX_LABEL_LENGTH ? label.slice(0, MAX_LABEL_LENGTH) + "…" : label;
+}
+
 export function MealPickerWheel({segments, onResult}: MealPickerWheelProps) {
     const [cumulativeRotation, setCumulativeRotation] = useState(0);
     const [spinning, setSpinning] = useState(false);
@@ -56,6 +60,13 @@ export function MealPickerWheel({segments, onResult}: MealPickerWheelProps) {
     const cx = 150;
     const cy = 150;
     const r = 140;
+
+    // Clear any pending timer on unmount to prevent state updates after unmount
+    useEffect(() => {
+        return () => {
+            if (timerRef.current) clearTimeout(timerRef.current);
+        };
+    }, []);
 
     function handleSpin() {
         if (spinning || n === 0) return;
@@ -162,8 +173,7 @@ export function MealPickerWheel({segments, onResult}: MealPickerWheelProps) {
                         const normalizedMid = ((midAngleDeg % 360) + 360) % 360;
                         const needsFlip = normalizedMid > 90 && normalizedMid <= 270;
                         const labelAngle = needsFlip ? midAngleDeg + 180 : midAngleDeg;
-                        const displayLabel =
-                            seg.label.length > MAX_LABEL_LENGTH ? seg.label.slice(0, MAX_LABEL_LENGTH) + "…" : seg.label;
+                        const displayLabel = truncateLabel(seg.label);
                         return (
                             <text
                                 key={i}
