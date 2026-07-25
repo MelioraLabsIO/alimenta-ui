@@ -20,6 +20,12 @@ const WHEEL_COLORS = [
 const SPIN_DURATION_MS = 3500;
 const SPIN_ROTATIONS = 6;
 const MAX_LABEL_LENGTH = 10;
+const PRIMARY_COLOR = "#58d1a0";
+const WHEEL_CENTER_X = 150;
+const WHEEL_CENTER_Y = 150;
+const WHEEL_RADIUS = 140;
+const POINTER_WIDTH = 20;
+const POINTER_HEIGHT = 24;
 
 export type WheelSegment = {
     label: string;
@@ -57,9 +63,9 @@ export function MealPickerWheel({segments, onResult}: MealPickerWheelProps) {
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const n = segments.length;
-    const cx = 150;
-    const cy = 150;
-    const r = 140;
+    const cx = WHEEL_CENTER_X;
+    const cy = WHEEL_CENTER_Y;
+    const r = WHEEL_RADIUS;
 
     // Clear any pending timer on unmount to prevent state updates after unmount
     useEffect(() => {
@@ -119,10 +125,14 @@ export function MealPickerWheel({segments, onResult}: MealPickerWheelProps) {
                     className="absolute top-0 left-1/2 z-10 -translate-x-1/2 -translate-y-[6px]"
                     aria-hidden="true"
                 >
-                    <svg width="20" height="24" viewBox="0 0 20 24">
+                    <svg
+                        width={POINTER_WIDTH}
+                        height={POINTER_HEIGHT}
+                        viewBox={`0 0 ${POINTER_WIDTH} ${POINTER_HEIGHT}`}
+                    >
                         <polygon
-                            points="10,22 0,2 20,2"
-                            fill="#58d1a0"
+                            points={`${POINTER_WIDTH / 2},${POINTER_HEIGHT - 2} 0,2 ${POINTER_WIDTH},2`}
+                            fill={PRIMARY_COLOR}
                             stroke="white"
                             strokeWidth="1.5"
                         />
@@ -206,7 +216,7 @@ export function MealPickerWheel({segments, onResult}: MealPickerWheelProps) {
                         stroke="rgba(255,255,255,0.3)"
                         strokeWidth="2"
                     />
-                    <circle cx={cx} cy={cy} r={8} fill="#58d1a0" />
+                    <circle cx={cx} cy={cy} r={8} fill={PRIMARY_COLOR} />
                 </svg>
             </div>
 
