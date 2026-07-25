@@ -208,15 +208,19 @@ export function MealPickerWheel({segments, onResult}: MealPickerWheelProps) {
                     })}
 
                     {/* Center hub */}
-                    <circle
-                        cx={cx}
-                        cy={cy}
-                        r={18}
-                        fill="var(--background)"
-                        stroke="rgba(255,255,255,0.3)"
-                        strokeWidth="2"
-                    />
-                    <circle cx={cx} cy={cy} r={8} fill={PRIMARY_COLOR} />
+                    {n > 1 && (
+                        <>
+                            <circle
+                                cx={cx}
+                                cy={cy}
+                                r={18}
+                                fill="var(--background)"
+                                stroke="rgba(255,255,255,0.3)"
+                                strokeWidth="2"
+                            />
+                            <circle cx={cx} cy={cy} r={8} fill={PRIMARY_COLOR} />
+                        </>
+                    )}
                 </svg>
             </div>
 
