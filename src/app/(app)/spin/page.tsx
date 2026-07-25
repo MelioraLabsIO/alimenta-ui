@@ -1,6 +1,6 @@
 "use client";
 
-import {useState, useRef} from "react";
+import {useState, useRef, useMemo} from "react";
 import {useQuery} from "@tanstack/react-query";
 import {getAllMeals} from "@/services/meal/queries";
 import {MealPickerWheel, WheelSegment} from "@/components/meals/meal-picker-wheel";
@@ -24,19 +24,22 @@ export default function SpinWheelPage() {
     });
 
     // Deduplicated past meal titles
-    const uniquePastMeals = Array.from(
-        new Map(
-            [...pastMeals]
-                .sort((a, b) => a.title.localeCompare(b.title))
-                .map((m) => [m.title.toLowerCase(), m.title]),
-        ).values(),
+    const uniquePastMeals = useMemo(
+        () =>
+            Array.from(
+                new Map(
+                    [...pastMeals]
+                        .sort((a, b) => a.title.localeCompare(b.title))
+                        .map((m) => [m.title.toLowerCase(), m.title]),
+                ).values(),
+            ),
+        [pastMeals],
     );
 
-    const filteredPastMeals = searchQuery.trim()
-        ? uniquePastMeals.filter((title) =>
-            title.toLowerCase().includes(searchQuery.trim().toLowerCase()),
-        )
-        : uniquePastMeals;
+    const filteredPastMeals = useMemo(() => {
+        const q = searchQuery.trim().toLowerCase();
+        return q ? uniquePastMeals.filter((title) => title.toLowerCase().includes(q)) : uniquePastMeals;
+    }, [uniquePastMeals, searchQuery]);
 
     function addSegment(label: string) {
         const trimmed = label.trim();
