@@ -224,7 +224,7 @@ export function MealPickerWheel({segments, onResult}: MealPickerWheelProps) {
             <div className="min-h-[48px] text-center">
                 {winner && (
                     <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                        <p className="text-xs text-muted-foreground mb-0.5">Today&apos;s pick 🎉</p>
+                        <p className="text-xs text-muted-foreground mb-0.5">Today's pick 🎉</p>
                         <p className="text-xl font-bold text-foreground">{winner.label}</p>
                     </div>
                 )}

@@ -30,8 +30,9 @@ export function MealPickerDialog({trigger}: MealPickerDialogProps) {
         enabled: open,
     });
 
-    // Deduplicate meal titles, sorting first so we consistently keep the alphabetically
-    // first casing variant when multiple meals share the same title.
+    // Deduplicate meal titles. Sort alphabetically first so that when two meals share
+    // the same lowercase title, we consistently keep the variant that comes first in a
+    // case-sensitive alphabetical order (i.e. the original casing is preserved, not normalised).
     const uniqueSegments = Array.from(
         new Map(
             [...meals]
