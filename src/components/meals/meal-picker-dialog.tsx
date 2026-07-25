@@ -30,10 +30,15 @@ export function MealPickerDialog({trigger}: MealPickerDialogProps) {
         enabled: open,
     });
 
-    // Deduplicate meal titles so the wheel shows unique options
+    // Deduplicate meal titles, sorting first so we consistently keep the alphabetically
+    // first casing variant when multiple meals share the same title.
     const uniqueSegments = Array.from(
-        new Map(meals.map((m) => [m.title.toLowerCase(), {label: m.title}])).values(),
-    ).slice(0, MAX_WHEEL_SEGMENTS); // cap at MAX_WHEEL_SEGMENTS for readability
+        new Map(
+            [...meals]
+                .sort((a, b) => a.title.localeCompare(b.title))
+                .map((m) => [m.title.toLowerCase(), {label: m.title}]),
+        ).values(),
+    ).slice(0, MAX_WHEEL_SEGMENTS);
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
