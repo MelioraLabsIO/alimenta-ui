@@ -1,26 +1,38 @@
 "use client";
 
-import {useState} from "react";
-import {Select} from "@mantine/core";
-import {Settings2} from "lucide-react";
-import {Button, Card, CardContent, CardHeader, CardTitle, Text} from "@/components/mantine/ui";
-import {toast} from "@/lib/notifications";
-import {PreferenceTagInput} from "./preference-tag-input";
-import type {FoodSearchItem} from "@/services/food/queries";
+import { useState } from "react";
+import { Select } from "@mantine/core";
+import { Settings2 } from "lucide-react";
+import {
+    Button,
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+    Text,
+} from "@/components/mantine/ui";
+import { toast } from "@/lib/notifications";
+import { PreferenceTagInput } from "./preference-tag-input";
+import type { FoodSearchItem } from "@/apis/food/queries";
 
 export function PreferencesSection() {
     const [units, setUnits] = useState("metric");
     const [goal, setGoal] = useState("maintain");
     const [dislikes, setDislikes] = useState<string[]>(["Mushrooms"]);
-    const [allergies, setAllergies] = useState<string[]>(["Gluten", "Shellfish"]);
-    const [selectedDislike, setSelectedDislike] = useState<FoodSearchItem | null>(null);
-    const [selectedAllergy, setSelectedAllergy] = useState<FoodSearchItem | null>(null);
+    const [allergies, setAllergies] = useState<string[]>([
+        "Gluten",
+        "Shellfish",
+    ]);
+    const [selectedDislike, setSelectedDislike] =
+        useState<FoodSearchItem | null>(null);
+    const [selectedAllergy, setSelectedAllergy] =
+        useState<FoodSearchItem | null>(null);
 
     function addItem(
         selectedFood: FoodSearchItem | null,
         items: string[],
         onUpdateItems: (items: string[]) => void,
-        onResetSelection: () => void,
+        onResetSelection: () => void
     ) {
         const item = selectedFood?.name.trim();
 
@@ -31,7 +43,11 @@ export function PreferencesSection() {
         onResetSelection();
     }
 
-    function removeItem(item: string, items: string[], onUpdateItems: (items: string[]) => void) {
+    function removeItem(
+        item: string,
+        items: string[],
+        onUpdateItems: (items: string[]) => void
+    ) {
         onUpdateItems(items.filter((currentItem) => currentItem !== item));
     }
 
@@ -43,7 +59,8 @@ export function PreferencesSection() {
         <Card className="border-border/50 bg-card/60">
             <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                    <Settings2 className="h-4 w-4 text-muted-foreground"/> Preferences
+                    <Settings2 className="h-4 w-4 text-muted-foreground" />{" "}
+                    Preferences
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-5">
@@ -54,8 +71,14 @@ export function PreferencesSection() {
                             value={units}
                             onChange={(value) => value && setUnits(value)}
                             data={[
-                                {value: "metric", label: "Metric (g, ml, kg)"},
-                                {value: "imperial", label: "Imperial (oz, fl oz, lb)"},
+                                {
+                                    value: "metric",
+                                    label: "Metric (g, ml, kg)",
+                                },
+                                {
+                                    value: "imperial",
+                                    label: "Imperial (oz, fl oz, lb)",
+                                },
                             ]}
                         />
                     </div>
@@ -65,9 +88,9 @@ export function PreferencesSection() {
                             value={goal}
                             onChange={(value) => value && setGoal(value)}
                             data={[
-                                {value: "cut", label: "Cut (lose weight)"},
-                                {value: "maintain", label: "Maintain"},
-                                {value: "bulk", label: "Bulk (gain muscle)"},
+                                { value: "cut", label: "Cut (lose weight)" },
+                                { value: "maintain", label: "Maintain" },
+                                { value: "bulk", label: "Bulk (gain muscle)" },
                             ]}
                         />
                     </div>
@@ -83,9 +106,16 @@ export function PreferencesSection() {
                             selectedFood={selectedDislike}
                             onSelectedFoodChangeAction={setSelectedDislike}
                             onAddItemAction={() =>
-                                addItem(selectedDislike, dislikes, setDislikes, () => setSelectedDislike(null))
+                                addItem(
+                                    selectedDislike,
+                                    dislikes,
+                                    setDislikes,
+                                    () => setSelectedDislike(null)
+                                )
                             }
-                            onRemoveItemAction={(item) => removeItem(item, dislikes, setDislikes)}
+                            onRemoveItemAction={(item) =>
+                                removeItem(item, dislikes, setDislikes)
+                            }
                         />
                         <PreferenceTagInput
                             label="Allergies"
@@ -94,9 +124,17 @@ export function PreferencesSection() {
                             selectedFood={selectedAllergy}
                             onSelectedFoodChangeAction={setSelectedAllergy}
                             onAddItemAction={() =>
-                                addItem(selectedAllergy, allergies, setAllergies, () => setSelectedAllergy(null))
+                                addItem(
+                                    selectedAllergy,
+                                    allergies,
+                                    setAllergies,
+                                    () => setSelectedAllergy(null)
+                                )
                             }
-                            onRemoveItemAction={(item) => removeItem(item, allergies, setAllergies)}/>
+                            onRemoveItemAction={(item) =>
+                                removeItem(item, allergies, setAllergies)
+                            }
+                        />
                     </div>
                 </div>
 

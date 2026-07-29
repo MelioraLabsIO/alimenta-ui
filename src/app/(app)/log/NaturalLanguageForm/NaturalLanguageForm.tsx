@@ -1,18 +1,18 @@
-import {useState} from "react";
-import {useMutation, useQueryClient} from "@tanstack/react-query";
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import {usePathname} from "next/navigation";
-import {EMealType, EMealUnit} from "@/core/types/models/meal";
-import type {Meal} from "@/core/types/models/meal";
-import {extractMeal, saveMeal} from "@/services/meal/mutations";
-import type {MealDraft} from "@/services/meal/mutations";
-import {toast} from "@/lib/notifications";
-import {ManualForm} from "@/app/(app)/log/ManualForm/ManualForm";
-import type {SaveMealDTO} from "@/core/types/dto";
-import {BackToPreviewButton} from "./widgets/BackToPreviewButton";
-import {ExtractedMealCard} from "./widgets/ExtractedMealCard";
-import {NaturalLanguageInputSection} from "./widgets/NaturalLanguageInputSection";
-import {SaveSuccessMessage} from "./widgets/SaveSuccessMessage";
+import { usePathname } from "next/navigation";
+import { EMealType, EMealUnit } from "@/core/types/models/meal";
+import type { Meal } from "@/core/types/models/meal";
+import { extractMeal, saveMeal } from "@/apis/meal/mutations";
+import type { MealDraft } from "@/apis/meal/mutations";
+import { toast } from "@/lib/notifications";
+import { ManualForm } from "@/app/(app)/log/ManualForm/ManualForm";
+import type { SaveMealDTO } from "@/core/types/dto";
+import { BackToPreviewButton } from "./widgets/BackToPreviewButton";
+import { ExtractedMealCard } from "./widgets/ExtractedMealCard";
+import { NaturalLanguageInputSection } from "./widgets/NaturalLanguageInputSection";
+import { SaveSuccessMessage } from "./widgets/SaveSuccessMessage";
 
 type NaturalLanguageMealItem = SaveMealDTO["items"][number] & {
     foodName: string;
@@ -24,7 +24,10 @@ function uid() {
 
 function toMealType(value: string): EMealType {
     const normalized = value.trim().toUpperCase();
-    return Object.values(EMealType).find((type) => type === normalized) ?? EMealType.OTHER;
+    return (
+        Object.values(EMealType).find((type) => type === normalized) ??
+        EMealType.OTHER
+    );
 }
 
 function toMealUnit(value: string | null): EMealUnit {
@@ -55,7 +58,11 @@ function toMealUnit(value: string | null): EMealUnit {
         return aliases[normalized];
     }
 
-    return Object.values(EMealUnit).find((unit) => unit.toLowerCase() === normalized) ?? EMealUnit.UNIT;
+    return (
+        Object.values(EMealUnit).find(
+            (unit) => unit.toLowerCase() === normalized
+        ) ?? EMealUnit.UNIT
+    );
 }
 
 function draftItems(draft: MealDraft): NaturalLanguageMealItem[] {
@@ -92,7 +99,7 @@ function draftPrefill(draft: MealDraft): Partial<Meal> {
     };
 }
 
-export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {
+export function NaturalLanguageForm({ onSuccess }: { onSuccess?: () => void }) {
     const queryClient = useQueryClient();
     const pathname = usePathname();
     const [text, setText] = useState("");
@@ -109,7 +116,11 @@ export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {
         mutationKey: ["extract-meal"],
         mutationFn: extractMeal,
         onError: (mutationError) => {
-            setError(mutationError instanceof Error ? mutationError.message : "Extraction failed.");
+            setError(
+                mutationError instanceof Error
+                    ? mutationError.message
+                    : "Extraction failed."
+            );
         },
     });
 
@@ -135,13 +146,19 @@ export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {
         },
         onSuccess: async (_, currentDraft) => {
             if (isHistoryPage) {
-                toast.success("Meal saved!", {description: currentDraft.mealName});
+                toast.success("Meal saved!", {
+                    description: currentDraft.mealName,
+                });
             } else {
                 toast.success("Meal saved!", {
                     description: (
                         <span>
-                            {currentDraft.mealName}. You can view your newly created meal{" "}
-                            <Link href="/history" className="font-medium underline underline-offset-2">
+                            {currentDraft.mealName}. You can view your newly
+                            created meal{" "}
+                            <Link
+                                href="/history"
+                                className="font-medium underline underline-offset-2"
+                            >
                                 here
                             </Link>
                             .
@@ -152,7 +169,7 @@ export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {
             resetExtractMeal();
             setText("");
             setEditMode(false);
-            await queryClient.invalidateQueries({queryKey: ["meals"]});
+            await queryClient.invalidateQueries({ queryKey: ["meals"] });
             onSuccess?.();
         },
         onError: (mutationError) => {
@@ -184,7 +201,7 @@ export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {
     if (editMode && draft) {
         return (
             <div className="space-y-4">
-                <BackToPreviewButton onBack={() => setEditMode(false)}/>
+                <BackToPreviewButton onBack={() => setEditMode(false)} />
                 <ManualForm
                     onSuccess={onSuccess}
                     prefill={draftPrefill(draft)}
@@ -206,7 +223,7 @@ export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {
                 }}
             />
 
-            {saved && <SaveSuccessMessage/>}
+            {saved && <SaveSuccessMessage />}
 
             {draft && (
                 <ExtractedMealCard
@@ -219,5 +236,3 @@ export function NaturalLanguageForm({onSuccess}: { onSuccess?: () => void }) {
         </div>
     );
 }
-
-

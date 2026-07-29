@@ -1,9 +1,13 @@
-import {Meal, MealRange, CaloriesAverageResponse} from "@/core/types/models/meal";
-import {apiFetch} from "@/apiClient/client";
-import {MealResponse} from "@/core/types/dto";
+import {
+    Meal,
+    MealRange,
+    CaloriesAverageResponse,
+} from "@/core/types/models/meal";
+import { apiFetch } from "@/apiClient/client";
+import { MealResponse } from "@/core/types/dto";
 
-export async function getRecentMeals(): Promise<Meal[]> {
-    return apiFetch("/api/v1/meals?limit=5");
+export async function getRecentMeals(maxQuantity = 5): Promise<Meal[]> {
+    return apiFetch(`/api/v1/meals?limit=${maxQuantity}`);
 }
 
 export async function getAllMeals(): Promise<MealResponse[]> {
@@ -39,7 +43,15 @@ export function getDateRange(range: MealRange): { from: Date; to: Date } {
 
     if (range === "this-month") {
         const from = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
-        const to = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+        const to = new Date(
+            now.getFullYear(),
+            now.getMonth() + 1,
+            0,
+            23,
+            59,
+            59,
+            999
+        );
         return { from, to };
     }
 
@@ -49,7 +61,9 @@ export function getDateRange(range: MealRange): { from: Date; to: Date } {
     return { from, to };
 }
 
-export async function getMealsByRange(range: MealRange = "this-week"): Promise<Meal[]> {
+export async function getMealsByRange(
+    range: MealRange = "this-week"
+): Promise<Meal[]> {
     const { from, to } = getDateRange(range);
     const params = new URLSearchParams({
         from: from.toISOString(),
