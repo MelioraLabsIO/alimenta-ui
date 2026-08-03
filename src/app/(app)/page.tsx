@@ -96,9 +96,9 @@ function MealRow({
 
 export default function DashboardPage() {
     const meals = useMemo(() => mealsRepo.list(), []);
-    const { data: recentMeals = [] } = useQuery({
+    const { data: recentMeals = [] } = useQuery<Meal[]>({
         queryKey: ["recent-meals"],
-        queryFn: getRecentMeals,
+        queryFn: () => getRecentMeals(),
     });
     const weeklyCalories = useMemo(() => mealsRepo.weeklyCalories(), []);
     const weeklyMacros = useMemo(() => mealsRepo.weeklyMacros(), []);

@@ -20,7 +20,7 @@ export type CreateSessionResponse = {
 export type SessionParticipant = {
     /** Stable backend-assigned user / connection ID. */
     id: string;
-    name: string;
+    displayName: string;
     /** Initials shown in the avatar (e.g. "JD"). */
     initials: string;
     isHost: boolean;
