@@ -9,7 +9,8 @@
         "prod": "next build && next start",
         "start": "next start",
         "lint": "eslint",
-        "typecheck": "tsc --noEmit"
+        "typecheck": "tsc --noEmit",
+        "checkTS": "tsc --noEmit"
     },
     "dependencies": {
         "@hookform/resolvers": "^5.2.2",
