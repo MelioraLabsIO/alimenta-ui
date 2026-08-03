@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { Dices } from "lucide-react";
 import { Button, Card, CardContent } from "@/components/mantine/ui";
 import { Tooltip } from "@mantine/core";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import {
     MealSpinWheel,
@@ -14,43 +15,54 @@ import {
     MealEntryForm,
 } from "@/app/(app)/spin/_components/MealEntryForm";
 import { PastMealsSearch } from "@/app/(app)/spin/_components/PastMealsSearch";
+import { createSpinSession } from "@/apis/spin/mutations";
 
 import { useSharedSession } from "./useSharedSession";
+import { CreateSessionView } from "./components/CreateSessionView";
 import { SessionShareCard } from "./components/SessionShareCard";
 import { SessionParticipants } from "./components/SessionParticipants";
 import { SharedWheelSegments } from "./components/SharedWheelSegments";
 import { SessionInstructions } from "./components/SessionInstructions";
-import type { UseSharedSessionReturn } from "./types";
+import { useAuthUserStore } from "@/stores/auth-user.store";
 
-type ExtendedSession = UseSharedSessionReturn & { _spinSeq: number };
-
-/**
- * Authenticated shared spin-wheel mode.
- *
- * Layout (desktop): left column = wheel + session info, right column = panels.
- * State is owned by `useSharedSession`; this component is pure composition.
- */
 export function Shared() {
+    const queryClient = useQueryClient();
+
+    const { user } = useAuthUserStore();
     const {
         session,
+        isHost,
         isLoading,
         error,
         currentUserId,
-        isHost,
         addEntry,
         removeEntry,
         clearAllEntries,
         requestSpin,
-        _spinSeq,
-    } = useSharedSession() as ExtendedSession;
+    } = useSharedSession(user);
+
+    const {
+        mutate: createSpinSessionMutation,
+        isPending: isCreatingSession,
+        data: createdSession,
+    } = useMutation({
+        mutationKey: ["createSpinSession"],
+        mutationFn: createSpinSession,
+        onSuccess: (createdSession) => {
+            queryClient.setQueryData(["session"], createdSession);
+        },
+    });
+
+    const onCreateSession = useCallback(() => {
+        createSpinSessionMutation();
+    }, [createSpinSessionMutation]);
 
     const entries = useMemo(() => session?.entries ?? [], [session?.entries]);
     const participants = useMemo(
-        () => session?.participants ?? [],
-        [session?.participants]
+        () => session?.spinParticipants ?? [],
+        [session?.spinParticipants]
     );
 
-    // Map SharedEntry[] → WheelSegment[] using stable IDs.
     const wheelSegments = useMemo(
         () =>
             entries.map((entry) => ({
@@ -60,18 +72,11 @@ export function Shared() {
         [entries]
     );
 
-    // Derive the winner's index from the backend-provided winnerId.
-    const winnerId = session?.winnerId ?? null;
-    const spinTrigger = useMemo((): SpinTrigger | null => {
-        if (!winnerId) return null;
-        const winnerIndex = entries.findIndex((e) => e.id === winnerId);
-        if (winnerIndex === -1) return null;
-        return { seq: _spinSeq, winnerIndex };
-    }, [winnerId, entries, _spinSeq]);
+    const spinTrigger: SpinTrigger | null = null;
 
     const canAddMore = entries.length < MAX_WHEEL_SEGMENTS;
     const addedLabels = entries
-        .filter((e) => e.participantId === currentUserId)
+        .filter((e) => e.participantId === user?.id)
         .map((e) => e.food);
 
     const hasEntries = wheelSegments.length > 0;
@@ -81,6 +86,8 @@ export function Shared() {
           ? "Add meals before spinning"
           : undefined;
 
+    const shareJoinUrl = createdSession?.joinURL;
+
     if (isLoading) {
         return (
             <div className="flex items-center justify-center py-24">
@@ -89,28 +96,27 @@ export function Shared() {
         );
     }
 
-    if (error || !session) {
+    if (!session) {
         return (
-            <p className="text-sm text-destructive py-8 text-center">
-                {error ?? "Failed to load session."}
-            </p>
+            <CreateSessionView
+                isCreatingSession={isCreatingSession}
+                onCreateSession={onCreateSession}
+            />
         );
     }
 
     return (
         <div className="max-w-6xl mx-auto space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-                {/* ── Left column: wheel + session info ── */}
                 <div className="space-y-4">
                     <Card className="border-border/50 bg-card/60">
                         <CardContent className="p-5 flex flex-col items-center gap-4">
-                            {/* Session code + QR */}
                             <SessionShareCard
                                 code={session.code}
+                                joinUrl={shareJoinUrl}
                                 isHost={isHost}
                             />
 
-                            {/* Wheel (or empty state) */}
                             {hasEntries ? (
                                 <MealSpinWheel
                                     segments={wheelSegments}
@@ -153,7 +159,6 @@ export function Shared() {
                                 </>
                             )}
 
-                            {/* Helper text below the built-in spin button */}
                             {hasEntries && (
                                 <p className="text-xs text-muted-foreground -mt-2 pb-1">
                                     Only the host can spin the wheel.
@@ -162,11 +167,9 @@ export function Shared() {
                         </CardContent>
                     </Card>
 
-                    {/* How it works */}
                     <SessionInstructions />
                 </div>
 
-                {/* ── Right column: session panels ── */}
                 <div className="space-y-4">
                     <SessionParticipants
                         participants={participants}
@@ -176,7 +179,6 @@ export function Shared() {
 
                     <MealEntryForm canAddMore={canAddMore} onAdd={addEntry} />
 
-                    {/* Past meals: always shown for authenticated users */}
                     <PastMealsSearch
                         addedLabels={addedLabels}
                         canAddMore={canAddMore}

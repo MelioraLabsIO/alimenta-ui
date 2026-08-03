@@ -10,6 +10,7 @@ import "@mantine/notifications/styles.css";
 import "./globals.css";
 import ReactQueryProvider from "@/providers/QueryProvider";
 import {ReactQueryDevtools} from "@tanstack/react-query-devtools";
+import AuthUserProvider from "@/providers/AuthUserProvider";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -37,9 +38,11 @@ export default function RootLayout({
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <MantineProvider theme={alimentaTheme} defaultColorScheme="dark">
             <ReactQueryProvider>
-                {children}
-                <Notifications position="top-right"/>
-                <ReactQueryDevtools initialIsOpen={false} />
+                <AuthUserProvider>
+                    {children}
+                    <Notifications position="top-right"/>
+                    <ReactQueryDevtools initialIsOpen={false} />
+                </AuthUserProvider>
             </ReactQueryProvider>
         </MantineProvider>
         </body>

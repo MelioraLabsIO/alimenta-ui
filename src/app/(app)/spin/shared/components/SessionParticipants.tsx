@@ -1,6 +1,15 @@
 "use client";
 
-import { Avatar, AvatarFallback, Badge, Card, CardContent, CardHeader, CardTitle, Skeleton } from "@/components/mantine/ui";
+import {
+    Avatar,
+    AvatarFallback,
+    Badge,
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+    Skeleton,
+} from "@/components/mantine/ui";
 import type { SessionParticipant } from "../types";
 
 const MAX_PARTICIPANTS = 10;
@@ -11,7 +20,11 @@ interface SessionParticipantsProps {
     error?: string | null;
 }
 
-function ParticipantAvatar({ participant }: { participant: SessionParticipant }) {
+function ParticipantAvatar({
+    participant,
+}: {
+    participant: SessionParticipant;
+}) {
     return (
         <li className="flex items-center gap-3 py-1">
             {/* Avatar */}
@@ -35,7 +48,7 @@ function ParticipantAvatar({ participant }: { participant: SessionParticipant })
 
             {/* Name */}
             <span className="flex-1 text-sm font-medium truncate">
-                {participant.name}
+                {participant.displayName}
             </span>
 
             {/* Host badge */}
@@ -79,7 +92,10 @@ export function SessionParticipants({
                 {isLoading ? (
                     <ul className="space-y-2" aria-label="Loading participants">
                         {[1, 2, 3].map((i) => (
-                            <li key={i} className="flex items-center gap-3 py-1">
+                            <li
+                                key={i}
+                                className="flex items-center gap-3 py-1"
+                            >
                                 <Skeleton className="h-8 w-8 rounded-full" />
                                 <Skeleton className="h-4 w-24 rounded" />
                             </li>
@@ -102,4 +118,3 @@ export function SessionParticipants({
         </Card>
     );
 }
-

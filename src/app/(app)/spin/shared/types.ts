@@ -42,7 +42,7 @@ export type SharedSession = {
     /** Short alphanumeric code participants use to join. */
     code: string;
     hostId: string;
-    participants: SessionParticipant[];
+    spinParticipants: SessionParticipant[];
     entries: SharedEntry[];
     status: SessionStatus;
     /**
