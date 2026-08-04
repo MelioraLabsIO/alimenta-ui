@@ -86,7 +86,7 @@ export function Shared() {
           ? "Add meals before spinning"
           : undefined;
 
-    const shareJoinUrl = createdSession?.joinURL;
+    const shareJoinUrl = session?.joinURL ?? createdSession?.joinURL ?? "";
 
     if (isLoading) {
         return (
