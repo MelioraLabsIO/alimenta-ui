@@ -18,11 +18,11 @@ export type CreateSessionResponse = {
 };
 
 export type SessionParticipant = {
-    /** Stable backend-assigned user / connection ID. */
     id: string;
     displayName: string;
-    /** Initials shown in the avatar (e.g. "JD"). */
-    initials: string;
+    userId: string;
+    foodName?: string;
+    createdAt: Date;
     isHost: boolean;
     /** Live presence – set by WebSocket heartbeat. */
     isConnected: boolean;
@@ -39,12 +39,18 @@ export type SharedEntry = {
 
 export type SharedSession = {
     id: string;
+    hostUserId: string;
     /** Short alphanumeric code participants use to join. */
-    code: string;
+    joinCode: string;
+    joinURL: string;
+    expiresAt: Date;
+    createdAt: Date;
     hostId: string;
-    spinParticipants: SessionParticipant[];
     entries: SharedEntry[];
     status: SessionStatus;
+    spinParticipants: SessionParticipant[];
+    // After Spinning
+
     /**
      * ID of the winning SharedEntry chosen by the backend.
      * `null` until the host initiates a spin and the backend responds.
