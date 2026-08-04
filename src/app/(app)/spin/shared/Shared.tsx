@@ -86,7 +86,7 @@ export function Shared() {
           ? "Add meals before spinning"
           : undefined;
 
-    const shareJoinUrl = createdSession?.joinURL;
+    const shareJoinUrl = session?.joinURL ?? createdSession?.joinURL ?? "";
 
     if (isLoading) {
         return (
@@ -112,7 +112,7 @@ export function Shared() {
                     <Card className="border-border/50 bg-card/60">
                         <CardContent className="p-5 flex flex-col items-center gap-4">
                             <SessionShareCard
-                                code={session.code}
+                                code={session.joinCode}
                                 joinUrl={shareJoinUrl}
                                 isHost={isHost}
                             />

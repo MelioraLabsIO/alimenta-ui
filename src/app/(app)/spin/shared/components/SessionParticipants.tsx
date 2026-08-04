@@ -20,6 +20,15 @@ interface SessionParticipantsProps {
     error?: string | null;
 }
 
+function getInitials(name: string) {
+    const words = name.split(" ");
+    if (words.length === 1) {
+        return words[0].charAt(0).toUpperCase();
+    } else {
+        return words[0].charAt(0) + words[words.length - 1].charAt(0);
+    }
+}
+
 function ParticipantAvatar({
     participant,
 }: {
@@ -31,7 +40,7 @@ function ParticipantAvatar({
             <div className="relative shrink-0">
                 <Avatar className="h-8 w-8">
                     <AvatarFallback className="text-xs bg-primary/20 text-primary font-semibold">
-                        {participant.initials}
+                        {getInitials(participant.displayName)}
                     </AvatarFallback>
                 </Avatar>
                 {/* Online indicator dot */}
