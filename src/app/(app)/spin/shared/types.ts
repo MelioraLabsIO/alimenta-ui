@@ -18,6 +18,7 @@ export type CreateSessionResponse = {
 };
 
 export type SessionParticipant = {
+    /** Stable backend-assigned user / connection ID. */
     id: string;
     displayName: string;
     userId: string;
@@ -46,6 +47,7 @@ export type SharedSession = {
     expiresAt: Date;
     createdAt: Date;
     hostId: string;
+    spinParticipants: SessionParticipant[];
     entries: SharedEntry[];
     status: SessionStatus;
     spinParticipants: SessionParticipant[];
