@@ -50,9 +50,7 @@ export type SharedSession = {
     spinParticipants: SessionParticipant[];
     entries: SharedEntry[];
     status: SessionStatus;
-    spinParticipants: SessionParticipant[];
     // After Spinning
-
     /**
      * ID of the winning SharedEntry chosen by the backend.
      * `null` until the host initiates a spin and the backend responds.
