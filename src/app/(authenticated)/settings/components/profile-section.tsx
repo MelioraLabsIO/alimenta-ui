@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { User } from "lucide-react";
 import {
     Avatar,
@@ -17,37 +17,26 @@ import {
 } from "@/components/mantine/ui";
 import { toast } from "@/lib/notifications";
 import { updateProfile } from "@/apis/profile/mutations";
-import {
-    getUserProfile,
-    type UserProfileResponse,
-} from "@/apis/profile/queries";
+// import { type UserProfileResponse } from "@/apis/profile/queries";
+import { useProfileStore } from "@/stores/profile.store";
+import { UserProfile } from "@/core/types/models/profile";
 
 export function ProfileSection() {
-    const queryClient = useQueryClient();
     const [name, setName] = useState({ firstName: "", lastName: "" });
 
-    const { data, isLoading, error } = useQuery<UserProfileResponse>({
-        queryKey: ["user-profile"],
-        queryFn: async () => getUserProfile(),
-    });
+    const data = useProfileStore((state) => state.profile);
+    const setProfile = useProfileStore((state) => state.setProfile);
+    const isLoading = !data;
 
     const { mutate: mutateUserProfile } = useMutation({
         mutationKey: ["update-user-profile"],
-        mutationFn: async (profile: Partial<UserProfileResponse>) =>
+        mutationFn: async (profile: Partial<UserProfile>) =>
             updateProfile(profile),
         onSuccess: (updatedProfile) => {
-            queryClient.setQueryData(
-                ["user-profile"],
-                (oldData: UserProfileResponse | undefined) => {
-                    if (!updatedProfile) {
-                        return oldData;
-                    }
+            if (updatedProfile) {
+                setProfile(updatedProfile);
+            }
 
-                    return {
-                        ...updatedProfile,
-                    };
-                }
-            );
             toast.success("Profile updated successfully");
         },
         onError: () => {
@@ -100,11 +89,6 @@ export function ProfileSection() {
                             {isLoading ? "Loading..." : fullName}
                         </p>
                         <p className="text-xs text-muted-foreground">{email}</p>
-                        {error ? (
-                            <p className="text-xs text-destructive mt-1">
-                                Error loading user profile.
-                            </p>
-                        ) : null}
                         <Button
                             variant="outline"
                             size="sm"
