@@ -9,14 +9,16 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/mantine/ui";
-import type { SharedEntry } from "../types";
-import { MAX_WHEEL_SEGMENTS } from "@/app/(app)/spin/_components/MealEntryForm";
+import type { SpinSessionParticipant } from "../types";
+import { MAX_WHEEL_SEGMENTS } from "@/app/(authenticated)/spin/_components/MealEntryForm";
 
 interface SharedWheelSegmentsProps {
-    entries: SharedEntry[];
-    currentUserId: string;
+    /** Participants that have set a food choice (`foodName` non-empty). */
+    participants: SpinSessionParticipant[];
+    /** The current viewer's own participant row ID — not `userId` (empty for guests). */
+    currentParticipantId: string;
     isHost: boolean;
-    onRemove: (entryId: string) => void;
+    onRemove: (participantId: string) => void;
     onClearAll: () => void;
 }
 
@@ -26,13 +28,13 @@ interface SharedWheelSegmentsProps {
  * Removal is allowed per entry if the viewer is the host OR the entry owner.
  */
 export function SharedWheelSegments({
-    entries,
-    currentUserId,
+    participants,
+    currentParticipantId,
     isHost,
     onRemove,
     onClearAll,
 }: SharedWheelSegmentsProps) {
-    if (entries.length === 0) {
+    if (participants.length === 0) {
         return (
             <Card className="border-border/50 bg-card/60">
                 <CardHeader className="pb-3">
@@ -57,33 +59,33 @@ export function SharedWheelSegments({
                         Wheel segments
                     </CardTitle>
                     <Badge variant="secondary" className="text-xs">
-                        {entries.length} / {MAX_WHEEL_SEGMENTS}
+                        {participants.length} / {MAX_WHEEL_SEGMENTS}
                     </Badge>
                 </div>
             </CardHeader>
             <CardContent className="pt-0">
                 <ul className="space-y-1" aria-label="Shared wheel segments">
-                    {entries.map((entry) => {
+                    {participants.map((participant) => {
                         const canRemove =
-                            isHost || entry.participantId === currentUserId;
+                            isHost || participant.id === currentParticipantId;
                         return (
                             <li
-                                key={entry.id}
+                                key={participant.id}
                                 className="flex items-center gap-2 rounded-md px-2 py-1.5 bg-muted/30"
                             >
                                 <span className="w-16 sm:w-20 shrink-0 text-sm font-medium truncate">
-                                    {entry.participantName}
+                                    {participant.displayName}
                                 </span>
                                 <span className="flex-1 text-sm text-muted-foreground truncate">
-                                    {entry.food}
+                                    {participant.foodName}
                                 </span>
                                 {canRemove ? (
                                     <Button
                                         variant="ghost"
                                         size="icon"
                                         className="h-6 w-6 text-muted-foreground hover:text-destructive shrink-0"
-                                        onClick={() => onRemove(entry.id)}
-                                        aria-label={`Remove ${entry.participantName}'s entry: ${entry.food}`}
+                                        onClick={() => onRemove(participant.id)}
+                                        aria-label={`Remove ${participant.displayName}'s entry: ${participant.foodName}`}
                                     >
                                         <X className="h-3.5 w-3.5" />
                                     </Button>
@@ -97,7 +99,7 @@ export function SharedWheelSegments({
                         );
                     })}
                 </ul>
-                {isHost && entries.length > 0 && (
+                {isHost && participants.length > 0 && (
                     <Button
                         variant="outline"
                         size="sm"
@@ -113,4 +115,3 @@ export function SharedWheelSegments({
         </Card>
     );
 }
-

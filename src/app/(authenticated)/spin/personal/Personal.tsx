@@ -3,13 +3,17 @@
 import { useState } from "react";
 import { Dices } from "lucide-react";
 import { Card, CardContent } from "@/components/mantine/ui";
+
+import {
+    MAX_WHEEL_SEGMENTS,
+    MealEntryForm,
+} from "@/app/(authenticated)/spin/_components/MealEntryForm";
+import { PastMealsSearch } from "@/app/(authenticated)/spin/_components/PastMealsSearch";
+import { WheelSegments } from "@/app/(authenticated)/spin/_components/WheelSegments";
 import {
     MealSpinWheel,
     WheelSegment,
-} from "@/app/(app)/spin/widgets/MealSpinWheel";
-import { MealEntryForm, MAX_WHEEL_SEGMENTS } from "@/app/(app)/spin/_components/MealEntryForm";
-import { PastMealsSearch } from "@/app/(app)/spin/_components/PastMealsSearch";
-import { WheelSegments } from "@/app/(app)/spin/_components/WheelSegments";
+} from "@/app/(authenticated)/spin/_components/MealSpinWheel";
 
 export function Personal() {
     const [segments, setSegments] = useState<WheelSegment[]>([]);
@@ -21,7 +25,11 @@ export function Personal() {
         const trimmed = label.trim();
         if (!trimmed) return;
         if (segments.length >= MAX_WHEEL_SEGMENTS) return;
-        if (segments.some((s) => s.label.toLowerCase() === trimmed.toLowerCase()))
+        if (
+            segments.some(
+                (s) => s.label.toLowerCase() === trimmed.toLowerCase()
+            )
+        )
             return;
         const id = Math.random().toString(36).slice(2, 10);
         setSegments((prev) => [...prev, { label: trimmed, id }]);
@@ -64,10 +72,7 @@ export function Personal() {
 
                 {/* Controls */}
                 <div className="space-y-4">
-                    <MealEntryForm
-                        canAddMore={canAddMore}
-                        onAdd={addSegment}
-                    />
+                    <MealEntryForm canAddMore={canAddMore} onAdd={addSegment} />
                     <PastMealsSearch
                         addedLabels={addedLabels}
                         canAddMore={canAddMore}
@@ -85,4 +90,3 @@ export function Personal() {
         </div>
     );
 }
-

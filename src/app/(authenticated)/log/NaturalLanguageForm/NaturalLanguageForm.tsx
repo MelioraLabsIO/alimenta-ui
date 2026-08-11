@@ -7,12 +7,12 @@ import type { Meal } from "@/core/types/models/meal";
 import { extractMeal, saveMeal } from "@/apis/meal/mutations";
 import type { MealDraft } from "@/apis/meal/mutations";
 import { toast } from "@/lib/notifications";
-import { ManualForm } from "@/app/(app)/log/ManualForm/ManualForm";
 import type { SaveMealDTO } from "@/core/types/dto";
 import { BackToPreviewButton } from "./widgets/BackToPreviewButton";
 import { ExtractedMealCard } from "./widgets/ExtractedMealCard";
 import { NaturalLanguageInputSection } from "./widgets/NaturalLanguageInputSection";
 import { SaveSuccessMessage } from "./widgets/SaveSuccessMessage";
+import { ManualForm } from "@/app/(authenticated)/log/ManualForm/ManualForm";
 
 type NaturalLanguageMealItem = SaveMealDTO["items"][number] & {
     foodName: string;

@@ -6,24 +6,25 @@ import { Button, Card, CardContent } from "@/components/mantine/ui";
 import { Tooltip } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import {
-    MealSpinWheel,
-    type SpinTrigger,
-} from "@/app/(app)/spin/widgets/MealSpinWheel";
-import {
-    MAX_WHEEL_SEGMENTS,
-    MealEntryForm,
-} from "@/app/(app)/spin/_components/MealEntryForm";
-import { PastMealsSearch } from "@/app/(app)/spin/_components/PastMealsSearch";
 import { createSpinSession } from "@/apis/spin/mutations";
 
 import { useSharedSession } from "./useSharedSession";
+import type { SpinSessionParticipant } from "./types";
 import { CreateSessionView } from "./components/CreateSessionView";
 import { SessionShareCard } from "./components/SessionShareCard";
 import { SessionParticipants } from "./components/SessionParticipants";
 import { SharedWheelSegments } from "./components/SharedWheelSegments";
 import { SessionInstructions } from "./components/SessionInstructions";
 import { useAuthUserStore } from "@/stores/auth-user.store";
+import {
+    MealSpinWheel,
+    SpinTrigger,
+} from "@/app/(authenticated)/spin/_components/MealSpinWheel";
+import {
+    MAX_WHEEL_SEGMENTS,
+    MealEntryForm,
+} from "@/app/(authenticated)/spin/_components/MealEntryForm";
+import { PastMealsSearch } from "@/app/(authenticated)/spin/_components/PastMealsSearch";
 
 export function Shared() {
     const queryClient = useQueryClient();
@@ -34,40 +35,48 @@ export function Shared() {
         isHost,
         isLoading,
         error,
-        currentUserId,
+        currentParticipantId,
         addEntry,
         removeEntry,
         clearAllEntries,
         requestSpin,
     } = useSharedSession(user);
 
-    const {
-        mutate: createSpinSessionMutation,
-        isPending: isCreatingSession,
-        data: createdSession,
-    } = useMutation({
-        mutationKey: ["createSpinSession"],
-        mutationFn: createSpinSession,
-        onSuccess: (createdSession) => {
-            queryClient.setQueryData(["session"], createdSession);
-        },
-    });
+    const { mutate: createSpinSessionMutation, isPending: isCreatingSession } =
+        useMutation({
+            mutationKey: ["createSpinSession"],
+            mutationFn: () => createSpinSession(),
+            onSuccess: (createdSession) => {
+                queryClient.setQueryData(["session"], createdSession);
+            },
+        });
 
-    const onCreateSession = useCallback(() => {
+    const handleCreateSession = useCallback(() => {
         createSpinSessionMutation();
     }, [createSpinSessionMutation]);
 
-    const entries = useMemo(() => session?.entries ?? [], [session?.entries]);
     const participants = useMemo(
         () => session?.spinParticipants ?? [],
         [session?.spinParticipants]
+    );
+
+    // Each participant carries at most one food choice — "entries" are
+    // simply the participants who have set one. `foodName` is omitted
+    // entirely by the backend until they pick, so guard with `?.`.
+    const entries = useMemo(
+        () =>
+            participants.filter(
+                (p): p is SpinSessionParticipant & { foodName: string } =>
+                    Boolean(p.foodName?.trim())
+            ),
+        [participants]
     );
 
     const wheelSegments = useMemo(
         () =>
             entries.map((entry) => ({
                 id: entry.id,
-                label: `${entry.participantName} — ${entry.food}`,
+                label: `${entry.displayName} — ${entry.foodName}`,
             })),
         [entries]
     );
@@ -76,8 +85,8 @@ export function Shared() {
 
     const canAddMore = entries.length < MAX_WHEEL_SEGMENTS;
     const addedLabels = entries
-        .filter((e) => e.participantId === user?.id)
-        .map((e) => e.food);
+        .filter((p) => p.id === currentParticipantId)
+        .map((p) => p.foodName);
 
     const hasEntries = wheelSegments.length > 0;
     const spinDisabledReason = !isHost
@@ -85,8 +94,6 @@ export function Shared() {
         : !hasEntries
           ? "Add meals before spinning"
           : undefined;
-
-    const shareJoinUrl = session?.joinURL ?? createdSession?.joinURL ?? "";
 
     if (isLoading) {
         return (
@@ -100,7 +107,7 @@ export function Shared() {
         return (
             <CreateSessionView
                 isCreatingSession={isCreatingSession}
-                onCreateSession={onCreateSession}
+                onCreateSession={handleCreateSession}
             />
         );
     }
@@ -113,7 +120,6 @@ export function Shared() {
                         <CardContent className="p-5 flex flex-col items-center gap-4">
                             <SessionShareCard
                                 code={session.joinCode}
-                                joinUrl={shareJoinUrl}
                                 isHost={isHost}
                             />
 
@@ -173,6 +179,7 @@ export function Shared() {
                 <div className="space-y-4">
                     <SessionParticipants
                         participants={participants}
+                        hostUserId={session.hostUserId}
                         isLoading={isLoading}
                         error={error}
                     />
@@ -185,17 +192,18 @@ export function Shared() {
                         onAdd={addEntry}
                         onRemoveByLabel={(label) => {
                             const entry = entries.find(
-                                (e) =>
-                                    e.participantId === currentUserId &&
-                                    e.food.toLowerCase() === label.toLowerCase()
+                                (p) =>
+                                    p.id === currentParticipantId &&
+                                    p.foodName.toLowerCase() ===
+                                        label.toLowerCase()
                             );
                             if (entry) removeEntry(entry.id);
                         }}
                     />
 
                     <SharedWheelSegments
-                        entries={entries}
-                        currentUserId={currentUserId}
+                        participants={entries}
+                        currentParticipantId={currentParticipantId}
                         isHost={isHost}
                         onRemove={removeEntry}
                         onClearAll={clearAllEntries}

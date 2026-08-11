@@ -10,12 +10,13 @@ import {
     CardTitle,
     Skeleton,
 } from "@/components/mantine/ui";
-import type { SessionParticipant } from "../types";
+import type { SpinSessionParticipant } from "../types";
 
 const MAX_PARTICIPANTS = 10;
 
 interface SessionParticipantsProps {
-    participants: SessionParticipant[];
+    participants: SpinSessionParticipant[];
+    hostUserId: string;
     isLoading?: boolean;
     error?: string | null;
 }
@@ -31,29 +32,21 @@ function getInitials(name: string) {
 
 function ParticipantAvatar({
     participant,
+    hostUserId,
 }: {
-    participant: SessionParticipant;
+    participant: SpinSessionParticipant;
+    hostUserId: string;
 }) {
+    const isHost = participant.userId !== "" && participant.userId === hostUserId;
+
     return (
         <li className="flex items-center gap-3 py-1">
             {/* Avatar */}
-            <div className="relative shrink-0">
-                <Avatar className="h-8 w-8">
-                    <AvatarFallback className="text-xs bg-primary/20 text-primary font-semibold">
-                        {getInitials(participant.displayName)}
-                    </AvatarFallback>
-                </Avatar>
-                {/* Online indicator dot */}
-                <span
-                    aria-label={participant.isConnected ? "Online" : "Offline"}
-                    className={[
-                        "absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full ring-2 ring-card",
-                        participant.isConnected
-                            ? "bg-emerald-400"
-                            : "bg-muted-foreground/40",
-                    ].join(" ")}
-                />
-            </div>
+            <Avatar className="h-8 w-8 shrink-0">
+                <AvatarFallback className="text-xs bg-primary/20 text-primary font-semibold">
+                    {getInitials(participant.displayName)}
+                </AvatarFallback>
+            </Avatar>
 
             {/* Name */}
             <span className="flex-1 text-sm font-medium truncate">
@@ -61,7 +54,7 @@ function ParticipantAvatar({
             </span>
 
             {/* Host badge */}
-            {participant.isHost && (
+            {isHost && (
                 <Badge
                     variant="outline"
                     className="text-[10px] border-emerald-500/30 text-emerald-400 shrink-0"
@@ -80,6 +73,7 @@ function ParticipantAvatar({
  */
 export function SessionParticipants({
     participants,
+    hostUserId,
     isLoading,
     error,
 }: SessionParticipantsProps) {
@@ -119,7 +113,11 @@ export function SessionParticipants({
                 ) : (
                     <ul className="space-y-1" aria-label="Session participants">
                         {participants.map((p) => (
-                            <ParticipantAvatar key={p.id} participant={p} />
+                            <ParticipantAvatar
+                                key={p.id}
+                                participant={p}
+                                hostUserId={hostUserId}
+                            />
                         ))}
                     </ul>
                 )}

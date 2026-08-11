@@ -1,28 +1,23 @@
-import {apiFetch} from "@/apiClient/client";
-import {getSession} from "@/lib/supabase/session";
+import { apiFetch } from "@/apiClient/client";
+import { UserProfile } from "@/core/types/models/profile";
 
-export type UserProfileResponse = {
-    id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-};
-
-async function getUserProfile() {
-    const session = await getSession();
-
-    const response = await apiFetch<UserProfileResponse>("/api/v1/profile", {
+async function getUserProfile(): Promise<
+    UserProfile & { displayName: string }
+> {
+    const userProfile = await apiFetch<UserProfile>("/api/v1/profile", {
         method: "GET",
-        headers: {
-            Authorization: `Bearer ${session.access_token}`,
-        },
     });
 
-    if (!response) {
+    // TODO: Analyze if the below error is fully necessary and
+    //  handle errors and return a more descriptive error message
+    if (!userProfile) {
         throw new Error("Failed to fetch user profile");
     }
 
-    return response;
+    return {
+        ...userProfile,
+        displayName: `${userProfile.firstName} ${userProfile.lastName}`,
+    };
 }
 
-export {getUserProfile};
+export { getUserProfile };

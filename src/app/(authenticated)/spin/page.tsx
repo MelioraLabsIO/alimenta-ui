@@ -3,9 +3,9 @@
 import { useState } from "react";
 
 import { Container, Tabs } from "@mantine/core";
-import { Personal } from "@/app/(app)/spin/personal/Personal";
-import { Shared } from "@/app/(app)/spin/shared/Shared";
 import { Dices } from "lucide-react";
+import { Shared } from "@/app/(authenticated)/spin/shared/Shared";
+import { Personal } from "@/app/(authenticated)/spin/personal/Personal";
 
 type ActiveTab = "personal" | "shared" | (string & {});
 

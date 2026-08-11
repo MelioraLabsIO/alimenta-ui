@@ -1,8 +1,8 @@
-import {createTheme, rem} from "@mantine/core";
+import { createTheme, rem } from "@mantine/core";
 
 export const alimentaTheme = createTheme({
     primaryColor: "alimenta",
-    primaryShade: {light: 6, dark: 5},
+    primaryShade: { light: 6, dark: 5 },
     fontFamily: "var(--font-geist-sans), system-ui, sans-serif",
     fontFamilyMonospace: "var(--font-geist-mono), ui-monospace, monospace",
     defaultRadius: "md",
@@ -44,21 +44,20 @@ export const alimentaTheme = createTheme({
             "#010201",
         ],
     },
+
     headings: {
         fontFamily: "var(--font-geist-sans), system-ui, sans-serif",
         fontWeight: "700",
         sizes: {
-            h1: {fontSize: rem(28), lineHeight: "1.15"},
-            h2: {fontSize: rem(22), lineHeight: "1.2"},
-            h3: {fontSize: rem(18), lineHeight: "1.25"},
+            h1: { fontSize: rem(28), lineHeight: "1.15" },
+            h2: { fontSize: rem(22), lineHeight: "1.2" },
+            h3: { fontSize: rem(18), lineHeight: "1.25" },
         },
     },
     components: {
         Button: {
-
             defaultProps: {
                 radius: "md",
-
             },
         },
         Card: {
@@ -70,12 +69,12 @@ export const alimentaTheme = createTheme({
         Modal: {
             defaultProps: {
                 radius: "md",
-                overlayProps: {blur: 4},
+                overlayProps: { blur: 4 },
             },
         },
         Drawer: {
             defaultProps: {
-                overlayProps: {blur: 4},
+                overlayProps: { blur: 4 },
             },
         },
         TextInput: {
