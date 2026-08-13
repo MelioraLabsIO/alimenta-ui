@@ -39,12 +39,19 @@ export type JoinSpinSessionResponse = {
 export type SpinSession = {
     id: string;
     /** Short alphanumeric code participants use to join. */
-    joinCode: string;
+    sessionCode: string;
     hostUserId: string;
     status: SessionStatus;
     expiresAt: Date;
     createdAt: Date;
     spinParticipants: SpinSessionParticipant[];
+};
+
+/** Body for the `PUT /spin-sessions/{code}/me/food` upsert-food-choice request. */
+export type UpsertParticipantFoodParams = {
+    foodName: string | null;
+    id: string;
+    sessionId?: string | null;
 };
 
 export type UseSharedSessionReturn = {
@@ -57,7 +64,7 @@ export type UseSharedSessionReturn = {
     currentParticipantId: string;
     isHost: boolean;
     /** Sets the food choice for the current user's participant row. */
-    addEntry: (food: string) => void;
+    addFood: (food: string) => void;
     /** Clears a participant's food choice by participant ID (host can remove any, others only their own). */
     removeEntry: (participantId: string) => void;
     /** Host-only: clears every participant's food choice. */

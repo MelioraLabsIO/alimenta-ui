@@ -9,13 +9,14 @@ import {
     SpinSessionParticipant,
 } from "@/app/(authenticated)/spin/shared/types";
 import { joinSpinSessionAsGuest } from "@/apis/spin/mutations";
+import { useSessionStorage } from "@/hooks/useSessionStorage";
 import { toast } from "@/lib/notifications";
 import {
     type JoinSpinSessionInput,
     joinSpinSessionSchema,
     type JoinSpinSessionSchema,
 } from "@/contracts/spin/join-spin-session.schema";
-import { Button } from "@mantine/core";
+import { Button, Stack } from "@mantine/core";
 
 export function AnonymousJoinForm({
     session,
@@ -33,15 +34,16 @@ export function AnonymousJoinForm({
         defaultValues: { displayName: "" },
     });
 
+    const [, setParticipantToken] = useSessionStorage(
+        `spin:${session.sessionCode}:participant-token`
+    );
+
     const { mutate: join, isPending } = useMutation({
         mutationFn: async (data: JoinSpinSessionSchema) =>
-            joinSpinSessionAsGuest(session.joinCode, data.displayName),
+            joinSpinSessionAsGuest(session.sessionCode, data.displayName),
         onSuccess: (result) => {
             if (result.participantToken) {
-                sessionStorage.setItem(
-                    `spin:${session.joinCode}:participant-token`,
-                    result.participantToken
-                );
+                setParticipantToken(result.participantToken);
             }
 
             onJoinedParticipantAction(result.participant);
@@ -53,38 +55,43 @@ export function AnonymousJoinForm({
 
     const handleJoinAsGuest = ({ displayName }: { displayName: string }) => {
         console.log(
-            `Joining spin session as guest: ${session.joinCode}, name: ${displayName}`
+            `Joining spin session as guest: ${session.sessionCode}, name: ${displayName}`
         );
         join({ displayName } as JoinSpinSessionSchema);
     };
 
     return (
-        <div>
+        <Stack gap={4}>
             <h1>Join the wheel</h1>
 
-            <form
-                onSubmit={handleSubmit((data) => handleJoinAsGuest(data))}
-                noValidate
-            >
-                <Input
-                    placeholder="Your name"
-                    className={errors.displayName ? "border-destructive" : ""}
-                    {...register("displayName")}
-                />
-                {errors.displayName && (
-                    <p className="text-xs text-destructive">
-                        {errors.displayName.message}
-                    </p>
-                )}
+            <Stack gap={2}>
+                <form
+                    onSubmit={handleSubmit((data) => handleJoinAsGuest(data))}
+                    noValidate
+                    className={"flex flex-col gap-2"}
+                >
+                    <Input
+                        placeholder="Your name"
+                        className={
+                            errors.displayName ? "border-destructive" : ""
+                        }
+                        {...register("displayName")}
+                    />
+                    {errors.displayName && (
+                        <p className="text-xs text-destructive">
+                            {errors.displayName.message}
+                        </p>
+                    )}
 
-                <Button variant="filled" type="submit" disabled={isPending}>
-                    Join session
-                </Button>
-            </form>
+                    <Button variant="filled" type="submit" disabled={isPending}>
+                        Join session
+                    </Button>
+                </form>
+            </Stack>
 
             {/*<a href={`/login?next=/spin/${session.joinCode}`}>*/}
             {/*    Already have an Alimenta account? Sign in*/}
             {/*</a>*/}
-        </div>
+        </Stack>
     );
 }

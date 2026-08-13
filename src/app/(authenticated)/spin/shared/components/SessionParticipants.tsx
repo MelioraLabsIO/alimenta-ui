@@ -1,9 +1,11 @@
 "use client";
 
+import { X } from "lucide-react";
 import {
     Avatar,
     AvatarFallback,
     Badge,
+    Button,
     Card,
     CardContent,
     CardHeader,
@@ -17,6 +19,9 @@ const MAX_PARTICIPANTS = 10;
 interface SessionParticipantsProps {
     participants: SpinSessionParticipant[];
     hostUserId: string;
+    /** Whether the current viewer is the session host — controls remove-participant access. */
+    isHost?: boolean;
+    onRemoveParticipant?: (participantId: string) => void;
     isLoading?: boolean;
     error?: string | null;
 }
@@ -33,11 +38,16 @@ function getInitials(name: string) {
 function ParticipantAvatar({
     participant,
     hostUserId,
+    canRemove,
+    onRemove,
 }: {
     participant: SpinSessionParticipant;
     hostUserId: string;
+    canRemove: boolean;
+    onRemove?: (participantId: string) => void;
 }) {
-    const isHost = participant.userId !== "" && participant.userId === hostUserId;
+    const isParticipantHost =
+        participant.userId !== "" && participant.userId === hostUserId;
 
     return (
         <li className="flex items-center gap-3 py-1">
@@ -54,7 +64,7 @@ function ParticipantAvatar({
             </span>
 
             {/* Host badge */}
-            {isHost && (
+            {isParticipantHost && (
                 <Badge
                     variant="outline"
                     className="text-[10px] border-emerald-500/30 text-emerald-400 shrink-0"
@@ -62,6 +72,19 @@ function ParticipantAvatar({
                 >
                     Host
                 </Badge>
+            )}
+
+            {/* Remove participant — host only, can't remove themselves */}
+            {canRemove && !isParticipantHost && (
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 shrink-0 text-muted-foreground hover:text-destructive"
+                    onClick={() => onRemove?.(participant.id)}
+                    aria-label={`Remove ${participant.displayName}`}
+                >
+                    <X className="h-3.5 w-3.5" />
+                </Button>
             )}
         </li>
     );
@@ -74,6 +97,8 @@ function ParticipantAvatar({
 export function SessionParticipants({
     participants,
     hostUserId,
+    isHost = false,
+    onRemoveParticipant,
     isLoading,
     error,
 }: SessionParticipantsProps) {
@@ -117,6 +142,8 @@ export function SessionParticipants({
                                 key={p.id}
                                 participant={p}
                                 hostUserId={hostUserId}
+                                canRemove={isHost}
+                                onRemove={onRemoveParticipant}
                             />
                         ))}
                     </ul>

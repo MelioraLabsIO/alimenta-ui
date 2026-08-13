@@ -7,6 +7,7 @@ import {
 import { getUserProfile } from "@/apis/profile/queries";
 import { joinSpinSessionAsMember } from "@/apis/spin/mutations";
 import { AnonymousJoinForm } from "@/app/(session)/spin/[session_code]/_components/AnonymousJoinForm";
+import { Stack } from "@mantine/core";
 
 type Props = {
     session: SpinSession;
@@ -22,7 +23,7 @@ export function JoinSpinSessionForm({
 }: Props) {
     if (currentUser) {
         return (
-            <div>
+            <Stack gap={2}>
                 <h1>Join this session</h1>
 
                 <p>Join as {currentUser.displayName}</p>
@@ -30,7 +31,7 @@ export function JoinSpinSessionForm({
                 <button
                     onClick={async () => {
                         const { participant } = await joinSpinSessionAsMember(
-                            session.joinCode
+                            session.sessionCode
                         );
 
                         onJoinedAction(participant);
@@ -38,7 +39,7 @@ export function JoinSpinSessionForm({
                 >
                     Join session
                 </button>
-            </div>
+            </Stack>
         );
     }
 

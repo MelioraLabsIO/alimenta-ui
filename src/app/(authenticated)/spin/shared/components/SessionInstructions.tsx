@@ -26,12 +26,17 @@ const STEPS = [
  * Optional informational card shown below the wheel explaining how a shared
  * session works.
  */
-export function SessionInstructions() {
+export function SessionInstructions(props: { isHost: boolean }) {
+    if (!props.isHost) return null;
+
     return (
         <Card className="border-border/50 bg-card/60">
             <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-3">
-                    <Users className="h-4 w-4 text-primary" aria-hidden="true" />
+                    <Users
+                        className="h-4 w-4 text-primary"
+                        aria-hidden="true"
+                    />
                     <span className="text-sm font-semibold">How it works</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -56,4 +61,3 @@ export function SessionInstructions() {
         </Card>
     );
 }
-
