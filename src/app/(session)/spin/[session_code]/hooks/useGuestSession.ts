@@ -3,19 +3,15 @@
 import { useQueries } from "@tanstack/react-query";
 import { getSpinParticipant, getSpinSession } from "@/apis/spin/queries";
 import { useParams } from "next/navigation";
+import { useSessionStorage } from "@/hooks/useSessionStorage";
 
 export function useGuestSession() {
     const params = useParams();
     const sessionCode = params.session_code as string;
 
-    let participantToken = "";
-    if (typeof window !== "undefined") {
-        participantToken = window.sessionStorage.getItem(
-            `spin:${sessionCode}:participant-token`
-        ) as string;
-    }
-
-    console.log("participantToken", participantToken);
+    const [participantToken] = useSessionStorage(
+        `spin:${sessionCode}:participant-token`
+    );
 
     const [
         { data: sessionData, isLoading: sessionLoading },

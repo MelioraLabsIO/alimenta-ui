@@ -6,7 +6,10 @@ import { Button, Card, CardContent } from "@/components/mantine/ui";
 import { Tooltip } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { createSpinSession } from "@/apis/spin/mutations";
+import {
+    createSpinSession,
+    deleteSpinParticipantAsMember,
+} from "@/apis/spin/mutations";
 
 import { useSharedSession } from "./useSharedSession";
 import type { SpinSessionParticipant } from "./types";
@@ -36,12 +39,13 @@ export function Shared() {
         isLoading,
         error,
         currentParticipantId,
-        addEntry,
+        addFood,
         removeEntry,
         clearAllEntries,
         requestSpin,
     } = useSharedSession(user);
 
+    /********************************************* MUTATIONS ************************************************/
     const { mutate: createSpinSessionMutation, isPending: isCreatingSession } =
         useMutation({
             mutationKey: ["createSpinSession"],
@@ -50,6 +54,29 @@ export function Shared() {
                 queryClient.setQueryData(["session"], createdSession);
             },
         });
+
+    const { mutate: removeParticipantMutation } = useMutation({
+        mutationFn: (participantId: string) =>
+            deleteSpinParticipantAsMember(session!.sessionCode, participantId),
+        onSuccess: (_, participantId) => {
+            queryClient.setQueryData(["session"], (current: typeof session) =>
+                current
+                    ? {
+                          ...current,
+                          spinParticipants: current.spinParticipants.filter(
+                              (p) => p.id !== participantId
+                          ),
+                      }
+                    : current
+            );
+        },
+    });
+
+    /********************************************* HANDLERS ************************************************/
+    const handleRemoveParticipant = useCallback(
+        (participantId: string) => removeParticipantMutation(participantId),
+        [removeParticipantMutation]
+    );
 
     const handleCreateSession = useCallback(() => {
         createSpinSessionMutation();
@@ -119,7 +146,7 @@ export function Shared() {
                     <Card className="border-border/50 bg-card/60">
                         <CardContent className="p-5 flex flex-col items-center gap-4">
                             <SessionShareCard
-                                code={session.joinCode}
+                                sessionCode={session.sessionCode}
                                 isHost={isHost}
                             />
 
@@ -173,23 +200,25 @@ export function Shared() {
                         </CardContent>
                     </Card>
 
-                    <SessionInstructions />
+                    <SessionInstructions isHost={isHost} />
                 </div>
 
                 <div className="space-y-4">
                     <SessionParticipants
                         participants={participants}
                         hostUserId={session.hostUserId}
+                        isHost={isHost}
+                        onRemoveParticipant={handleRemoveParticipant}
                         isLoading={isLoading}
                         error={error}
                     />
 
-                    <MealEntryForm canAddMore={canAddMore} onAdd={addEntry} />
+                    <MealEntryForm canAddMore={canAddMore} onAdd={addFood} />
 
                     <PastMealsSearch
                         addedLabels={addedLabels}
                         canAddMore={canAddMore}
-                        onAdd={addEntry}
+                        onAdd={addFood}
                         onRemoveByLabel={(label) => {
                             const entry = entries.find(
                                 (p) =>

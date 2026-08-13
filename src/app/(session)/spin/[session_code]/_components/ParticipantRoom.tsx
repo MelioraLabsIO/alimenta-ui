@@ -1,13 +1,31 @@
 "use client";
 
-import { useMemo } from "react";
-import { Dices } from "lucide-react";
-import { Card, CardContent } from "@/components/mantine/ui";
+import { useCallback, useMemo, useState } from "react";
+import { Dices, LogOut } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    Button,
+    Card,
+    CardContent,
+} from "@/components/mantine/ui";
+import { useSessionStorage } from "@/hooks/useSessionStorage";
 import type {
     SpinSession,
     SpinSessionParticipant,
+    UpsertParticipantFoodParams,
 } from "@/app/(authenticated)/spin/shared/types";
-import type { getUserProfile } from "@/apis/profile/queries";
+import {
+    deleteSpinParticipantAsGuest,
+    upsertParticipantFoodAsGuest,
+} from "@/apis/spin/mutations";
 import { SessionShareCard } from "@/app/(authenticated)/spin/shared/components/SessionShareCard";
 import { SessionParticipants } from "@/app/(authenticated)/spin/shared/components/SessionParticipants";
 import { SessionInstructions } from "@/app/(authenticated)/spin/shared/components/SessionInstructions";
@@ -17,26 +35,106 @@ import {
     MAX_WHEEL_SEGMENTS,
     MealEntryForm,
 } from "@/app/(authenticated)/spin/_components/MealEntryForm";
-import { PastMealsSearch } from "@/app/(authenticated)/spin/_components/PastMealsSearch";
 
 type Props = {
     session: SpinSession;
     participant: SpinSessionParticipant;
-    authenticatedUser: Awaited<ReturnType<typeof getUserProfile>> | null;
+    /** Called after the current participant successfully removes themselves. */
+    onLeftAction?: () => void;
 };
 
 /**
- * Room shown to a participant (guest or authenticated) after joining a
- * shared spin session. Reuses the same building blocks as the authenticated
- * `Shared` view — entry/spin mutations are still TODO there too, so this
- * stays display-only until those are wired to real endpoints.
+ * Room shown to a guest after joining a shared spin session via its join
+ * code. Nobody on this path has an Alimenta account, so identity is entirely
+ * the participant row's own `id`/`participantToken` — never a Supabase
+ * session. Reuses the same building blocks as the authenticated `Shared`
+ * view — entry/spin mutations are still TODO there too, so this stays
+ * display-only until those are wired to real endpoints.
  */
-export function ParticipantRoom({
-    session,
-    participant,
-    authenticatedUser,
-}: Props) {
-    const isHost = authenticatedUser?.id === session.hostUserId;
+export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
+    const isHost =
+        participant.userId !== "" && participant.userId === session.hostUserId;
+
+    const queryClient = useQueryClient();
+
+    // Guests authenticate via a per-session token stashed in `sessionStorage`
+    // on join (see `AnonymousJoinForm`).
+    const [participantToken, setParticipantToken] = useSessionStorage(
+        `spin:${session.sessionCode}:participant-token`
+    );
+
+    const { mutate: removeParticipantMutation } = useMutation({
+        mutationFn: (participantId: string) =>
+            deleteSpinParticipantAsGuest(
+                session.sessionCode,
+                participantId,
+                participantToken ?? ""
+            ),
+        onSuccess: (_, participantId) => {
+            queryClient.setQueryData(
+                ["guest-session", session.sessionCode],
+                (current: SpinSession | undefined) =>
+                    current
+                        ? {
+                              ...current,
+                              spinParticipants: current.spinParticipants.filter(
+                                  (p) => p.id !== participantId
+                              ),
+                          }
+                        : current
+            );
+
+            if (participantId === participant.id) {
+                setParticipantToken(null);
+                onLeftAction?.();
+            }
+        },
+    });
+
+    const handleRemoveParticipant = useCallback(
+        (participantId: string) => removeParticipantMutation(participantId),
+        [removeParticipantMutation]
+    );
+
+    const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
+
+    const handleConfirmLeaveSession = useCallback(() => {
+        removeParticipantMutation(participant.id);
+        setLeaveDialogOpen(false);
+    }, [removeParticipantMutation, participant.id]);
+
+    const { mutate: upsertFoodMutation } = useMutation({
+        mutationFn: (foodName: string) => {
+            const params: UpsertParticipantFoodParams = {
+                foodName,
+                id: participant.id,
+                sessionId: session.id,
+            };
+
+            return upsertParticipantFoodAsGuest(
+                session.sessionCode,
+                params,
+                participantToken ?? ""
+            );
+        },
+        onSuccess: (updatedParticipant) => {
+            queryClient.setQueryData(
+                ["guest-session", session.sessionCode],
+                (current: SpinSession | undefined) =>
+                    current
+                        ? {
+                              ...current,
+                              spinParticipants: current.spinParticipants.map(
+                                  (p) =>
+                                      p.id === updatedParticipant.id
+                                          ? updatedParticipant
+                                          : p
+                              ),
+                          }
+                        : current
+            );
+        },
+    });
 
     const participants = session.spinParticipants ?? [];
 
@@ -65,15 +163,13 @@ export function ParticipantRoom({
           ? "Add meals before spinning"
           : undefined;
 
-    // `participant.userId` is empty for guests — use the participant row's
-    // own `id` to identify "my" entry instead.
-    const addedLabels = entries
-        .filter((entry) => entry.id === participant.id)
-        .map((entry) => entry.foodName);
+    const handleAddEntry = useCallback(
+        (label: string) => upsertFoodMutation(label),
+        [upsertFoodMutation]
+    );
 
     // TODO: wire these to real mutations once the backend endpoints exist —
     // the authenticated Shared view (useSharedSession.ts) has the same gap.
-    const handleAddEntry: (label: string) => void = () => {};
     const handleRemoveEntry: (entryId: string) => void = () => {};
     const handleClearAllEntries: () => void = () => {};
     const handleRequestSpin: () => void = () => {};
@@ -85,16 +181,63 @@ export function ParticipantRoom({
                     <Card className="border-border/50 bg-card/60">
                         <CardContent className="p-5 flex flex-col items-center gap-4">
                             <SessionShareCard
-                                code={session.joinCode}
+                                sessionCode={session.sessionCode}
                                 isHost={isHost}
                             />
 
-                            <p className="text-xs text-muted-foreground">
-                                Joined as{" "}
-                                <span className="font-medium text-foreground">
-                                    {participant.displayName}
-                                </span>
-                            </p>
+                            <div className="flex items-center gap-1.5">
+                                <p className="text-xs text-muted-foreground">
+                                    Joined as{" "}
+                                    <span className="font-medium text-foreground">
+                                        {participant.displayName}
+                                    </span>
+                                </p>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                                    onClick={() => setLeaveDialogOpen(true)}
+                                    aria-label="Leave session"
+                                >
+                                    <LogOut className="h-3.5 w-3.5" />
+                                </Button>
+                            </div>
+
+                            <AlertDialog
+                                open={leaveDialogOpen}
+                                onOpenChange={setLeaveDialogOpen}
+                            >
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>
+                                            Leave this session?
+                                        </AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            You&apos;ll be removed from the
+                                            session and your food choice, if
+                                            any, will be cleared. You can rejoin
+                                            later with the session code.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter
+                                        style={{
+                                            marginTop: "1.5rem",
+                                            display: "flex",
+                                            justifyContent: "flex-end",
+                                            gap: "0.5rem",
+                                        }}
+                                    >
+                                        <AlertDialogCancel>
+                                            Cancel
+                                        </AlertDialogCancel>
+                                        <AlertDialogAction
+                                            onClick={handleConfirmLeaveSession}
+                                        >
+                                            Leave session
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
 
                             {hasEntries ? (
                                 <MealSpinWheel
@@ -115,36 +258,21 @@ export function ParticipantRoom({
                         </CardContent>
                     </Card>
 
-                    <SessionInstructions />
+                    <SessionInstructions isHost={isHost} />
                 </div>
 
                 <div className="space-y-4">
                     <SessionParticipants
                         participants={participants}
                         hostUserId={session.hostUserId}
+                        isHost={isHost}
+                        onRemoveParticipant={handleRemoveParticipant}
                     />
 
                     <MealEntryForm
                         canAddMore={canAddMore}
                         onAdd={handleAddEntry}
                     />
-
-                    {authenticatedUser && (
-                        <PastMealsSearch
-                            addedLabels={addedLabels}
-                            canAddMore={canAddMore}
-                            onAdd={handleAddEntry}
-                            onRemoveByLabel={(label) => {
-                                const entry = entries.find(
-                                    (e) =>
-                                        e.id === participant.id &&
-                                        e.foodName.toLowerCase() ===
-                                            label.toLowerCase()
-                                );
-                                if (entry) handleRemoveEntry(entry.id);
-                            }}
-                        />
-                    )}
 
                     <SharedWheelSegments
                         participants={entries}
