@@ -12,6 +12,8 @@ import { Container } from "@mantine/core";
 export function SharedSessionView() {
     const profile = useProfileStore((state) => state.profile);
     const queryClient = useQueryClient();
+
+    // State
     const [joinedParticipant, setJoinedParticipant] =
         useState<SpinSessionParticipant | null>(null);
 
@@ -19,6 +21,18 @@ export function SharedSessionView() {
         useGuestSession();
 
     const resolvedParticipant = participant ?? joinedParticipant;
+
+    /********************************************* HANDLERS ************************************************/
+    const handleParticipantJoined = (joined: SpinSessionParticipant) => {
+        setJoinedParticipant(joined);
+    };
+
+    const handleParticipantLeft = () => {
+        setJoinedParticipant(null);
+        queryClient.removeQueries({
+            queryKey: ["guest-session", session?.sessionCode],
+        });
+    };
 
     if (isLoadingSession || isLoadingParticipant || !session) {
         return (
@@ -37,7 +51,7 @@ export function SharedSessionView() {
                 <JoinSpinSessionForm
                     session={session}
                     currentUser={profile}
-                    onJoinedAction={setJoinedParticipant}
+                    onJoinedAction={handleParticipantJoined}
                 />
             </Container>
         );
@@ -53,12 +67,7 @@ export function SharedSessionView() {
             <ParticipantRoom
                 session={session}
                 participant={resolvedParticipant}
-                onLeftAction={() => {
-                    setJoinedParticipant(null);
-                    queryClient.removeQueries({
-                        queryKey: ["guest-session", session.sessionCode],
-                    });
-                }}
+                onLeftAction={handleParticipantLeft}
             />
         </Container>
     );

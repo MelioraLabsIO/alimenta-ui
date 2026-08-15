@@ -1,4 +1,3 @@
-// src/app/(app)/app/layout.tsx
 import { redirect } from "next/navigation";
 import { AppHeader } from "@/components/layout/app-header";
 import { SidebarNav } from "@/components/layout/sidebar-nav";
