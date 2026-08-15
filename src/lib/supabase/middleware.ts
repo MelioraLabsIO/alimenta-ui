@@ -2,7 +2,6 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 const PUBLIC_ROUTE_PREFIXES = ["/auth", "/login", "/marketing", "/reset-password"];
-const PROTECTED_ROUTE_PREFIXES = ["/history", "/insights", "/log", "/settings"];
 
 export function isPublicRoute(pathname: string) {
     if (PUBLIC_ROUTE_PREFIXES.some((route) => pathname === route || pathname.startsWith(`${route}/`))) {
@@ -13,13 +12,7 @@ export function isPublicRoute(pathname: string) {
 }
 
 export function isProtectedRoute(pathname: string) {
-    if (pathname === "/" || pathname === "/spin") {
-        return true;
-    }
-
-    return PROTECTED_ROUTE_PREFIXES.some(
-        (route) => pathname === route || pathname.startsWith(`${route}/`)
-    );
+    return !isPublicRoute(pathname);
 }
 
 export async function updateSession(request: NextRequest) {
