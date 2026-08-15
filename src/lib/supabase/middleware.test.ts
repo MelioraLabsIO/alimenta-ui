@@ -22,6 +22,7 @@ test("protects authenticated application routes", () => {
     assert.equal(isProtectedRoute("/log"), true);
     assert.equal(isProtectedRoute("/settings/preferences"), true);
     assert.equal(isProtectedRoute("/spin"), true);
+    assert.equal(isProtectedRoute("/future-route"), true);
 });
 
 test("does not protect guest-facing routes", () => {
