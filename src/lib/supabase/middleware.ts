@@ -1,6 +1,20 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+const PUBLIC_ROUTE_PREFIXES = ["/auth", "/login", "/marketing", "/reset-password"];
+
+export function isPublicRoute(pathname: string) {
+    if (PUBLIC_ROUTE_PREFIXES.some((route) => pathname === route || pathname.startsWith(`${route}/`))) {
+        return true;
+    }
+
+    return /^\/spin\/[^/]+$/.test(pathname);
+}
+
+export function isProtectedRoute(pathname: string) {
+    return !isPublicRoute(pathname);
+}
+
 export async function updateSession(request: NextRequest) {
     let supabaseResponse = NextResponse.next({
         request,
@@ -36,19 +50,15 @@ export async function updateSession(request: NextRequest) {
     const {
         data: { user },
     } = await supabase.auth.getUser();
-
     const pathname = request.nextUrl.pathname;
-    const isPublicRoute =
-        pathname.startsWith("/login") || pathname.startsWith("/auth");
+    const protectedRoute = isProtectedRoute(pathname);
 
-    if (!user && !isPublicRoute) {
-        // no user, potentially respond by redirecting the user to the login page
+    if (!user && protectedRoute) {
         const url = request.nextUrl.clone();
         url.pathname = "/login";
         return NextResponse.redirect(url);
     }
 
-    // If user is logged in and tries to access login, redirect to dashboard
     if (user && pathname.startsWith("/login")) {
         const url = request.nextUrl.clone();
         url.pathname = "/";
