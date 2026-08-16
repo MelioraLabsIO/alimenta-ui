@@ -38,8 +38,8 @@ export function SessionShareCard({
         joinUrl && joinUrl.trim().length > 0
             ? joinUrl
             : typeof window !== "undefined"
-              ? `${window.location.origin}/join/${sessionCode}`
-              : `/join/${sessionCode}`;
+              ? `${window.location.origin}/spin/${sessionCode}`
+              : `spin/${sessionCode}`;
 
     async function handleCopyCode() {
         try {
