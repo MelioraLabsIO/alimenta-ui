@@ -62,46 +62,27 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
     const [participantToken, setParticipantToken] = useSessionStorage(
         `spin:${session.sessionCode}:participant-token`
     );
+    const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
 
+    /********************************************* MUTATIONS ************************************************/
     const { mutate: removeParticipantMutation } = useMutation({
-        mutationFn: (participantId: string) =>
+        mutationFn: () =>
             deleteSpinParticipantAsGuest(
                 session.sessionCode,
-                participantId,
                 participantToken ?? ""
             ),
-        onSuccess: (_, participantId) => {
+        onSuccess: (deletedParticipant: Pick<SpinSessionParticipant, "id">) => {
             queryClient.setQueryData(
                 ["guest-session", session.sessionCode],
-                (current: SpinSession | undefined) =>
-                    current
-                        ? {
-                              ...current,
-                              spinParticipants: current.spinParticipants.filter(
-                                  (p) => p.id !== participantId
-                              ),
-                          }
-                        : current
+                null
             );
 
-            if (participantId === participant.id) {
+            if (deletedParticipant.id === participant.id) {
                 setParticipantToken(null);
                 onLeftAction?.();
             }
         },
     });
-
-    const handleRemoveParticipant = useCallback(
-        (participantId: string) => removeParticipantMutation(participantId),
-        [removeParticipantMutation]
-    );
-
-    const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
-
-    const handleConfirmLeaveSession = useCallback(() => {
-        removeParticipantMutation(participant.id);
-        setLeaveDialogOpen(false);
-    }, [removeParticipantMutation, participant.id]);
 
     const { mutate: upsertFoodMutation } = useMutation({
         mutationFn: (foodName: string) => {
@@ -135,6 +116,16 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
             );
         },
     });
+    /********************************************* HANDLERS ************************************************/
+    const handleRemoveParticipant = useCallback(
+        () => removeParticipantMutation(),
+        [removeParticipantMutation]
+    );
+
+    const handleConfirmLeaveSession = useCallback(() => {
+        removeParticipantMutation();
+        setLeaveDialogOpen(false);
+    }, [removeParticipantMutation]);
 
     const participants = session.spinParticipants ?? [];
 

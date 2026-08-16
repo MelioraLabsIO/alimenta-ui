@@ -18,6 +18,7 @@ export function useSharedSession(user: User | null): UseSharedSessionReturn {
         queryKey: ["session"],
         queryFn: getActiveSession,
         enabled: Boolean(user?.id),
+        retry: 1,
     });
 
     const currentUserId = user?.id ?? "";
