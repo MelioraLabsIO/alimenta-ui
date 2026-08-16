@@ -52,11 +52,10 @@ export async function deleteSpinParticipantAsMember(
  */
 export async function deleteSpinParticipantAsGuest(
     joinCode: string,
-    participantId: string,
     participantToken: string
-): Promise<void> {
+): Promise<Pick<SpinSessionParticipant, "id">> {
     return apiFetch(
-        `/api/v1/spin-sessions/${joinCode}/participants/${participantId}`,
+        `/api/v1/spin-sessions/${joinCode}/participants/me`,
         {
             method: "DELETE",
             headers: { "X-Participant-Token": participantToken },

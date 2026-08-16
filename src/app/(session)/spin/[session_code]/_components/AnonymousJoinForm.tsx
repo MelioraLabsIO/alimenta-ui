@@ -51,12 +51,10 @@ export function AnonymousJoinForm({
         onError: () => {
             toast.error("Failed to join, please try again.");
         },
+        retry: 1,
     });
 
     const handleJoinAsGuest = ({ displayName }: { displayName: string }) => {
-        console.log(
-            `Joining spin session as guest: ${session.sessionCode}, name: ${displayName}`
-        );
         join({ displayName } as JoinSpinSessionSchema);
     };
 
@@ -64,7 +62,7 @@ export function AnonymousJoinForm({
         <Stack gap={4}>
             <h1>Join the wheel</h1>
 
-            <Stack gap={2}>
+            <Stack gap={2} style={{ marginBottom: "1rem" }}>
                 <form
                     onSubmit={handleSubmit((data) => handleJoinAsGuest(data))}
                     noValidate
@@ -89,9 +87,9 @@ export function AnonymousJoinForm({
                 </form>
             </Stack>
 
-            {/*<a href={`/login?next=/spin/${session.joinCode}`}>*/}
-            {/*    Already have an Alimenta account? Sign in*/}
-            {/*</a>*/}
+            <a href={`/login?next=/spin`}>
+                Already have an Alimenta account? Sign in
+            </a>
         </Stack>
     );
 }

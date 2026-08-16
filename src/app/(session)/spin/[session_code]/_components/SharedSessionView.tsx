@@ -8,10 +8,12 @@ import { ParticipantRoom } from "@/app/(session)/spin/[session_code]/_components
 import { useGuestSession } from "@/app/(session)/spin/[session_code]/hooks/useGuestSession";
 import type { SpinSessionParticipant } from "@/app/(authenticated)/spin/shared/types";
 import { Container } from "@mantine/core";
+import { useRouter } from "next/navigation";
 
 export function SharedSessionView() {
     const profile = useProfileStore((state) => state.profile);
     const queryClient = useQueryClient();
+    const navigate = useRouter();
 
     // State
     const [joinedParticipant, setJoinedParticipant] =
@@ -32,6 +34,7 @@ export function SharedSessionView() {
         queryClient.removeQueries({
             queryKey: ["guest-session", session?.sessionCode],
         });
+        navigate.push("/");
     };
 
     if (isLoadingSession || isLoadingParticipant || !session) {
