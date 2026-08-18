@@ -1,15 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { forgotPassword, login, signup } from "./actions";
 import { Button } from "@/components/mantine/ui";
 import { Input } from "@/components/mantine/ui";
 import { Text } from "@/components/mantine/ui";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/mantine/ui";
 import { toast } from "@/lib/notifications";
+import { sanitizeNextPath } from "@/lib/routes";
 import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPageContent />
+    </Suspense>
+  );
+}
+
+function LoginPageContent() {
+  const searchParams = useSearchParams();
+  const redirectTo = sanitizeNextPath(searchParams.get("next"));
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
@@ -34,7 +46,7 @@ export default function LoginPage() {
         } else {
           toast.success(isSignUp ? "Account created!" : "Welcome back!");
           // Explicit redirect on client side if successful
-          window.location.href = "/";
+          window.location.href = redirectTo;
         }
       }
     } catch (error) {

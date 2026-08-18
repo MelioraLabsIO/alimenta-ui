@@ -15,7 +15,7 @@ import {
     WheelSegment,
 } from "@/app/(authenticated)/spin/_components/MealSpinWheel";
 
-export function Personal() {
+export default function Personal() {
     const [segments, setSegments] = useState<WheelSegment[]>([]);
 
     const canAddMore = segments.length < MAX_WHEEL_SEGMENTS;
@@ -53,6 +53,10 @@ export function Personal() {
 
     return (
         <div className="max-w-6xl mx-auto space-y-6">
+            <p className="text-sm text-muted-foreground">
+                Build your wheel, then spin to decide what to eat.
+            </p>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
                 {/* Wheel */}
                 <Card className="border-border/50 bg-card/60">

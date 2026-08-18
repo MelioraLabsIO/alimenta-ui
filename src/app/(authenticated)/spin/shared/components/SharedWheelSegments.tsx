@@ -64,7 +64,7 @@ export function SharedWheelSegments({
                 </div>
             </CardHeader>
             <CardContent className="pt-0">
-                <ul className="space-y-1" aria-label="Shared wheel segments">
+                <ul className="space-y-1" aria-label="Page wheel segments">
                     {participants.map((participant) => {
                         const canRemove =
                             isHost || participant.id === currentParticipantId;

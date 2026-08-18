@@ -1,12 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { JoinSpinSessionForm } from "./JoinSpinSessionForm";
 import { useProfileStore } from "@/stores/profile.store";
 import { ParticipantRoom } from "@/app/(session)/spin/[session_code]/_components/ParticipantRoom";
 import { useGuestSession } from "@/app/(session)/spin/[session_code]/hooks/useGuestSession";
-import type { SpinSessionParticipant } from "@/app/(authenticated)/spin/shared/types";
+import {
+    JoinSpinSessionResponse,
+    SpinSession,
+    SpinSessionParticipant,
+} from "@/app/(authenticated)/spin/shared/types";
 import { Container } from "@mantine/core";
 import { useRouter } from "next/navigation";
 
@@ -25,17 +29,32 @@ export function SharedSessionView() {
     const resolvedParticipant = participant ?? joinedParticipant;
 
     /********************************************* HANDLERS ************************************************/
-    const handleParticipantJoined = (joined: SpinSessionParticipant) => {
-        setJoinedParticipant(joined);
-    };
+    const handleParticipantJoined = useCallback(
+        (joined: JoinSpinSessionResponse) => {
+            setJoinedParticipant(joined.participant);
+            queryClient.setQueryData(
+                ["guest-session", session?.sessionCode],
+                (cachedData: SpinSession) => {
+                    return {
+                        ...cachedData,
+                        spinParticipants: [
+                            ...(cachedData?.spinParticipants || []),
+                            joined.participant,
+                        ],
+                    };
+                }
+            );
+        },
+        [queryClient, session?.sessionCode]
+    );
 
-    const handleParticipantLeft = () => {
+    const handleParticipantLeft = useCallback(() => {
         setJoinedParticipant(null);
         queryClient.removeQueries({
             queryKey: ["guest-session", session?.sessionCode],
         });
         navigate.push("/");
-    };
+    }, [queryClient, navigate, session?.sessionCode]);
 
     if (isLoadingSession || isLoadingParticipant || !session) {
         return (

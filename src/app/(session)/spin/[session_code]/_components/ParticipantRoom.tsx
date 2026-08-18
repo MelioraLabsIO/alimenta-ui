@@ -24,6 +24,7 @@ import type {
 } from "@/app/(authenticated)/spin/shared/types";
 import {
     deleteSpinParticipantAsGuest,
+    deleteSpinParticipantAsMember,
     upsertParticipantFoodAsGuest,
 } from "@/apis/spin/mutations";
 import { SessionShareCard } from "@/app/(authenticated)/spin/shared/components/SessionShareCard";
@@ -44,16 +45,17 @@ type Props = {
 };
 
 /**
- * Room shown to a guest after joining a shared spin session via its join
- * code. Nobody on this path has an Alimenta account, so identity is entirely
- * the participant row's own `id`/`participantToken` — never a Supabase
- * session. Reuses the same building blocks as the authenticated `Shared`
- * view — entry/spin mutations are still TODO there too, so this stays
- * display-only until those are wired to real endpoints.
+ * Room shown to a participant after joining a shared spin session via its
+ * join code — either a guest, identified entirely by the participant row's
+ * own `id`/`participantToken` (never a Supabase session), or an
+ * authenticated Alimenta member, identified by their Supabase session (no
+ * participant token). Reuses the same building blocks as the authenticated
+ * `Shared` view — entry/spin mutations are still TODO there too, so this
+ * stays display-only until those are wired to real endpoints.
  */
 export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
-    const isHost =
-        participant.userId !== "" && participant.userId === session.hostUserId;
+    const isMember = participant.userId !== "";
+    const isHost = isMember && participant.userId === session.hostUserId;
 
     const queryClient = useQueryClient();
 
@@ -65,7 +67,9 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
     const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
 
     /********************************************* MUTATIONS ************************************************/
-    const { mutate: removeParticipantMutation } = useMutation({
+    // Guest self-removal: identified by their session-stored participant
+    // token, so the backend only ever knows this as "remove me."
+    const { mutate: removeSelfAsGuestMutation } = useMutation({
         mutationFn: () =>
             deleteSpinParticipantAsGuest(
                 session.sessionCode,
@@ -79,6 +83,32 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
 
             if (deletedParticipant.id === participant.id) {
                 setParticipantToken(null);
+                onLeftAction?.();
+            }
+        },
+    });
+
+    // Authenticated-member removal by participant ID: used both when the
+    // host removes another participant, and when a non-host member leaves
+    // by passing their own participant ID.
+    const { mutate: removeParticipantByIdMutation } = useMutation({
+        mutationFn: (participantId: string) =>
+            deleteSpinParticipantAsMember(session.sessionCode, participantId),
+        onSuccess: (_, removedParticipantId) => {
+            queryClient.setQueryData(
+                ["guest-session", session.sessionCode],
+                (current: SpinSession | undefined) =>
+                    current
+                        ? {
+                              ...current,
+                              spinParticipants: current.spinParticipants.filter(
+                                  (p) => p.id !== removedParticipantId
+                              ),
+                          }
+                        : current
+            );
+
+            if (removedParticipantId === participant.id) {
                 onLeftAction?.();
             }
         },
@@ -117,15 +147,26 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
         },
     });
     /********************************************* HANDLERS ************************************************/
+    // Host removing another participant — always an authenticated member
+    // action, since only members can be host.
     const handleRemoveParticipant = useCallback(
-        () => removeParticipantMutation(),
-        [removeParticipantMutation]
+        (participantId: string) => removeParticipantByIdMutation(participantId),
+        [removeParticipantByIdMutation]
     );
 
     const handleConfirmLeaveSession = useCallback(() => {
-        removeParticipantMutation();
+        if (isMember) {
+            removeParticipantByIdMutation(participant.id);
+        } else {
+            removeSelfAsGuestMutation();
+        }
         setLeaveDialogOpen(false);
-    }, [removeParticipantMutation]);
+    }, [
+        isMember,
+        participant.id,
+        removeParticipantByIdMutation,
+        removeSelfAsGuestMutation,
+    ]);
 
     const participants = session.spinParticipants ?? [];
 

@@ -36,13 +36,11 @@ export async function joinSpinSessionAsGuest(
 
 /** Removes a participant, identified by the current authenticated member's Supabase session. */
 export async function deleteSpinParticipantAsMember(
-    joinCode: string,
-    participantId: string
+    joinCode: string
 ): Promise<void> {
-    return apiFetch(
-        `/api/v1/spin-sessions/${joinCode}/participants/${participantId}`,
-        { method: "DELETE" }
-    );
+    return apiFetch(`/api/v1/spin-sessions/${joinCode}/participants/me`, {
+        method: "DELETE",
+    });
 }
 
 /**

@@ -1,8 +1,20 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
-import { Dices } from "lucide-react";
-import { Button, Card, CardContent } from "@/components/mantine/ui";
+import { useCallback, useMemo, useState } from "react";
+import { Dices, LogOut } from "lucide-react";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    Button,
+    Card,
+    CardContent,
+} from "@/components/mantine/ui";
 import { Tooltip } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -11,7 +23,7 @@ import {
     deleteSpinParticipantAsMember,
 } from "@/apis/spin/mutations";
 
-import { useSharedSession } from "./useSharedSession";
+import { useSharedSession } from "./hooks/useSharedSession";
 import type { SpinSessionParticipant } from "./types";
 import { CreateSessionView } from "./components/CreateSessionView";
 import { SessionShareCard } from "./components/SessionShareCard";
@@ -29,7 +41,7 @@ import {
 } from "@/app/(authenticated)/spin/_components/MealEntryForm";
 import { PastMealsSearch } from "@/app/(authenticated)/spin/_components/PastMealsSearch";
 
-export function Shared() {
+export default function Shared() {
     const queryClient = useQueryClient();
 
     const { user } = useAuthUserStore();
@@ -45,6 +57,8 @@ export function Shared() {
         requestSpin,
     } = useSharedSession(user);
 
+    const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
+
     /********************************************* MUTATIONS ************************************************/
     const { mutate: createSpinSessionMutation, isPending: isCreatingSession } =
         useMutation({
@@ -59,6 +73,14 @@ export function Shared() {
         mutationFn: (participantId: string) =>
             deleteSpinParticipantAsMember(session!.sessionCode, participantId),
         onSuccess: (_, participantId) => {
+            // Leaving yourself clears the whole session so this view falls
+            // back to "no active session" — a host removing someone else
+            // just drops that participant from the list.
+            if (participantId === currentParticipantId) {
+                queryClient.setQueryData(["session"], null);
+                return;
+            }
+
             queryClient.setQueryData(["session"], (current: typeof session) =>
                 current
                     ? {
@@ -77,6 +99,11 @@ export function Shared() {
         (participantId: string) => removeParticipantMutation(participantId),
         [removeParticipantMutation]
     );
+
+    const handleConfirmLeaveSession = useCallback(() => {
+        removeParticipantMutation(currentParticipantId);
+        setLeaveDialogOpen(false);
+    }, [removeParticipantMutation, currentParticipantId]);
 
     const handleCreateSession = useCallback(() => {
         createSpinSessionMutation();
@@ -132,15 +159,27 @@ export function Shared() {
 
     if (!session) {
         return (
-            <CreateSessionView
-                isCreatingSession={isCreatingSession}
-                onCreateSession={handleCreateSession}
-            />
+            <div className="max-w-6xl mx-auto space-y-6">
+                <p className="text-sm text-muted-foreground">
+                    Create a session, invite friends, add meals, and spin to
+                    decide what to eat.
+                </p>
+
+                <CreateSessionView
+                    isCreatingSession={isCreatingSession}
+                    onCreateSession={handleCreateSession}
+                />
+            </div>
         );
     }
 
     return (
         <div className="max-w-6xl mx-auto space-y-6">
+            <p className="text-sm text-muted-foreground">
+                Create a session, invite friends, add meals, and spin to
+                decide what to eat.
+            </p>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
                 <div className="space-y-4">
                     <Card className="border-border/50 bg-card/60">
@@ -149,6 +188,63 @@ export function Shared() {
                                 sessionCode={session.sessionCode}
                                 isHost={isHost}
                             />
+
+                            {!isHost && (
+                                <div className="flex items-center gap-1.5 -mt-2">
+                                    <p className="text-xs text-muted-foreground">
+                                        You&apos;re a participant in this
+                                        session
+                                    </p>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                                        onClick={() =>
+                                            setLeaveDialogOpen(true)
+                                        }
+                                        aria-label="Leave session"
+                                    >
+                                        <LogOut className="h-3.5 w-3.5" />
+                                    </Button>
+                                </div>
+                            )}
+
+                            <AlertDialog
+                                open={leaveDialogOpen}
+                                onOpenChange={setLeaveDialogOpen}
+                            >
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>
+                                            Leave this session?
+                                        </AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            You&apos;ll be removed from the
+                                            session and your food choice, if
+                                            any, will be cleared. You can
+                                            rejoin later with the session
+                                            code.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter
+                                        style={{
+                                            marginTop: "1.5rem",
+                                            display: "flex",
+                                            justifyContent: "flex-end",
+                                            gap: "0.5rem",
+                                        }}
+                                    >
+                                        <AlertDialogCancel>
+                                            Cancel
+                                        </AlertDialogCancel>
+                                        <AlertDialogAction
+                                            onClick={handleConfirmLeaveSession}
+                                        >
+                                            Leave session
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
 
                             {hasEntries ? (
                                 <MealSpinWheel

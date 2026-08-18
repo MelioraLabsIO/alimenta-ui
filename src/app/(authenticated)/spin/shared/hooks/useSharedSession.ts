@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import type { SpinSession, UseSharedSessionReturn } from "./types";
+import type { SpinSession, UseSharedSessionReturn } from "../types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getActiveSession } from "@/apis/spin/queries";
 import { upsertParticipantFoodAsMember } from "@/apis/spin/mutations";

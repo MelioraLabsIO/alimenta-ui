@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { routes, sanitizeNextPath } from "@/lib/routes";
 
 const PUBLIC_ROUTE_PREFIXES = ["/auth", "/login", "/marketing", "/reset-password"];
 
@@ -54,15 +55,14 @@ export async function updateSession(request: NextRequest) {
     const protectedRoute = isProtectedRoute(pathname);
 
     if (!user && protectedRoute) {
-        const url = request.nextUrl.clone();
-        url.pathname = "/login";
-        return NextResponse.redirect(url);
+        return NextResponse.redirect(new URL(routes.login(), request.nextUrl.origin));
     }
 
     if (user && pathname.startsWith("/login")) {
-        const url = request.nextUrl.clone();
-        url.pathname = "/";
-        return NextResponse.redirect(url);
+        const nextParam = request.nextUrl.searchParams.get("next");
+        return NextResponse.redirect(
+            new URL(sanitizeNextPath(nextParam), request.nextUrl.origin)
+        );
     }
 
     // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're

@@ -5,25 +5,27 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/mantine/ui";
 import {
+    JoinSpinSessionResponse,
     SpinSession,
-    SpinSessionParticipant,
 } from "@/app/(authenticated)/spin/shared/types";
 import { joinSpinSessionAsGuest } from "@/apis/spin/mutations";
 import { useSessionStorage } from "@/hooks/useSessionStorage";
 import { toast } from "@/lib/notifications";
+import { routes } from "@/lib/routes";
 import {
     type JoinSpinSessionInput,
     joinSpinSessionSchema,
     type JoinSpinSessionSchema,
 } from "@/contracts/spin/join-spin-session.schema";
 import { Button, Stack } from "@mantine/core";
+import { useCallback } from "react";
 
 export function AnonymousJoinForm({
     session,
     onJoinedParticipantAction,
 }: {
     session: SpinSession;
-    onJoinedParticipantAction: (participant: SpinSessionParticipant) => void;
+    onJoinedParticipantAction: (result: JoinSpinSessionResponse) => void;
 }) {
     const {
         register,
@@ -46,7 +48,7 @@ export function AnonymousJoinForm({
                 setParticipantToken(result.participantToken);
             }
 
-            onJoinedParticipantAction(result.participant);
+            onJoinedParticipantAction(result);
         },
         onError: () => {
             toast.error("Failed to join, please try again.");
@@ -54,9 +56,12 @@ export function AnonymousJoinForm({
         retry: 1,
     });
 
-    const handleJoinAsGuest = ({ displayName }: { displayName: string }) => {
-        join({ displayName } as JoinSpinSessionSchema);
-    };
+    const handleJoinAsGuest = useCallback(
+        ({ displayName }: { displayName: string }) => {
+            join({ displayName } as JoinSpinSessionSchema);
+        },
+        [join]
+    );
 
     return (
         <Stack gap={4}>
@@ -87,7 +92,14 @@ export function AnonymousJoinForm({
                 </form>
             </Stack>
 
-            <a href={`/login?next=/spin`}>
+            <a
+                href={routes.login({
+                    next: routes.spinShared(session.sessionCode, {
+                        autojoin: true,
+                    }),
+                })}
+                className="text-sm text-primary"
+            >
                 Already have an Alimenta account? Sign in
             </a>
         </Stack>
