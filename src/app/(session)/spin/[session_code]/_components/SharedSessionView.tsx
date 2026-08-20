@@ -50,11 +50,8 @@ export function SharedSessionView() {
 
     const handleParticipantLeft = useCallback(() => {
         setJoinedParticipant(null);
-        queryClient.removeQueries({
-            queryKey: ["guest-session", session?.sessionCode],
-        });
         navigate.push("/");
-    }, [queryClient, navigate, session?.sessionCode]);
+    }, [navigate]);
 
     if (isLoadingSession || isLoadingParticipant || !session) {
         return (

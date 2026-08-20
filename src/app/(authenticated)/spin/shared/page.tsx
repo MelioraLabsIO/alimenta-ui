@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { Dices, LogOut } from "lucide-react";
+import { Dices, LogOut, Trash2 } from "lucide-react";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -20,7 +20,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import {
     createSpinSession,
-    deleteSpinParticipantAsMember,
+    deleteSpinParticipant,
+    deleteSpinSession,
+    leaveSessionAsMember,
 } from "@/apis/spin/mutations";
 
 import { useSharedSession } from "./hooks/useSharedSession";
@@ -58,6 +60,8 @@ export default function Shared() {
     } = useSharedSession(user);
 
     const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
+    const [deleteSessionDialogOpen, setDeleteSessionDialogOpen] =
+        useState(false);
 
     /********************************************* MUTATIONS ************************************************/
     const { mutate: createSpinSessionMutation, isPending: isCreatingSession } =
@@ -69,18 +73,20 @@ export default function Shared() {
             },
         });
 
+    // Non-host member leaving on their own — the host can't leave this way,
+    // they have to delete the session instead (see deleteSessionMutation).
+    const { mutate: leaveSessionMutation } = useMutation({
+        mutationFn: () => leaveSessionAsMember(session!.id),
+        onSuccess: () => {
+            queryClient.setQueryData(["session"], null);
+        },
+    });
+
+    // Host removing another participant by ID.
     const { mutate: removeParticipantMutation } = useMutation({
         mutationFn: (participantId: string) =>
-            deleteSpinParticipantAsMember(session!.sessionCode, participantId),
+            deleteSpinParticipant(session!.id, participantId),
         onSuccess: (_, participantId) => {
-            // Leaving yourself clears the whole session so this view falls
-            // back to "no active session" — a host removing someone else
-            // just drops that participant from the list.
-            if (participantId === currentParticipantId) {
-                queryClient.setQueryData(["session"], null);
-                return;
-            }
-
             queryClient.setQueryData(["session"], (current: typeof session) =>
                 current
                     ? {
@@ -94,6 +100,14 @@ export default function Shared() {
         },
     });
 
+    // Host deleting the whole session.
+    const { mutate: deleteSessionMutation } = useMutation({
+        mutationFn: () => deleteSpinSession(session!.id),
+        onSuccess: () => {
+            queryClient.setQueryData(["session"], null);
+        },
+    });
+
     /********************************************* HANDLERS ************************************************/
     const handleRemoveParticipant = useCallback(
         (participantId: string) => removeParticipantMutation(participantId),
@@ -101,9 +115,14 @@ export default function Shared() {
     );
 
     const handleConfirmLeaveSession = useCallback(() => {
-        removeParticipantMutation(currentParticipantId);
+        leaveSessionMutation();
         setLeaveDialogOpen(false);
-    }, [removeParticipantMutation, currentParticipantId]);
+    }, [leaveSessionMutation]);
+
+    const handleConfirmDeleteSession = useCallback(() => {
+        deleteSessionMutation();
+        setDeleteSessionDialogOpen(false);
+    }, [deleteSessionMutation]);
 
     const handleCreateSession = useCallback(() => {
         createSpinSessionMutation();
@@ -176,8 +195,8 @@ export default function Shared() {
     return (
         <div className="max-w-6xl mx-auto space-y-6">
             <p className="text-sm text-muted-foreground">
-                Create a session, invite friends, add meals, and spin to
-                decide what to eat.
+                Create a session, invite friends, add meals, and spin to decide
+                what to eat.
             </p>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
@@ -189,7 +208,22 @@ export default function Shared() {
                                 isHost={isHost}
                             />
 
-                            {!isHost && (
+                            {isHost ? (
+                                <div className="flex items-center gap-1.5 -mt-2">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-6 px-2 gap-1 text-muted-foreground hover:text-destructive"
+                                        onClick={() =>
+                                            setDeleteSessionDialogOpen(true)
+                                        }
+                                        aria-label="Delete session"
+                                    >
+                                        <Trash2 className="h-3.5 w-3.5" />
+                                        Delete session
+                                    </Button>
+                                </div>
+                            ) : (
                                 <div className="flex items-center gap-1.5 -mt-2">
                                     <p className="text-xs text-muted-foreground">
                                         You&apos;re a participant in this
@@ -199,9 +233,7 @@ export default function Shared() {
                                         variant="ghost"
                                         size="icon"
                                         className="h-6 w-6 text-muted-foreground hover:text-destructive"
-                                        onClick={() =>
-                                            setLeaveDialogOpen(true)
-                                        }
+                                        onClick={() => setLeaveDialogOpen(true)}
                                         aria-label="Leave session"
                                     >
                                         <LogOut className="h-3.5 w-3.5" />
@@ -221,9 +253,8 @@ export default function Shared() {
                                         <AlertDialogDescription>
                                             You&apos;ll be removed from the
                                             session and your food choice, if
-                                            any, will be cleared. You can
-                                            rejoin later with the session
-                                            code.
+                                            any, will be cleared. You can rejoin
+                                            later with the session code.
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter
@@ -241,6 +272,41 @@ export default function Shared() {
                                             onClick={handleConfirmLeaveSession}
                                         >
                                             Leave session
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+
+                            <AlertDialog
+                                open={deleteSessionDialogOpen}
+                                onOpenChange={setDeleteSessionDialogOpen}
+                            >
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>
+                                            Delete this session?
+                                        </AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This ends the session for
+                                            everyone and can&apos;t be undone.
+                                            All participants will be removed.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter
+                                        style={{
+                                            marginTop: "1.5rem",
+                                            display: "flex",
+                                            justifyContent: "flex-end",
+                                            gap: "0.5rem",
+                                        }}
+                                    >
+                                        <AlertDialogCancel>
+                                            Cancel
+                                        </AlertDialogCancel>
+                                        <AlertDialogAction
+                                            onClick={handleConfirmDeleteSession}
+                                        >
+                                            Delete session
                                         </AlertDialogAction>
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
