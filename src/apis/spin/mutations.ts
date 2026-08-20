@@ -23,7 +23,6 @@ export async function joinSpinSessionAsGuest(
     joinCode: string,
     name: string
 ): Promise<JoinSpinSessionResponse> {
-    console.log(`Joining spin session as guest: ${joinCode}, name: ${name}`);
     return apiFetch(
         `/api/v1/spin-sessions/${joinCode}/join`,
         {
@@ -34,11 +33,31 @@ export async function joinSpinSessionAsGuest(
     );
 }
 
+/** Removes another participant by ID — a host-only action. */
+export function deleteSpinParticipant(
+    sessionId: string,
+    participantId: string
+): Promise<boolean> {
+    return apiFetch(
+        `/api/v1/spin-sessions/${sessionId}/participants/${participantId}`,
+        {
+            method: "DELETE",
+        }
+    );
+}
+
+/** Deletes the entire session — a host-only action; the host can't leave it any other way. */
+export function deleteSpinSession(sessionId: string): Promise<boolean> {
+    return apiFetch(`/api/v1/spin-sessions/${sessionId}`, {
+        method: "DELETE",
+    });
+}
+
 /** Removes a participant, identified by the current authenticated member's Supabase session. */
-export async function deleteSpinParticipantAsMember(
-    joinCode: string
-): Promise<void> {
-    return apiFetch(`/api/v1/spin-sessions/${joinCode}/participants/me`, {
+export async function leaveSessionAsMember(
+    sessionId: string
+): Promise<Pick<SpinSessionParticipant, "id" | "userId" | "displayName">> {
+    return apiFetch(`/api/v1/spin-sessions/${sessionId}/participants/me`, {
         method: "DELETE",
     });
 }
@@ -48,12 +67,12 @@ export async function deleteSpinParticipantAsMember(
  * `participantToken` (from `sessionStorage`) via the `X-Participant-Token`
  * header.
  */
-export async function deleteSpinParticipantAsGuest(
-    joinCode: string,
+export async function leaveSessionAsGuest(
+    sessionId: string,
     participantToken: string
 ): Promise<Pick<SpinSessionParticipant, "id">> {
     return apiFetch(
-        `/api/v1/spin-sessions/${joinCode}/participants/me`,
+        `/api/v1/spin-sessions/${sessionId}/participants/me`,
         {
             method: "DELETE",
             headers: { "X-Participant-Token": participantToken },
@@ -67,11 +86,11 @@ export async function deleteSpinParticipantAsGuest(
  * authenticated member, identified by the Supabase session.
  */
 export async function upsertParticipantFoodAsMember(
-    joinCode: string,
+    sessionId: string,
     params: UpsertParticipantFoodParams
 ): Promise<SpinSessionParticipant> {
     return apiFetch<SpinSessionParticipant>(
-        `/api/v1/spin-sessions/${joinCode}/me/food`,
+        `/api/v1/spin-sessions/${sessionId}/me/food`,
         {
             method: "PUT",
             body: JSON.stringify(params),
@@ -85,12 +104,12 @@ export async function upsertParticipantFoodAsMember(
  * the `X-Participant-Token` header.
  */
 export async function upsertParticipantFoodAsGuest(
-    joinCode: string,
+    sessionId: string,
     params: UpsertParticipantFoodParams,
     participantToken: string
 ): Promise<SpinSessionParticipant> {
     return apiFetch<SpinSessionParticipant>(
-        `/api/v1/spin-sessions/${joinCode}/me/food`,
+        `/api/v1/spin-sessions/${sessionId}/me/food`,
         {
             method: "PUT",
             body: JSON.stringify(params),

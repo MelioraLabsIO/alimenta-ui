@@ -30,11 +30,10 @@ export function useSharedSession(user: User | null): UseSharedSessionReturn {
     const { mutate: upsertFoodMutation } = useMutation({
         mutationFn: (payload: {
             foodName: string;
-            sessionCode: string;
             participantId: string;
             sessionId: string;
         }) =>
-            upsertParticipantFoodAsMember(payload.sessionCode, {
+            upsertParticipantFoodAsMember(payload.sessionId, {
                 foodName: payload.foodName,
                 id: payload.participantId,
                 sessionId: payload.sessionId,
@@ -64,7 +63,6 @@ export function useSharedSession(user: User | null): UseSharedSessionReturn {
 
             upsertFoodMutation({
                 foodName: food,
-                sessionCode: spinSession.sessionCode,
                 participantId: currentParticipantId,
                 sessionId: spinSession.id,
             });

@@ -27,7 +27,7 @@ export const routes = {
     login: (params?: { next?: string }) =>
         withQuery("/login", { next: params?.next }),
     spinShared: (sessionCode: string, params?: { autojoin?: boolean }) =>
-        withQuery(`/spin/${sessionCode}`, {
+        withQuery(`/spin/shared`, {
             [AUTOJOIN_PARAM]: params?.autojoin ? "1" : undefined,
         }),
 };
