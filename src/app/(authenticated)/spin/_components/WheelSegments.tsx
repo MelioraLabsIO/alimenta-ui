@@ -28,20 +28,44 @@ interface WheelSegmentsProps {
     onClearAll: () => void;
     /** Whether the current user can clear all segments. */
     canClearAll: boolean;
+    /**
+     * Shown in place of the list while there are no segments. Omit to hide the
+     * card entirely when empty, as Personal mode does — there the wheel's own
+     * empty state already tells the user to add meals.
+     */
+    emptyMessage?: string;
 }
 
 /**
- * Generic wheel-segments card. Renders a labelled list with per-row remove
- * buttons and a "Clear all" action. Works for both Personal (simple labels)
- * and can be composed for Shared mode (label + sublabel columns).
+ * Wheel-segments card for both modes: a labelled list with per-row remove
+ * buttons and a "Clear all" action. Personal passes plain labels; Shared
+ * passes `sublabel` too, rendering the participant's name beside their meal.
  */
 export function WheelSegments({
     segments,
     onRemove,
     onClearAll,
     canClearAll,
+    emptyMessage,
 }: WheelSegmentsProps) {
-    if (segments.length === 0) return null;
+    if (segments.length === 0) {
+        if (!emptyMessage) return null;
+
+        return (
+            <Card className="border-border/50 bg-card/60">
+                <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-semibold">
+                        Wheel segments
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                    <p className="text-sm text-muted-foreground py-1">
+                        {emptyMessage}
+                    </p>
+                </CardContent>
+            </Card>
+        );
+    }
 
     return (
         <Card className="border-border/50 bg-card/60">
@@ -64,7 +88,7 @@ export function WheelSegments({
                         >
                             {seg.sublabel ? (
                                 <>
-                                    <span className="w-20 shrink-0 text-sm font-medium truncate">
+                                    <span className="w-16 sm:w-20 shrink-0 text-sm font-medium truncate">
                                         {seg.label}
                                     </span>
                                     <span className="flex-1 text-sm text-muted-foreground truncate">
@@ -76,6 +100,7 @@ export function WheelSegments({
                                     {seg.label}
                                 </span>
                             )}
+
                             {seg.canRemove ? (
                                 <Button
                                     variant="ghost"
@@ -88,7 +113,10 @@ export function WheelSegments({
                                 </Button>
                             ) : (
                                 /* Keep visual space consistent */
-                                <span className="h-6 w-6 shrink-0" aria-hidden="true" />
+                                <span
+                                    className="h-6 w-6 shrink-0"
+                                    aria-hidden="true"
+                                />
                             )}
                         </li>
                     ))}
@@ -109,4 +137,3 @@ export function WheelSegments({
         </Card>
     );
 }
-

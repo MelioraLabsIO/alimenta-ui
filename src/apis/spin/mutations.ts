@@ -12,19 +12,19 @@ export async function createSpinSession(): Promise<SpinSession> {
 }
 
 export async function joinSpinSessionAsMember(
-    joinCode: string
+    sessionId: string
 ): Promise<JoinSpinSessionResponse> {
-    return apiFetch(`/api/v1/spin-sessions/${joinCode}/join/me`, {
+    return apiFetch(`/api/v1/spin-sessions/${sessionId}/join/me`, {
         method: "POST",
     });
 }
 
 export async function joinSpinSessionAsGuest(
-    joinCode: string,
+    sessionId: string,
     name: string
 ): Promise<JoinSpinSessionResponse> {
     return apiFetch(
-        `/api/v1/spin-sessions/${joinCode}/join`,
+        `/api/v1/spin-sessions/${sessionId}/join`,
         {
             method: "POST",
             body: JSON.stringify({ name }),

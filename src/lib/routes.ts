@@ -26,13 +26,21 @@ export const routes = {
     home: () => "/",
     login: (params?: { next?: string }) =>
         withQuery("/login", { next: params?.next }),
-    spinShared: (sessionCode: string, params?: { autojoin?: boolean }) =>
-        withQuery(`/spin/shared`, {
+    /** The public join/participant view for one session, keyed by its ID. */
+    spinSession: (sessionId: string, params?: { autojoin?: boolean }) =>
+        withQuery(`/spin/${encodeURIComponent(sessionId)}`, {
             [AUTOJOIN_PARAM]: params?.autojoin ? "1" : undefined,
         }),
+    /**
+     * The authenticated member/host view of the current user's active
+     * session — resolved server-side from their auth, not from a URL
+     * param. Where a signed-in visitor belongs once they're part of a
+     * session, instead of the guest `spinSession` room.
+     */
+    spinShared: () => "/spin/shared",
 };
 
-/** Whether `searchParams` carries the "auto-join this session" marker set by `routes.spinShared(..., { autojoin: true })`. */
+/** Whether `searchParams` carries the "auto-join this session" marker set by `routes.spinSession(..., { autojoin: true })`. */
 export function hasAutojoinParam(searchParams: URLSearchParams): boolean {
     return searchParams.get(AUTOJOIN_PARAM) === "1";
 }

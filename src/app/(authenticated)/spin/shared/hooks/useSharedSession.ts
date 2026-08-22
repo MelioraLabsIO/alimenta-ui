@@ -17,6 +17,7 @@ export function useSharedSession(user: User | null): UseSharedSessionReturn {
     } = useQuery({
         queryKey: ["session"],
         queryFn: getActiveSession,
+        // TODO: Ensure that this session is fetched only when the user is a participant, if not he shall not see the session
         enabled: Boolean(user?.id),
         retry: 1,
     });

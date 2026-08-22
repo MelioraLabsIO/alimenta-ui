@@ -47,7 +47,7 @@ export function LogMealDialog({
     };
 
     return (
-        <Dialog open={open} onOpenChange={handleOpenChange}>
+        <Dialog open={open} onOpenChangeAction={handleOpenChange}>
             {!mealToEdit && (
                 <DialogTrigger asChild>
                     <Button className="gap-2">

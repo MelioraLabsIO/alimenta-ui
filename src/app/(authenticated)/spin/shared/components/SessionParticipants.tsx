@@ -3,7 +3,6 @@
 import { X } from "lucide-react";
 import {
     Avatar,
-    AvatarFallback,
     Badge,
     Button,
     Card,
@@ -13,6 +12,7 @@ import {
     Skeleton,
 } from "@/components/mantine/ui";
 import type { SpinSessionParticipant } from "../types";
+import { getInitialsFromName } from "@/lib/profile";
 
 const MAX_PARTICIPANTS = 10;
 
@@ -24,15 +24,6 @@ interface SessionParticipantsProps {
     onRemoveParticipant?: (participantId: string) => void;
     isLoading?: boolean;
     error?: string | null;
-}
-
-function getInitials(name: string) {
-    const words = name.split(" ");
-    if (words.length === 1) {
-        return words[0].charAt(0).toUpperCase();
-    } else {
-        return words[0].charAt(0) + words[words.length - 1].charAt(0);
-    }
 }
 
 function ParticipantAvatar({
@@ -52,10 +43,8 @@ function ParticipantAvatar({
     return (
         <li className="flex items-center gap-3 py-1">
             {/* Avatar */}
-            <Avatar className="h-8 w-8 shrink-0">
-                <AvatarFallback className="text-xs bg-primary/20 text-primary font-semibold">
-                    {getInitials(participant.displayName)}
-                </AvatarFallback>
+            <Avatar className="h-8 w-8 text-xs">
+                {getInitialsFromName(participant.displayName)}
             </Avatar>
 
             {/* Name */}
@@ -133,7 +122,7 @@ export function SessionParticipants({
                     <p className="text-sm text-destructive py-2">{error}</p>
                 ) : participants.length === 0 ? (
                     <p className="text-sm text-muted-foreground py-2">
-                        No participants yet. Share the code to invite others.
+                        No participants yet. Share the link to invite others.
                     </p>
                 ) : (
                     <ul className="space-y-1" aria-label="Session participants">

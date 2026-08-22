@@ -9,19 +9,29 @@ export type DisclosureContextValue = {
 
 export type RootProps = {
     open?: boolean;
-    onOpenChange?: (open: boolean) => void;
+    onOpenChangeAction?: (open: boolean) => void;
     children: React.ReactNode;
 };
 
-export const DialogContext = React.createContext<DisclosureContextValue | null>(null);
-export const SheetContext = React.createContext<DisclosureContextValue | null>(null);
-export const AlertContext = React.createContext<DisclosureContextValue | null>(null);
+export const DialogContext = React.createContext<DisclosureContextValue | null>(
+    null
+);
+export const SheetContext = React.createContext<DisclosureContextValue | null>(
+    null
+);
+export const AlertContext = React.createContext<DisclosureContextValue | null>(
+    null
+);
 
-export function useDisclosureContext(context: React.Context<DisclosureContextValue | null>) {
+export function useDisclosureContext(
+    context: React.Context<DisclosureContextValue | null>
+) {
     const value = React.useContext(context);
 
     if (!value) {
-        throw new Error("Disclosure component must be rendered inside its root.");
+        throw new Error(
+            "Disclosure component must be rendered inside its root."
+        );
     }
 
     return value;
