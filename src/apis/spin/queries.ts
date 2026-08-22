@@ -9,9 +9,9 @@ export function getActiveSession(): Promise<SpinSession> {
     return apiFetch("/api/v1/spin-sessions/active");
 }
 
-export function getSpinSession(joinCode: string): Promise<SpinSession> {
+export function getSpinSession(sessionId: string): Promise<SpinSession> {
     return apiFetch(
-        `/api/v1/spin-sessions/${joinCode}`,
+        `/api/v1/spin-sessions/${sessionId}`,
         {
             method: "GET",
         },
@@ -20,11 +20,11 @@ export function getSpinSession(joinCode: string): Promise<SpinSession> {
 }
 
 export function getSpinParticipant(
-    joinCode: string,
+    sessionId: string,
     participantToken: string
 ): Promise<SpinSessionParticipant> {
     return apiFetch(
-        `/api/v1/spin-sessions/${joinCode}/participant`,
+        `/api/v1/spin-sessions/${sessionId}/participant`,
         {
             method: "GET",
             headers: {

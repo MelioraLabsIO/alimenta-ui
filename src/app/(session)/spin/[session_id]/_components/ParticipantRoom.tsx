@@ -12,6 +12,7 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
+    Avatar,
     Button,
     Card,
     CardContent,
@@ -28,12 +29,13 @@ import {
 } from "@/apis/spin/mutations";
 import { SessionShareCard } from "@/app/(authenticated)/spin/shared/components/SessionShareCard";
 import { SessionParticipants } from "@/app/(authenticated)/spin/shared/components/SessionParticipants";
-import { SharedWheelSegments } from "@/app/(authenticated)/spin/shared/components/SharedWheelSegments";
+import { WheelSegments } from "@/app/(authenticated)/spin/_components/WheelSegments";
 import { MealSpinWheel } from "@/app/(authenticated)/spin/_components/MealSpinWheel";
 import {
     MAX_WHEEL_SEGMENTS,
     MealEntryForm,
 } from "@/app/(authenticated)/spin/_components/MealEntryForm";
+import { getInitialsFromName } from "@/lib/profile";
 
 type Props = {
     session: SpinSession;
@@ -44,7 +46,7 @@ type Props = {
 
 /**
  * Room shown to a guest after joining a shared spin session via its join
- * code, identified entirely by the participant row's own
+ * link, identified entirely by the participant row's own
  * `id`/`participantToken` (never a Supabase session). A guest can never be
  * the session host — that requires an authenticated Alimenta member, who
  * gets their own room in the authenticated `Shared` view instead. Reuses the
@@ -58,7 +60,7 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
     // Guests authenticate via a per-session token stashed in `sessionStorage`
     // on join (see `AnonymousJoinForm`).
     const [participantToken, setParticipantToken] = useSessionStorage(
-        `spin:${session.sessionCode}:participant-token`
+        `spin:${session.id}:participant-token`
     );
     const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
 
@@ -69,10 +71,7 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
         mutationFn: () =>
             leaveSessionAsGuest(session.id, participantToken ?? ""),
         onSuccess: (deletedParticipant: Pick<SpinSessionParticipant, "id">) => {
-            queryClient.setQueryData(
-                ["guest-session", session.sessionCode],
-                null
-            );
+            queryClient.setQueryData(["guest-session", session.id], null);
 
             if (deletedParticipant.id === participant.id) {
                 setParticipantToken(null);
@@ -97,7 +96,7 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
         },
         onSuccess: (updatedParticipant) => {
             queryClient.setQueryData(
-                ["guest-session", session.sessionCode],
+                ["guest-session", session.id],
                 (current: SpinSession | undefined) =>
                     current
                         ? {
@@ -138,6 +137,15 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
         [entries]
     );
 
+    // A guest can only ever remove their own entry — removing anyone else's,
+    // and clearing the board, are host-only and the host is never in here.
+    const segmentRows = entries.map((entry) => ({
+        id: entry.id,
+        label: entry.displayName,
+        sublabel: entry.foodName,
+        canRemove: entry.id === participant.id,
+    }));
+
     const canAddMore = entries.length < MAX_WHEEL_SEGMENTS;
     const hasEntries = wheelSegments.length > 0;
     // Guests can never spin — only the session host can.
@@ -156,36 +164,62 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
 
     return (
         <div className="max-w-6xl mx-auto space-y-6">
+            {/* Guests get no app chrome — the (session) layout is a bare
+                <main> — so the room carries its own identity. */}
+            <header>
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+                    <Dices className="h-3.5 w-3.5" aria-hidden="true" />
+                    Meal Picker
+                </div>
+                <h1 className="text-3xl font-bold tracking-tight">
+                    Shared spin session
+                </h1>
+                <p className="mt-1 text-sm text-muted-foreground">
+                    Add the meal you&apos;re in the mood for — the host spins
+                    once everyone&apos;s in.
+                </p>
+            </header>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
                 <div className="space-y-4">
                     <Card className="border-border/50 bg-card/60">
                         <CardContent className="p-5 flex flex-col items-center gap-4">
                             <SessionShareCard
-                                sessionCode={session.sessionCode}
+                                sessionId={session.id}
                                 isHost={false}
                             />
 
-                            <div className="flex items-center gap-1.5">
-                                <p className="text-xs text-muted-foreground">
-                                    Joined as{" "}
-                                    <span className="font-medium text-foreground">
+                            <div className="flex w-full items-center gap-3 rounded-lg border border-border/50 bg-muted/30 px-3 py-2.5">
+                                <Avatar className="h-9 w-9 text-xs">
+                                    {getInitialsFromName(
+                                        participant.displayName
+                                    )}
+                                </Avatar>
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-xs text-muted-foreground">
+                                        Joined as
+                                    </p>
+                                    <p className="truncate text-sm font-medium">
                                         {participant.displayName}
-                                    </span>
-                                </p>
+                                    </p>
+                                </div>
                                 <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                                    variant="outline"
+                                    size="sm"
+                                    className="shrink-0"
                                     onClick={() => setLeaveDialogOpen(true)}
+                                    leftSection={
+                                        <LogOut className="h-3.5 w-3.5" />
+                                    }
                                     aria-label="Leave session"
                                 >
-                                    <LogOut className="h-3.5 w-3.5" />
+                                    Leave
                                 </Button>
                             </div>
 
                             <AlertDialog
                                 open={leaveDialogOpen}
-                                onOpenChange={setLeaveDialogOpen}
+                                onOpenChangeAction={setLeaveDialogOpen}
                             >
                                 <AlertDialogContent>
                                     <AlertDialogHeader>
@@ -196,7 +230,7 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
                                             You&apos;ll be removed from the
                                             session and your food choice, if
                                             any, will be cleared. You can rejoin
-                                            later with the session code.
+                                            later with the same join link.
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter
@@ -235,6 +269,10 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
                                     </p>
                                 </div>
                             )}
+
+                            <p className="text-xs text-muted-foreground">
+                                {spinDisabledReason}.
+                            </p>
                         </CardContent>
                     </Card>
                 </div>
@@ -250,12 +288,12 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
                         onAdd={handleAddEntry}
                     />
 
-                    <SharedWheelSegments
-                        participants={entries}
-                        currentParticipantId={participant.id}
-                        isHost={false}
+                    <WheelSegments
+                        segments={segmentRows}
                         onRemove={handleRemoveEntry}
                         onClearAll={handleClearAllEntries}
+                        canClearAll={false}
+                        emptyMessage="No meals added yet. Each participant adds one."
                     />
                 </div>
             </div>

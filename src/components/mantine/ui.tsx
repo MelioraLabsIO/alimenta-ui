@@ -11,7 +11,7 @@ export {
     AlertDialogTitle,
 } from "./ui/overlays/alert-dialog";
 export {Button} from "./ui/buttons/button";
-export {Avatar, AvatarFallback} from "./ui/data-display/avatar";
+export {Avatar} from "./ui/data-display/avatar";
 export {Badge} from "./ui/data-display/badge";
 export {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "./ui/data-display/table";
 export {Skeleton} from "./ui/feedback/skeleton";

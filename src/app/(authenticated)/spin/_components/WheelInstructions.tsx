@@ -1,34 +1,20 @@
 "use client";
 
-import { Link2, UtensilsCrossed, Dices } from "lucide-react";
+import { Users, type LucideIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/mantine/ui";
-import { Users } from "lucide-react";
 
-const STEPS = [
-    {
-        icon: Link2,
-        title: "1. Share the code",
-        description: "Invite others to join using the code or QR.",
-    },
-    {
-        icon: UtensilsCrossed,
-        title: "2. Add your meal",
-        description: "Everyone adds one meal they're in the mood for.",
-    },
-    {
-        icon: Dices,
-        title: "3. Spin to decide",
-        description: "The host spins and we all eat the winner!",
-    },
-] as const;
+export type WheelInstructionStep = {
+    icon: LucideIcon;
+    title: string;
+    description: string;
+};
 
 /**
- * Optional informational card shown below the wheel explaining how a shared
- * session works.
+ * "How it works" card shown under the wheel. The steps differ between
+ * Personal and Shared modes, so each page supplies its own — the card itself
+ * is identical in both, which is what keeps the two columns balanced.
  */
-export function SessionInstructions(props: { isHost: boolean }) {
-    if (!props.isHost) return null;
-
+export function WheelInstructions({ steps }: { steps: WheelInstructionStep[] }) {
     return (
         <Card className="border-border/50 bg-card/60">
             <CardContent className="p-4">
@@ -40,7 +26,7 @@ export function SessionInstructions(props: { isHost: boolean }) {
                     <span className="text-sm font-semibold">How it works</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {STEPS.map(({ icon: Icon, title, description }) => (
+                    {steps.map(({ icon: Icon, title, description }) => (
                         <div key={title} className="space-y-1">
                             <div className="flex items-center gap-1.5">
                                 <Icon

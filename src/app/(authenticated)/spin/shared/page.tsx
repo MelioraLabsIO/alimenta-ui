@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { Dices, LogOut, Trash2 } from "lucide-react";
+import { Dices, Link2, LogOut, Trash2, UtensilsCrossed } from "lucide-react";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -30,8 +30,11 @@ import type { SpinSessionParticipant } from "./types";
 import { CreateSessionView } from "./components/CreateSessionView";
 import { SessionShareCard } from "./components/SessionShareCard";
 import { SessionParticipants } from "./components/SessionParticipants";
-import { SharedWheelSegments } from "./components/SharedWheelSegments";
-import { SessionInstructions } from "./components/SessionInstructions";
+import { WheelSegments } from "@/app/(authenticated)/spin/_components/WheelSegments";
+import {
+    WheelInstructions,
+    type WheelInstructionStep,
+} from "@/app/(authenticated)/spin/_components/WheelInstructions";
 import { useAuthUserStore } from "@/stores/auth-user.store";
 import {
     MealSpinWheel,
@@ -42,6 +45,24 @@ import {
     MealEntryForm,
 } from "@/app/(authenticated)/spin/_components/MealEntryForm";
 import { PastMealsSearch } from "@/app/(authenticated)/spin/_components/PastMealsSearch";
+
+const INSTRUCTION_STEPS: WheelInstructionStep[] = [
+    {
+        icon: Link2,
+        title: "1. Share the link",
+        description: "Invite others to join using the join link or QR.",
+    },
+    {
+        icon: UtensilsCrossed,
+        title: "2. Add your meal",
+        description: "Everyone adds one meal they're in the mood for.",
+    },
+    {
+        icon: Dices,
+        title: "3. Spin to decide",
+        description: "The host spins and we all eat the winner!",
+    },
+];
 
 export default function Shared() {
     const queryClient = useQueryClient();
@@ -77,8 +98,16 @@ export default function Shared() {
     // they have to delete the session instead (see deleteSessionMutation).
     const { mutate: leaveSessionMutation } = useMutation({
         mutationFn: () => leaveSessionAsMember(session!.id),
-        onSuccess: () => {
+        onMutate: async () => {
+            await queryClient.cancelQueries({ queryKey: ["session"] });
+            const previousSession = queryClient.getQueryData<typeof session>([
+                "session",
+            ]);
             queryClient.setQueryData(["session"], null);
+            return { previousSession };
+        },
+        onError: (_err, _vars, context) => {
+            queryClient.setQueryData(["session"], context?.previousSession);
         },
     });
 
@@ -86,7 +115,11 @@ export default function Shared() {
     const { mutate: removeParticipantMutation } = useMutation({
         mutationFn: (participantId: string) =>
             deleteSpinParticipant(session!.id, participantId),
-        onSuccess: (_, participantId) => {
+        onMutate: async (participantId) => {
+            await queryClient.cancelQueries({ queryKey: ["session"] });
+            const previousSession = queryClient.getQueryData<typeof session>([
+                "session",
+            ]);
             queryClient.setQueryData(["session"], (current: typeof session) =>
                 current
                     ? {
@@ -97,14 +130,27 @@ export default function Shared() {
                       }
                     : current
             );
+            return { previousSession };
+        },
+        onError: (_err, _participantId, context) => {
+            queryClient.setQueryData(["session"], context?.previousSession);
         },
     });
 
     // Host deleting the whole session.
     const { mutate: deleteSessionMutation } = useMutation({
+        mutationKey: ["deleteSpinSession"],
         mutationFn: () => deleteSpinSession(session!.id),
-        onSuccess: () => {
+        onMutate: async () => {
+            await queryClient.cancelQueries({ queryKey: ["session"] });
+            const previousSession = queryClient.getQueryData<typeof session>([
+                "session",
+            ]);
             queryClient.setQueryData(["session"], null);
+            return { previousSession };
+        },
+        onError: (_err, _vars, context) => {
+            queryClient.setQueryData(["session"], context?.previousSession);
         },
     });
 
@@ -152,6 +198,19 @@ export default function Shared() {
                 label: `${entry.displayName} — ${entry.foodName}`,
             })),
         [entries]
+    );
+
+    // The segments card shows the name and the meal in separate columns, and
+    // lets you remove an entry if it's yours (or if you're the host).
+    const segmentRows = useMemo(
+        () =>
+            entries.map((entry) => ({
+                id: entry.id,
+                label: entry.displayName,
+                sublabel: entry.foodName,
+                canRemove: isHost || entry.id === currentParticipantId,
+            })),
+        [entries, isHost, currentParticipantId]
     );
 
     const spinTrigger: SpinTrigger | null = null;
@@ -204,7 +263,7 @@ export default function Shared() {
                     <Card className="border-border/50 bg-card/60">
                         <CardContent className="p-5 flex flex-col items-center gap-4">
                             <SessionShareCard
-                                sessionCode={session.sessionCode}
+                                sessionId={session.id}
                                 isHost={isHost}
                             />
 
@@ -243,7 +302,7 @@ export default function Shared() {
 
                             <AlertDialog
                                 open={leaveDialogOpen}
-                                onOpenChange={setLeaveDialogOpen}
+                                onOpenChangeAction={setLeaveDialogOpen}
                             >
                                 <AlertDialogContent>
                                     <AlertDialogHeader>
@@ -254,7 +313,7 @@ export default function Shared() {
                                             You&apos;ll be removed from the
                                             session and your food choice, if
                                             any, will be cleared. You can rejoin
-                                            later with the session code.
+                                            later with the same join link.
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter
@@ -279,7 +338,7 @@ export default function Shared() {
 
                             <AlertDialog
                                 open={deleteSessionDialogOpen}
-                                onOpenChange={setDeleteSessionDialogOpen}
+                                onOpenChangeAction={setDeleteSessionDialogOpen}
                             >
                                 <AlertDialogContent>
                                     <AlertDialogHeader>
@@ -287,9 +346,9 @@ export default function Shared() {
                                             Delete this session?
                                         </AlertDialogTitle>
                                         <AlertDialogDescription>
-                                            This ends the session for
-                                            everyone and can&apos;t be undone.
-                                            All participants will be removed.
+                                            This ends the session for everyone
+                                            and can&apos;t be undone. All
+                                            participants will be removed.
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter
@@ -362,7 +421,7 @@ export default function Shared() {
                         </CardContent>
                     </Card>
 
-                    <SessionInstructions isHost={isHost} />
+                    <WheelInstructions steps={INSTRUCTION_STEPS} />
                 </div>
 
                 <div className="space-y-4">
@@ -392,12 +451,12 @@ export default function Shared() {
                         }}
                     />
 
-                    <SharedWheelSegments
-                        participants={entries}
-                        currentParticipantId={currentParticipantId}
-                        isHost={isHost}
+                    <WheelSegments
+                        segments={segmentRows}
                         onRemove={removeEntry}
                         onClearAll={clearAllEntries}
+                        canClearAll={isHost}
+                        emptyMessage="No meals added yet. Each participant adds one."
                     />
                 </div>
             </div>

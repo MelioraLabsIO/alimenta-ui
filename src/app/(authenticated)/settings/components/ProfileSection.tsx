@@ -5,7 +5,6 @@ import { useMutation } from "@tanstack/react-query";
 import { User } from "lucide-react";
 import {
     Avatar,
-    AvatarFallback,
     Button,
     Card,
     CardContent,
@@ -19,6 +18,7 @@ import { toast } from "@/lib/notifications";
 import { updateProfile } from "@/apis/profile/mutations";
 // import { type UserProfileResponse } from "@/apis/profile/queries";
 import { useProfileStore } from "@/stores/profile.store";
+import { getProfileInitials } from "@/lib/profile";
 import { UserProfile } from "@/core/types/models/profile";
 
 export function ProfileSection() {
@@ -55,9 +55,7 @@ export function ProfileSection() {
 
     const email = data?.email ?? "";
     const fullName = `${name.firstName} ${name.lastName}`.trim();
-    const avatarInitials = data
-        ? `${data.firstName[0] ?? ""}${data.lastName[0] ?? ""}`.toUpperCase()
-        : "";
+    const avatarInitials = getProfileInitials(data);
     const hasModifiedProfile = Boolean(
         data &&
         (data.firstName !== name.firstName || data.lastName !== name.lastName)
@@ -79,10 +77,8 @@ export function ProfileSection() {
             </CardHeader>
             <CardContent className="space-y-5">
                 <div className="flex items-center gap-4">
-                    <Avatar className="h-16 w-16">
-                        <AvatarFallback className="text-xl bg-primary/20 text-primary font-bold">
-                            {isLoading ? ".." : avatarInitials}
-                        </AvatarFallback>
+                    <Avatar className="h-16 w-16 text-xl">
+                        {isLoading ? ".." : avatarInitials}
                     </Avatar>
                     <div>
                         <p className="text-sm font-medium">

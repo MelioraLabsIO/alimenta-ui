@@ -48,5 +48,9 @@ export async function apiFetch<T = unknown>(
         throw new Error(`API error ${response.status}`);
     }
 
-    return response.json() as Promise<T>;
+    // Some endpoints (e.g. DELETE) return a status with no body — 204, or
+    // 200 with an empty payload. `response.json()` throws on an empty body,
+    // so only parse when there's actually something to parse.
+    const text = await response.text();
+    return (text ? JSON.parse(text) : undefined) as T;
 }

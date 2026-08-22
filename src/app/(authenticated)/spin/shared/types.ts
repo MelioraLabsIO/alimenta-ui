@@ -1,7 +1,7 @@
 /**
  * Domain types for an authenticated shared spin-wheel session.
  *
- * These mirror the real `/api/v1/spin-sessions/{joinCode}` response shape.
+ * These mirror the real `/api/v1/spin-sessions/{sessionId}` response shape.
  * There is no separate "entries" collection — each participant carries at
  * most one food choice directly (`foodName`, empty until they add one), and
  * there is no `isHost`/`isConnected` flag on a participant — host status is
@@ -37,9 +37,8 @@ export type JoinSpinSessionResponse = {
 };
 
 export type SpinSession = {
+    /** The only identifier participants join by — it's the `/spin/[session_id]` slug. */
     id: string;
-    /** Short alphanumeric code participants use to join. */
-    sessionCode: string;
     hostUserId: string;
     status: SessionStatus;
     expiresAt: Date;
@@ -47,7 +46,7 @@ export type SpinSession = {
     spinParticipants: SpinSessionParticipant[];
 };
 
-/** Body for the `PUT /spin-sessions/{code}/me/food` upsert-food-choice request. */
+/** Body for the `PUT /spin-sessions/{sessionId}/me/food` upsert-food-choice request. */
 export type UpsertParticipantFoodParams = {
     foodName: string | null;
     id: string;
