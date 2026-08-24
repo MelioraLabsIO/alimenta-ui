@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import type { SpinSession, UseSharedSessionReturn } from "../types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getActiveSession } from "@/apis/spin/queries";
 import { upsertParticipantFoodAsMember } from "@/apis/spin/mutations";
 import { User } from "@supabase/supabase-js";
+import { createWebSocket } from "next/dist/client/dev/hot-reloader/app/web-socket";
 
 export function useSharedSession(user: User | null): UseSharedSessionReturn {
     const queryClient = useQueryClient();

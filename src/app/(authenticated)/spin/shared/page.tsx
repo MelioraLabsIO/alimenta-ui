@@ -45,6 +45,7 @@ import {
     MealEntryForm,
 } from "@/app/(authenticated)/spin/_components/MealEntryForm";
 import { PastMealsSearch } from "@/app/(authenticated)/spin/_components/PastMealsSearch";
+import { useSpinRealtime } from "@/app/(authenticated)/spin/shared/hooks/useSpinRealtime";
 
 const INSTRUCTION_STEPS: WheelInstructionStep[] = [
     {
@@ -79,6 +80,8 @@ export default function Shared() {
         clearAllEntries,
         requestSpin,
     } = useSharedSession(user);
+
+    useSpinRealtime(session?.id);
 
     const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
     const [deleteSessionDialogOpen, setDeleteSessionDialogOpen] =
