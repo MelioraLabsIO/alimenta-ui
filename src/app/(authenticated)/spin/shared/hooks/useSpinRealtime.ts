@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { BASE_URL } from "@/apiClient/client";
 
 interface SpinEvent {
     type: string;
@@ -19,7 +18,7 @@ export function useSpinRealtime(sessionId: string | null | undefined) {
         }
 
         const socket = new WebSocket(
-            `ws://${BASE_URL}/api/v1/spin-sessions/ws/spin/${sessionId}`
+            `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/ws`
         );
 
         socket.onopen = () => {
