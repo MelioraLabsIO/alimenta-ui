@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { BASE_URL } from "@/apiClient/client";
 
 interface SpinEvent {
     type: string;
