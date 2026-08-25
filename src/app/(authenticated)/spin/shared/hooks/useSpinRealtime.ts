@@ -17,8 +17,10 @@ export function useSpinRealtime(sessionId: string | null | undefined) {
             return;
         }
 
+        const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+
         const socket = new WebSocket(
-            `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/ws`
+            `${protocol}//${window.location.host}/api/v1/spin-sessions/ws/spin/${sessionId}`
         );
 
         socket.onopen = () => {
