@@ -1,0 +1,56 @@
+"use client";
+
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+
+interface SpinEvent {
+    type: string;
+    sessionId: string;
+    data: unknown;
+}
+
+export function useSpinRealtime(sessionId: string | null | undefined) {
+    const queryClient = useQueryClient();
+
+    useEffect(() => {
+        if (!sessionId) {
+            return;
+        }
+
+        const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+
+        const socket = new WebSocket(
+            `${protocol}//${window.location.host}/api/v1/spin-sessions/ws/spin/${sessionId}`
+        );
+
+        socket.onopen = () => {
+            console.log("Spin realtime connected");
+
+            // Ensure our snapshot is current after subscribing.
+            queryClient.invalidateQueries({
+                queryKey: ["session"],
+            });
+        };
+
+        socket.onmessage = (message) => {
+            const event: SpinEvent = JSON.parse(message.data);
+            console.log("Spin event received:", event);
+
+            queryClient.invalidateQueries({
+                queryKey: ["session"],
+            });
+        };
+
+        socket.onerror = (error) => {
+            console.error("Spin realtime error:", error);
+        };
+
+        socket.onclose = () => {
+            console.log("Spin realtime disconnected");
+        };
+
+        return () => {
+            socket.close();
+        };
+    }, [sessionId, queryClient]);
+}

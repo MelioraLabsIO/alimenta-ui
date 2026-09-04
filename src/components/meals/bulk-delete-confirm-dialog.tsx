@@ -6,9 +6,9 @@ import {
     AlertDialogDescription,
     AlertDialogFooter,
     AlertDialogHeader,
-    AlertDialogTitle
+    AlertDialogTitle,
 } from "@/components/mantine/ui";
-import {Group} from "@mantine/core";
+import { Group } from "@mantine/core";
 
 interface BulkDeleteConfirmDialogProps {
     open: boolean;
@@ -17,15 +17,26 @@ interface BulkDeleteConfirmDialogProps {
     onConfirm: () => void;
 }
 
-export function BulkDeleteConfirmDialog({open, onOpenChange, count, onConfirm}: BulkDeleteConfirmDialogProps) {
+export function BulkDeleteConfirmDialog({
+    open,
+    onOpenChange,
+    count,
+    onConfirm,
+}: BulkDeleteConfirmDialogProps) {
     return (
-        <AlertDialog open={open} onOpenChange={onOpenChange}>
+        <AlertDialog open={open} onOpenChangeAction={onOpenChange}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Delete {count} meal{count !== 1 ? "s" : ""}?</AlertDialogTitle>
+                    <AlertDialogTitle>
+                        Delete {count} meal{count !== 1 ? "s" : ""}?
+                    </AlertDialogTitle>
                     <AlertDialogDescription>
-                        You are about to permanently delete <strong>{count} meal{count !== 1 ? "s" : ""}</strong>. This
-                        action cannot be undone and the deleted meal{count !== 1 ? "s" : ""} cannot be retrieved. It may
+                        You are about to permanently delete{" "}
+                        <strong>
+                            {count} meal{count !== 1 ? "s" : ""}
+                        </strong>
+                        . This action cannot be undone and the deleted meal
+                        {count !== 1 ? "s" : ""} cannot be retrieved. It may
                         also affect your nutrition statistics and reports.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
@@ -37,7 +48,10 @@ export function BulkDeleteConfirmDialog({open, onOpenChange, count, onConfirm}: 
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                             onClick={onConfirm}
                         >
-                            Delete <em>{count} meal{count !== 1 ? "s" : ""}</em>
+                            Delete{" "}
+                            <em>
+                                {count} meal{count !== 1 ? "s" : ""}
+                            </em>
                         </AlertDialogAction>
                     </Group>
                 </AlertDialogFooter>

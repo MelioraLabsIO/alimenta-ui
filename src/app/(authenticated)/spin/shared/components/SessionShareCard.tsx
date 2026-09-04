@@ -55,7 +55,7 @@ export function SessionShareCard({
             <div className="flex items-center justify-between gap-2">
                 <Dialog
                     open={shareDialogOpen}
-                    onOpenChange={setShareDialogOpen}
+                    onOpenChangeAction={setShareDialogOpen}
                 >
                     <DialogTrigger asChild>
                         <Button

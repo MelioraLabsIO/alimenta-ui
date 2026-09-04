@@ -201,7 +201,7 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
 
                             <AlertDialog
                                 open={leaveDialogOpen}
-                                onOpenChange={setLeaveDialogOpen}
+                                onOpenChangeAction={setLeaveDialogOpen}
                             >
                                 <AlertDialogContent>
                                     <AlertDialogHeader>

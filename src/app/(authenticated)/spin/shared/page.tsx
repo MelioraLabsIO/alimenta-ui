@@ -214,7 +214,7 @@ export default function Shared() {
 
                             <AlertDialog
                                 open={leaveDialogOpen}
-                                onOpenChange={setLeaveDialogOpen}
+                                onOpenChangeAction={setLeaveDialogOpen}
                             >
                                 <AlertDialogContent>
                                     <AlertDialogHeader>

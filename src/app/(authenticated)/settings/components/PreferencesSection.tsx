@@ -12,7 +12,7 @@ import {
     Text,
 } from "@/components/mantine/ui";
 import { toast } from "@/lib/notifications";
-import { PreferenceTagInput } from "./preference-tag-input";
+import { PreferenceTagInput } from "./PreferenceTagInput";
 import type { FoodSearchItem } from "@/apis/food/queries";
 
 export function PreferencesSection() {

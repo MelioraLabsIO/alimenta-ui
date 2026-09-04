@@ -1,6 +1,6 @@
-import {AiPreferencesSection} from "./components/ai-preferences-section";
-import {PreferencesSection} from "./components/preferences-section";
-import {ProfileSection} from "./components/profile-section";
+import { AiPreferencesSection } from "./components/AiPreferencesSection";
+import { PreferencesSection } from "./components/PreferencesSection";
+import { ProfileSection } from "./components/ProfileSection";
 
 export default function SettingsPage() {
     return (
@@ -8,7 +8,7 @@ export default function SettingsPage() {
             <div>
                 <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
                 <p className="text-sm text-muted-foreground mt-0.5">
-                    Manage your profile, preferences, and AI behaviour.
+                    Manage your profile, preferences, and AI behavior.
                 </p>
             </div>
 

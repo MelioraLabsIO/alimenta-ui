@@ -140,7 +140,7 @@ function MealDetailDialog({
         ["", "Poor", "Fair", "Okay", "Good", "Great"][v] ?? "";
 
     return (
-        <Dialog open={open} onOpenChange={onClose}>
+        <Dialog open={open} onOpenChangeAction={onClose}>
             <DialogContent className="max-w-lg">
                 <DialogHeader>
                     <DialogTitle className="text-base">
