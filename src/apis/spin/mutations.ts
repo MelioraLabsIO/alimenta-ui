@@ -54,19 +54,6 @@ export function deleteSpinSession(sessionId: string): Promise<boolean> {
 }
 
 /** Removes self, identified by the current authenticated member's Supabase session. */
-export async function deleteSpinParticipant(
-    sessionId: string,
-    participantId: string
-): Promise<void> {
-    return apiFetch(
-        `/api/v1/spin-sessions/${sessionId}/participants/${participantId}`,
-        {
-            method: "DELETE",
-        }
-    );
-}
-
-/** Removes self, identified by the current authenticated member's Supabase session. */
 export async function leaveSessionAsMember(
     sessionId: string
 ): Promise<Pick<SpinSessionParticipant, "id" | "userId" | "displayName">> {

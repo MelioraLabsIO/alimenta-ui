@@ -157,15 +157,6 @@ export default function Shared() {
         },
     });
 
-    // Self-removal, identified by Supabase session — no participant ID
-    // needed. Every participant on this authenticated view is a member.
-    const { mutate: removeSelfAsMemberMutation } = useMutation({
-        mutationFn: () => deleteSpinParticipantAsMember(session!.id),
-        onSuccess: () => {
-            queryClient.setQueryData(["session"], null);
-        },
-    });
-
     /********************************************* HANDLERS ************************************************/
     const handleRemoveParticipant = useCallback(
         (participantId: string) => removeParticipantMutation(participantId),

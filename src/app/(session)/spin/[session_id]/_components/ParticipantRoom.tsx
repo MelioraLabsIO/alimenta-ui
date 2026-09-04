@@ -25,11 +25,12 @@ import type {
 } from "@/app/(authenticated)/spin/shared/types";
 import {
     leaveSessionAsGuest,
+    leaveSessionAsMember,
     upsertParticipantFoodAsGuest,
 } from "@/apis/spin/mutations";
 import { SessionShareCard } from "@/app/(authenticated)/spin/shared/components/SessionShareCard";
 import { SessionParticipants } from "@/app/(authenticated)/spin/shared/components/SessionParticipants";
-import { SharedWheelSegments } from "@/app/(authenticated)/spin/shared/components/SharedWheelSegments";
+import { WheelSegments } from "@/app/(authenticated)/spin/_components/WheelSegments";
 import { MealSpinWheel } from "@/app/(authenticated)/spin/_components/MealSpinWheel";
 import {
     MAX_WHEEL_SEGMENTS,
@@ -88,7 +89,7 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
     // Authenticated-member self-removal, identified by Supabase session —
     // no participant ID needed.
     const { mutate: removeSelfAsMemberMutation } = useMutation({
-        mutationFn: () => deleteSpinParticipantAsMember(session.id),
+        mutationFn: () => leaveSessionAsMember(session.id),
         onSuccess: () => {
             queryClient.setQueryData(["guest-session", session.id], null);
             onLeftAction?.();
@@ -308,10 +309,8 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
                         onAdd={handleAddEntry}
                     />
 
-                    <SharedWheelSegments
-                        participants={entries}
-                        currentParticipantId={participant.id}
-                        isHost={false}
+                    <WheelSegments
+                        segments={segmentRows}
                         onRemove={handleRemoveEntry}
                         onClearAll={handleClearAllEntries}
                         canClearAll={false}
