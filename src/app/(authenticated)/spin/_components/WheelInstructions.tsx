@@ -14,7 +14,11 @@ export type WheelInstructionStep = {
  * Personal and Shared modes, so each page supplies its own — the card itself
  * is identical in both, which is what keeps the two columns balanced.
  */
-export function WheelInstructions({ steps }: { steps: WheelInstructionStep[] }) {
+export function WheelInstructions({
+    steps,
+}: {
+    steps: WheelInstructionStep[];
+}) {
     return (
         <Card className="border-border/50 bg-card/60">
             <CardContent className="p-4">

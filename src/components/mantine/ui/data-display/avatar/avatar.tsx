@@ -21,7 +21,10 @@ import type { ComponentProps } from "react";
  * the caller's on the same property, and this shim has no `tailwind-merge`
  * to resolve that, so whichever class Tailwind emitted last would win.
  */
-export const Avatar = ({ className = "", ...props }: ComponentProps<"span">) => (
+export const Avatar = ({
+    className = "",
+    ...props
+}: ComponentProps<"span">) => (
     <span
         className={`relative flex shrink-0 select-none items-center justify-center overflow-hidden rounded-full bg-primary/20 font-semibold text-primary ${className}`}
         {...props}

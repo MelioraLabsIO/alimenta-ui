@@ -39,6 +39,7 @@ export type JoinSpinSessionResponse = {
 export type SpinSession = {
     /** The only identifier participants join by — it's the `/spin/[session_id]` slug. */
     id: string;
+    /** Short alphanumeric code participants use to join. */
     hostUserId: string;
     status: SessionStatus;
     expiresAt: Date;

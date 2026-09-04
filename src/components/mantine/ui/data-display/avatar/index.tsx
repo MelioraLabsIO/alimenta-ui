@@ -1,3 +1,3 @@
 "use client";
 
-export {Avatar} from "./avatar";
+export { Avatar } from "./avatar";

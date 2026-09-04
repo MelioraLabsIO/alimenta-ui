@@ -2,10 +2,20 @@
 
 import * as React from "react";
 
-export type Variant = "default" | "secondary" | "outline" | "ghost" | "destructive" | "subtle" | "light";
+export type Variant =
+    | "default"
+    | "secondary"
+    | "outline"
+    | "ghost"
+    | "destructive"
+    | "subtle"
+    | "light";
 export type Size = "default" | "sm" | "lg" | "icon" | string;
 
-export type ButtonProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "color"> & {
+export type ButtonProps = Omit<
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
+    "color"
+> & {
     variant?: Variant;
     size?: Size;
     component?: React.ElementType;

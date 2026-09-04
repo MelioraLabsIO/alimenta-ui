@@ -53,7 +53,7 @@ export function deleteSpinSession(sessionId: string): Promise<boolean> {
     });
 }
 
-/** Removes a participant, identified by the current authenticated member's Supabase session. */
+/** Removes self, identified by the current authenticated member's Supabase session. */
 export async function leaveSessionAsMember(
     sessionId: string
 ): Promise<Pick<SpinSessionParticipant, "id" | "userId" | "displayName">> {

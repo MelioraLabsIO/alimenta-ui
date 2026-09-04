@@ -25,6 +25,7 @@ import type {
 } from "@/app/(authenticated)/spin/shared/types";
 import {
     leaveSessionAsGuest,
+    leaveSessionAsMember,
     upsertParticipantFoodAsGuest,
 } from "@/apis/spin/mutations";
 import { SessionShareCard } from "@/app/(authenticated)/spin/shared/components/SessionShareCard";
@@ -55,6 +56,11 @@ type Props = {
  * endpoints.
  */
 export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
+    // The host manages their session from the authenticated `/spin/shared`
+    // page, never from this join-by-code room — so a viewer here is always
+    // a non-host, whether guest or authenticated member.
+    const isMember = Boolean(participant.userId);
+
     const queryClient = useQueryClient();
 
     // Guests authenticate via a per-session token stashed in `sessionStorage`
@@ -77,6 +83,16 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
                 setParticipantToken(null);
                 onLeftAction?.();
             }
+        },
+    });
+
+    // Authenticated-member self-removal, identified by Supabase session —
+    // no participant ID needed.
+    const { mutate: removeSelfAsMemberMutation } = useMutation({
+        mutationFn: () => leaveSessionAsMember(session.id),
+        onSuccess: () => {
+            queryClient.setQueryData(["guest-session", session.id], null);
+            onLeftAction?.();
         },
     });
 
@@ -114,9 +130,13 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
     });
     /********************************************* HANDLERS ************************************************/
     const handleConfirmLeaveSession = useCallback(() => {
-        removeSelfAsGuestMutation();
+        if (isMember) {
+            removeSelfAsMemberMutation();
+        } else {
+            removeSelfAsGuestMutation();
+        }
         setLeaveDialogOpen(false);
-    }, [removeSelfAsGuestMutation]);
+    }, [isMember, removeSelfAsMemberMutation, removeSelfAsGuestMutation]);
 
     const participants = session.spinParticipants ?? [];
 
@@ -148,6 +168,7 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
 
     const canAddMore = entries.length < MAX_WHEEL_SEGMENTS;
     const hasEntries = wheelSegments.length > 0;
+
     // Guests can never spin — only the session host can.
     const spinDisabledReason = "Only the host can spin the wheel";
 
