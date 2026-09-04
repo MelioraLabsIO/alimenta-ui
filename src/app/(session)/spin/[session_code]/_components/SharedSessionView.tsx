@@ -33,7 +33,7 @@ export function SharedSessionView() {
         (joined: JoinSpinSessionResponse) => {
             setJoinedParticipant(joined.participant);
             queryClient.setQueryData(
-                ["guest-session", session?.sessionCode],
+                ["guest-session", session?.id],
                 (cachedData: SpinSession) => {
                     return {
                         ...cachedData,
@@ -45,16 +45,16 @@ export function SharedSessionView() {
                 }
             );
         },
-        [queryClient, session?.sessionCode]
+        [queryClient, session?.id]
     );
 
     const handleParticipantLeft = useCallback(() => {
         setJoinedParticipant(null);
         queryClient.removeQueries({
-            queryKey: ["guest-session", session?.sessionCode],
+            queryKey: ["guest-session", session?.id],
         });
         navigate.push("/");
-    }, [queryClient, navigate, session?.sessionCode]);
+    }, [queryClient, navigate, session?.id]);
 
     if (isLoadingSession || isLoadingParticipant || !session) {
         return (
