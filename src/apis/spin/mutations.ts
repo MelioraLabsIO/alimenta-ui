@@ -20,12 +20,12 @@ export async function joinSpinSessionAsMember(
 }
 
 export async function joinSpinSessionAsGuest(
-    joinCode: string,
+    sessionId: string,
     name: string
 ): Promise<JoinSpinSessionResponse> {
-    console.log(`Joining spin session as guest: ${joinCode}, name: ${name}`);
+    console.log(`Joining spin session as guest: ${sessionId}, name: ${name}`);
     return apiFetch(
-        `/api/v1/spin-sessions/${joinCode}/join`,
+        `/api/v1/spin-sessions/${sessionId}/join`,
         {
             method: "POST",
             body: JSON.stringify({ name }),
@@ -34,11 +34,24 @@ export async function joinSpinSessionAsGuest(
     );
 }
 
-/** Removes a participant, identified by the current authenticated member's Supabase session. */
-export async function deleteSpinParticipantAsMember(
-    joinCode: string
+/** Removes self, identified by the current authenticated member's Supabase session. */
+export async function deleteSpinParticipant(
+    sessionId: string,
+    participantId: string
 ): Promise<void> {
-    return apiFetch(`/api/v1/spin-sessions/${joinCode}/participants/me`, {
+    return apiFetch(
+        `/api/v1/spin-sessions/${sessionId}/participants/${participantId}`,
+        {
+            method: "DELETE",
+        }
+    );
+}
+
+/** Removes self, identified by the current authenticated member's Supabase session. */
+export async function deleteSpinParticipantAsMember(
+    sessionId: string
+): Promise<void> {
+    return apiFetch(`/api/v1/spin-sessions/${sessionId}/participants/me`, {
         method: "DELETE",
     });
 }
@@ -49,11 +62,11 @@ export async function deleteSpinParticipantAsMember(
  * header.
  */
 export async function deleteSpinParticipantAsGuest(
-    joinCode: string,
+    sessionId: string,
     participantToken: string
 ): Promise<Pick<SpinSessionParticipant, "id">> {
     return apiFetch(
-        `/api/v1/spin-sessions/${joinCode}/participants/me`,
+        `/api/v1/spin-sessions/${sessionId}/participants/me`,
         {
             method: "DELETE",
             headers: { "X-Participant-Token": participantToken },

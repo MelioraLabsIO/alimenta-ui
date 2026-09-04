@@ -20,6 +20,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import {
     createSpinSession,
+    deleteSpinParticipant,
     deleteSpinParticipantAsMember,
 } from "@/apis/spin/mutations";
 
@@ -69,18 +70,11 @@ export default function Shared() {
             },
         });
 
+    // Host removal of another participant, by participant ID.
     const { mutate: removeParticipantMutation } = useMutation({
         mutationFn: (participantId: string) =>
-            deleteSpinParticipantAsMember(session!.sessionCode, participantId),
+            deleteSpinParticipant(session!.id, participantId),
         onSuccess: (_, participantId) => {
-            // Leaving yourself clears the whole session so this view falls
-            // back to "no active session" — a host removing someone else
-            // just drops that participant from the list.
-            if (participantId === currentParticipantId) {
-                queryClient.setQueryData(["session"], null);
-                return;
-            }
-
             queryClient.setQueryData(["session"], (current: typeof session) =>
                 current
                     ? {
@@ -94,6 +88,15 @@ export default function Shared() {
         },
     });
 
+    // Self-removal, identified by Supabase session — no participant ID
+    // needed. Every participant on this authenticated view is a member.
+    const { mutate: removeSelfAsMemberMutation } = useMutation({
+        mutationFn: () => deleteSpinParticipantAsMember(session!.id),
+        onSuccess: () => {
+            queryClient.setQueryData(["session"], null);
+        },
+    });
+
     /********************************************* HANDLERS ************************************************/
     const handleRemoveParticipant = useCallback(
         (participantId: string) => removeParticipantMutation(participantId),
@@ -101,9 +104,9 @@ export default function Shared() {
     );
 
     const handleConfirmLeaveSession = useCallback(() => {
-        removeParticipantMutation(currentParticipantId);
+        removeSelfAsMemberMutation();
         setLeaveDialogOpen(false);
-    }, [removeParticipantMutation, currentParticipantId]);
+    }, [removeSelfAsMemberMutation]);
 
     const handleCreateSession = useCallback(() => {
         createSpinSessionMutation();
@@ -173,11 +176,13 @@ export default function Shared() {
         );
     }
 
+    console.log("Session:", session);
+
     return (
         <div className="max-w-6xl mx-auto space-y-6">
             <p className="text-sm text-muted-foreground">
-                Create a session, invite friends, add meals, and spin to
-                decide what to eat.
+                Create a session, invite friends, add meals, and spin to decide
+                what to eat.
             </p>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
@@ -185,7 +190,7 @@ export default function Shared() {
                     <Card className="border-border/50 bg-card/60">
                         <CardContent className="p-5 flex flex-col items-center gap-4">
                             <SessionShareCard
-                                sessionCode={session.sessionCode}
+                                sessionCode={session.id}
                                 isHost={isHost}
                             />
 
@@ -199,9 +204,7 @@ export default function Shared() {
                                         variant="ghost"
                                         size="icon"
                                         className="h-6 w-6 text-muted-foreground hover:text-destructive"
-                                        onClick={() =>
-                                            setLeaveDialogOpen(true)
-                                        }
+                                        onClick={() => setLeaveDialogOpen(true)}
                                         aria-label="Leave session"
                                     >
                                         <LogOut className="h-3.5 w-3.5" />
@@ -221,9 +224,8 @@ export default function Shared() {
                                         <AlertDialogDescription>
                                             You&apos;ll be removed from the
                                             session and your food choice, if
-                                            any, will be cleared. You can
-                                            rejoin later with the session
-                                            code.
+                                            any, will be cleared. You can rejoin
+                                            later with the session code.
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter

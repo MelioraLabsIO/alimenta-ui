@@ -39,7 +39,6 @@ export type JoinSpinSessionResponse = {
 export type SpinSession = {
     id: string;
     /** Short alphanumeric code participants use to join. */
-    sessionCode: string;
     hostUserId: string;
     status: SessionStatus;
     expiresAt: Date;

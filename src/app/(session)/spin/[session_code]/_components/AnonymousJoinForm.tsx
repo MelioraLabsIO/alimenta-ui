@@ -37,12 +37,12 @@ export function AnonymousJoinForm({
     });
 
     const [, setParticipantToken] = useSessionStorage(
-        `spin:${session.sessionCode}:participant-token`
+        `spin:${session.id}:participant-token`
     );
 
     const { mutate: join, isPending } = useMutation({
         mutationFn: async (data: JoinSpinSessionSchema) =>
-            joinSpinSessionAsGuest(session.sessionCode, data.displayName),
+            joinSpinSessionAsGuest(session.id, data.displayName),
         onSuccess: (result) => {
             if (result.participantToken) {
                 setParticipantToken(result.participantToken);
@@ -94,7 +94,7 @@ export function AnonymousJoinForm({
 
             <a
                 href={routes.login({
-                    next: routes.spinShared(session.sessionCode, {
+                    next: routes.spinShared(session.id, {
                         autojoin: true,
                     }),
                 })}

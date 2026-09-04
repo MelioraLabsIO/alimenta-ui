@@ -29,7 +29,6 @@ import {
 } from "@/apis/spin/mutations";
 import { SessionShareCard } from "@/app/(authenticated)/spin/shared/components/SessionShareCard";
 import { SessionParticipants } from "@/app/(authenticated)/spin/shared/components/SessionParticipants";
-import { SessionInstructions } from "@/app/(authenticated)/spin/shared/components/SessionInstructions";
 import { SharedWheelSegments } from "@/app/(authenticated)/spin/shared/components/SharedWheelSegments";
 import { MealSpinWheel } from "@/app/(authenticated)/spin/_components/MealSpinWheel";
 import {
@@ -54,15 +53,17 @@ type Props = {
  * stays display-only until those are wired to real endpoints.
  */
 export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
-    const isMember = participant.userId !== "";
-    const isHost = isMember && participant.userId === session.hostUserId;
+    // The host manages their session from the authenticated `/spin/shared`
+    // page, never from this join-by-code room — so a viewer here is always
+    // a non-host, whether guest or authenticated member.
+    const isMember = Boolean(participant.userId);
 
     const queryClient = useQueryClient();
 
     // Guests authenticate via a per-session token stashed in `sessionStorage`
     // on join (see `AnonymousJoinForm`).
     const [participantToken, setParticipantToken] = useSessionStorage(
-        `spin:${session.sessionCode}:participant-token`
+        `spin:${session.id}:participant-token`
     );
     const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
 
@@ -71,15 +72,9 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
     // token, so the backend only ever knows this as "remove me."
     const { mutate: removeSelfAsGuestMutation } = useMutation({
         mutationFn: () =>
-            deleteSpinParticipantAsGuest(
-                session.sessionCode,
-                participantToken ?? ""
-            ),
+            deleteSpinParticipantAsGuest(session.id, participantToken ?? ""),
         onSuccess: (deletedParticipant: Pick<SpinSessionParticipant, "id">) => {
-            queryClient.setQueryData(
-                ["guest-session", session.sessionCode],
-                null
-            );
+            queryClient.setQueryData(["guest-session", session.id], null);
 
             if (deletedParticipant.id === participant.id) {
                 setParticipantToken(null);
@@ -88,29 +83,13 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
         },
     });
 
-    // Authenticated-member removal by participant ID: used both when the
-    // host removes another participant, and when a non-host member leaves
-    // by passing their own participant ID.
-    const { mutate: removeParticipantByIdMutation } = useMutation({
-        mutationFn: (participantId: string) =>
-            deleteSpinParticipantAsMember(session.sessionCode, participantId),
-        onSuccess: (_, removedParticipantId) => {
-            queryClient.setQueryData(
-                ["guest-session", session.sessionCode],
-                (current: SpinSession | undefined) =>
-                    current
-                        ? {
-                              ...current,
-                              spinParticipants: current.spinParticipants.filter(
-                                  (p) => p.id !== removedParticipantId
-                              ),
-                          }
-                        : current
-            );
-
-            if (removedParticipantId === participant.id) {
-                onLeftAction?.();
-            }
+    // Authenticated-member self-removal, identified by Supabase session —
+    // no participant ID needed.
+    const { mutate: removeSelfAsMemberMutation } = useMutation({
+        mutationFn: () => deleteSpinParticipantAsMember(session.id),
+        onSuccess: () => {
+            queryClient.setQueryData(["guest-session", session.id], null);
+            onLeftAction?.();
         },
     });
 
@@ -123,14 +102,14 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
             };
 
             return upsertParticipantFoodAsGuest(
-                session.sessionCode,
+                session.id,
                 params,
                 participantToken ?? ""
             );
         },
         onSuccess: (updatedParticipant) => {
             queryClient.setQueryData(
-                ["guest-session", session.sessionCode],
+                ["guest-session", session.id],
                 (current: SpinSession | undefined) =>
                     current
                         ? {
@@ -147,26 +126,14 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
         },
     });
     /********************************************* HANDLERS ************************************************/
-    // Host removing another participant — always an authenticated member
-    // action, since only members can be host.
-    const handleRemoveParticipant = useCallback(
-        (participantId: string) => removeParticipantByIdMutation(participantId),
-        [removeParticipantByIdMutation]
-    );
-
     const handleConfirmLeaveSession = useCallback(() => {
         if (isMember) {
-            removeParticipantByIdMutation(participant.id);
+            removeSelfAsMemberMutation();
         } else {
             removeSelfAsGuestMutation();
         }
         setLeaveDialogOpen(false);
-    }, [
-        isMember,
-        participant.id,
-        removeParticipantByIdMutation,
-        removeSelfAsGuestMutation,
-    ]);
+    }, [isMember, removeSelfAsMemberMutation, removeSelfAsGuestMutation]);
 
     const participants = session.spinParticipants ?? [];
 
@@ -189,11 +156,8 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
 
     const canAddMore = entries.length < MAX_WHEEL_SEGMENTS;
     const hasEntries = wheelSegments.length > 0;
-    const spinDisabledReason = !isHost
-        ? "Only the host can spin the wheel"
-        : !hasEntries
-          ? "Add meals before spinning"
-          : undefined;
+
+    const spinDisabledReason = "Only the host can spin the wheel";
 
     const handleAddEntry = useCallback(
         (label: string) => upsertFoodMutation(label),
@@ -213,8 +177,8 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
                     <Card className="border-border/50 bg-card/60">
                         <CardContent className="p-5 flex flex-col items-center gap-4">
                             <SessionShareCard
-                                sessionCode={session.sessionCode}
-                                isHost={isHost}
+                                sessionCode={session.id}
+                                isHost={false}
                             />
 
                             <div className="flex items-center gap-1.5">
@@ -275,7 +239,7 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
                                 <MealSpinWheel
                                     segments={wheelSegments}
                                     onSpinRequest={handleRequestSpin}
-                                    canSpin={isHost && hasEntries}
+                                    canSpin={false}
                                     spinDisabledReason={spinDisabledReason}
                                 />
                             ) : (
@@ -289,16 +253,12 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
                             )}
                         </CardContent>
                     </Card>
-
-                    <SessionInstructions isHost={isHost} />
                 </div>
 
                 <div className="space-y-4">
                     <SessionParticipants
                         participants={participants}
                         hostUserId={session.hostUserId}
-                        isHost={isHost}
-                        onRemoveParticipant={handleRemoveParticipant}
                     />
 
                     <MealEntryForm
@@ -309,7 +269,7 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
                     <SharedWheelSegments
                         participants={entries}
                         currentParticipantId={participant.id}
-                        isHost={isHost}
+                        isHost={false}
                         onRemove={handleRemoveEntry}
                         onClearAll={handleClearAllEntries}
                     />

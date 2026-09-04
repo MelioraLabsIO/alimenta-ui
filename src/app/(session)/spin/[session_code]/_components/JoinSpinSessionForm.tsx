@@ -35,10 +35,10 @@ export function JoinSpinSessionForm({
         if (!currentUser || !autoJoin || hasAutoJoined.current) return;
         hasAutoJoined.current = true;
 
-        router.replace(routes.spinShared(session.sessionCode));
+        router.replace(routes.spinShared(session.id));
 
-        joinSpinSessionAsMember(session.sessionCode).then(onJoinedAction);
-    }, [currentUser, autoJoin, router, session.sessionCode, onJoinedAction]);
+        joinSpinSessionAsMember(session.id).then(onJoinedAction);
+    }, [currentUser, autoJoin, router, session.id, onJoinedAction]);
 
     if (currentUser) {
         return (
@@ -50,7 +50,7 @@ export function JoinSpinSessionForm({
                 <button
                     onClick={async () => {
                         onJoinedAction(
-                            await joinSpinSessionAsMember(session.sessionCode)
+                            await joinSpinSessionAsMember(session.id)
                         );
                     }}
                 >

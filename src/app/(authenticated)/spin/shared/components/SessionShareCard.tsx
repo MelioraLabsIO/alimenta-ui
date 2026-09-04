@@ -31,7 +31,6 @@ export function SessionShareCard({
     isHost,
 }: SessionShareCardProps) {
     const [shareDialogOpen, setShareDialogOpen] = useState(false);
-    const [copiedCode, setCopiedCode] = useState(false);
     const [copiedLink, setCopiedLink] = useState(false);
 
     const resolvedJoinUrl =
@@ -40,16 +39,6 @@ export function SessionShareCard({
             : typeof window !== "undefined"
               ? `${window.location.origin}/spin/${sessionCode}`
               : `spin/${sessionCode}`;
-
-    async function handleCopyCode() {
-        try {
-            await navigator.clipboard.writeText(sessionCode);
-            setCopiedCode(true);
-            setTimeout(() => setCopiedCode(false), 2000);
-        } catch {
-            setCopiedCode(false);
-        }
-    }
 
     async function handleCopyJoinLink() {
         try {
@@ -85,8 +74,8 @@ export function SessionShareCard({
                                 <em>Share</em> this session
                             </DialogTitle>
                             <DialogDescription>
-                                Ask others to scan this QR code to join using
-                                code {sessionCode}.
+                                Ask others to scan this QR code to join this
+                                session.
                             </DialogDescription>
                         </DialogHeader>
                         <div className="flex flex-col items-center gap-3 py-1">
@@ -139,33 +128,6 @@ export function SessionShareCard({
             </div>
 
             <div className="min-w-0 space-y-2">
-                <div>
-                    <p className="text-xs text-muted-foreground mb-0.5">
-                        Session code
-                    </p>
-                    <div className="flex items-center gap-2">
-                        <span className="text-2xl font-bold font-mono tracking-wider">
-                            {sessionCode}
-                        </span>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 text-muted-foreground hover:text-foreground"
-                            onClick={handleCopyCode}
-                            aria-label={
-                                copiedCode
-                                    ? "Code copied!"
-                                    : `Copy session code ${sessionCode}`
-                            }
-                        >
-                            {copiedCode ? (
-                                <Check className="h-4 w-4 text-primary" />
-                            ) : (
-                                <Copy className="h-4 w-4" />
-                            )}
-                        </Button>
-                    </div>
-                </div>
                 <p className="text-xs text-muted-foreground">
                     Use Share to show the join QR code.
                 </p>

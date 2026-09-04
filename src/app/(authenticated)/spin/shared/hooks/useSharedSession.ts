@@ -64,7 +64,7 @@ export function useSharedSession(user: User | null): UseSharedSessionReturn {
 
             upsertFoodMutation({
                 foodName: food,
-                sessionCode: spinSession.sessionCode,
+                sessionCode: spinSession.id,
                 participantId: currentParticipantId,
                 sessionId: spinSession.id,
             });
