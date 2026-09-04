@@ -3,6 +3,7 @@
 import { useState } from "react";
 import QRCode from "react-qr-code";
 import { Check, Copy, Crown, Share2 } from "lucide-react";
+import { routes } from "@/lib/routes";
 import {
     Badge,
     Button,
@@ -16,29 +17,31 @@ import {
 import { Stack } from "@mantine/core";
 
 interface SessionShareCardProps {
-    sessionCode: string;
+    /** The session's ID — the only thing needed to join, and the `/spin/[session_id]` slug of the join link. */
+    sessionId: string;
     joinUrl?: string;
     isHost: boolean;
 }
 
 /**
- * Displays the session code, a copy button, a QR share dialog trigger, and a
- * host indicator badge. Lives in the left column of the Shared layout.
+ * Displays the QR share dialog trigger and a host indicator badge. Lives in
+ * the left column of the Shared layout.
  */
 export function SessionShareCard({
-    sessionCode,
+    sessionId,
     joinUrl,
     isHost,
 }: SessionShareCardProps) {
     const [shareDialogOpen, setShareDialogOpen] = useState(false);
     const [copiedLink, setCopiedLink] = useState(false);
 
+    const joinPath = routes.spinSession(sessionId);
     const resolvedJoinUrl =
         joinUrl && joinUrl.trim().length > 0
             ? joinUrl
             : typeof window !== "undefined"
-              ? `${window.location.origin}/spin/${sessionCode}`
-              : `spin/${sessionCode}`;
+              ? `${window.location.origin}${joinPath}`
+              : joinPath.slice(1);
 
     async function handleCopyJoinLink() {
         try {
@@ -74,14 +77,14 @@ export function SessionShareCard({
                                 <em>Share</em> this session
                             </DialogTitle>
                             <DialogDescription>
-                                Ask others to scan this QR code to join this
-                                session.
+                                Ask others to scan this QR code, or send them
+                                the join link below.
                             </DialogDescription>
                         </DialogHeader>
                         <div className="flex flex-col items-center gap-3 py-1">
                             <div
                                 className="rounded-lg bg-white p-3 mt-4"
-                                aria-label={`QR code to join session ${sessionCode}`}
+                                aria-label="QR code to join this session"
                             >
                                 <QRCode value={resolvedJoinUrl} size={192} />
                             </div>
@@ -127,11 +130,9 @@ export function SessionShareCard({
                 )}
             </div>
 
-            <div className="min-w-0 space-y-2">
-                <p className="text-xs text-muted-foreground">
-                    Use Share to show the join QR code.
-                </p>
-            </div>
+            <p className="text-xs text-muted-foreground">
+                Use Share to show the join QR code.
+            </p>
         </div>
     );
 }

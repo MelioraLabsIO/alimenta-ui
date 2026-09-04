@@ -44,7 +44,7 @@ export function SharedSessionView() {
     // resolved from their own auth), never in the guest room below.
     const alreadyJoinedAsMember = Boolean(
         profile &&
-        session?.spinParticipants.some((p) => p.userId === profile.id)
+            session?.spinParticipants.some((p) => p.userId === profile.id)
     );
 
     useEffect(() => {

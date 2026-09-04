@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import type { SpinSession, UseSharedSessionReturn } from "../types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getActiveSession } from "@/apis/spin/queries";
 import { upsertParticipantFoodAsMember } from "@/apis/spin/mutations";
 import { User } from "@supabase/supabase-js";
+import { createWebSocket } from "next/dist/client/dev/hot-reloader/app/web-socket";
 
 export function useSharedSession(user: User | null): UseSharedSessionReturn {
     const queryClient = useQueryClient();
@@ -17,6 +18,7 @@ export function useSharedSession(user: User | null): UseSharedSessionReturn {
     } = useQuery({
         queryKey: ["session"],
         queryFn: getActiveSession,
+        // TODO: Ensure that this session is fetched only when the user is a participant, if not he shall not see the session
         enabled: Boolean(user?.id),
         retry: 1,
     });
@@ -30,11 +32,10 @@ export function useSharedSession(user: User | null): UseSharedSessionReturn {
     const { mutate: upsertFoodMutation } = useMutation({
         mutationFn: (payload: {
             foodName: string;
-            sessionCode: string;
             participantId: string;
             sessionId: string;
         }) =>
-            upsertParticipantFoodAsMember(payload.sessionCode, {
+            upsertParticipantFoodAsMember(payload.sessionId, {
                 foodName: payload.foodName,
                 id: payload.participantId,
                 sessionId: payload.sessionId,
