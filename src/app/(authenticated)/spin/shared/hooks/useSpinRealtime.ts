@@ -30,7 +30,6 @@ export function useSpinRealtime(sessionId: string | null | undefined) {
         const socket = new WebSocket(
             `${wsBase}/api/v1/spin-sessions/ws/spin/${sessionId}`
         );
-        // ws://localhost:8080/api/v1/spin-sessions/ws/spin/{id}
 
         socket.onopen = () => {
             console.log("Spin realtime connected");

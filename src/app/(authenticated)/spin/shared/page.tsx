@@ -254,8 +254,6 @@ export default function Shared() {
         );
     }
 
-    console.log("Session:", session);
-
     return (
         <div className="max-w-6xl mx-auto space-y-6">
             <p className="text-sm text-muted-foreground">
