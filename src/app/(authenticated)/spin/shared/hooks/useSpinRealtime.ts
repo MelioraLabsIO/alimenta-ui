@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { BASE_URL } from "@/apiClient/client";
 
 interface SpinEvent {
     type: string;
@@ -17,11 +18,19 @@ export function useSpinRealtime(sessionId: string | null | undefined) {
             return;
         }
 
-        const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+        // The realtime endpoint lives on the backend API, not the Next
+        // server, so derive its host from BASE_URL (http://localhost:8080 in
+        // dev, NEXT_PUBLIC_API_URL otherwise) rather than window.location.
+        // Swapping the leading "http" turns http/https into ws/wss.
+        const wsBase = (BASE_URL ?? window.location.origin).replace(
+            /^http/,
+            "ws"
+        );
 
         const socket = new WebSocket(
-            `${protocol}//${window.location.host}/api/v1/spin-sessions/ws/spin/${sessionId}`
+            `${wsBase}/api/v1/spin-sessions/ws/spin/${sessionId}`
         );
+        // ws://localhost:8080/api/v1/spin-sessions/ws/spin/{id}
 
         socket.onopen = () => {
             console.log("Spin realtime connected");
