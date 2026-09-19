@@ -1,7 +1,14 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
-import { Dices, Link2, LogOut, Trash2, UtensilsCrossed } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+    Dices,
+    Link2,
+    LogOut,
+    PartyPopper,
+    Trash2,
+    UtensilsCrossed,
+} from "lucide-react";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -38,8 +45,11 @@ import {
 import { useAuthUserStore } from "@/stores/auth-user.store";
 import {
     MealSpinWheel,
+    SPIN_DURATION_MS,
     SpinTrigger,
 } from "@/app/(authenticated)/spin/_components/MealSpinWheel";
+import { SpinWinnerDialog } from "@/app/(authenticated)/spin/_components/SpinWinnerDialog";
+import { isSpinSessionComplete } from "@/app/(authenticated)/spin/shared/session-lock";
 import {
     MAX_WHEEL_SEGMENTS,
     MealEntryForm,
@@ -81,11 +91,25 @@ export default function Shared() {
         requestSpin,
     } = useSharedSession(user);
 
-    useSpinRealtime(session?.id);
+    const { winner: realtimeWinner, spinSeq } = useSpinRealtime(session?.id);
+
+    // The live event only exists for someone connected at spin time; on
+    // reload (or a late join) the winner comes back from the session GET
+    // response instead. Prefer the realtime one since it can't be stale.
+    const displayWinner = realtimeWinner ?? session?.winner ?? null;
+
+    // Frozen the moment a winner is picked — via the persisted `status` on a
+    // reload, or the live `spin.completed` event within the session. No
+    // joining, food edits, participant removal, or re-spinning past this.
+    const sessionLocked = isSpinSessionComplete(
+        session,
+        Boolean(realtimeWinner)
+    );
 
     const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
     const [deleteSessionDialogOpen, setDeleteSessionDialogOpen] =
         useState(false);
+    const [winnerDialogOpen, setWinnerDialogOpen] = useState(false);
 
     /********************************************* MUTATIONS ************************************************/
     const { mutate: createSpinSessionMutation, isPending: isCreatingSession } =
@@ -204,19 +228,42 @@ export default function Shared() {
     );
 
     // The segments card shows the name and the meal in separate columns, and
-    // lets you remove an entry if it's yours (or if you're the host).
+    // lets you remove an entry if it's yours (or if you're the host) — never
+    // once the session is locked.
     const segmentRows = useMemo(
         () =>
             entries.map((entry) => ({
                 id: entry.id,
                 label: entry.displayName,
                 sublabel: entry.foodName,
-                canRemove: isHost || entry.id === currentParticipantId,
+                canRemove:
+                    !sessionLocked &&
+                    (isHost || entry.id === currentParticipantId),
             })),
-        [entries, isHost, currentParticipantId]
+        [entries, isHost, currentParticipantId, sessionLocked]
     );
 
-    const spinTrigger: SpinTrigger | null = null;
+    // Translate the realtime winner into the index the wheel needs to land
+    // on. `spinSeq` (bumped once per `spin.completed` event) is what makes the
+    // wheel re-animate, so it drives the `seq`.
+    const spinTrigger: SpinTrigger | null = useMemo(() => {
+        if (!realtimeWinner || spinSeq === 0) return null;
+        const winnerIndex = entries.findIndex(
+            (entry) => entry.id === realtimeWinner.id
+        );
+        if (winnerIndex === -1) return null;
+        return { seq: spinSeq, winnerIndex };
+    }, [realtimeWinner, spinSeq, entries]);
+
+    // Reveal the winner dialog once the wheel has come to rest.
+    useEffect(() => {
+        if (spinSeq === 0 || !realtimeWinner) return;
+        const timer = setTimeout(
+            () => setWinnerDialogOpen(true),
+            SPIN_DURATION_MS + 150
+        );
+        return () => clearTimeout(timer);
+    }, [spinSeq, realtimeWinner]);
 
     const canAddMore = entries.length < MAX_WHEEL_SEGMENTS;
     const addedLabels = entries
@@ -224,11 +271,16 @@ export default function Shared() {
         .map((p) => p.foodName);
 
     const hasEntries = wheelSegments.length > 0;
-    const spinDisabledReason = !isHost
-        ? "Only the host can spin the wheel"
-        : !hasEntries
-          ? "Add meals before spinning"
-          : undefined;
+
+    let spinDisabledReason: string | undefined;
+    if (sessionLocked) {
+        spinDisabledReason =
+            "A winner has been picked — this session is complete";
+    } else if (!isHost) {
+        spinDisabledReason = "Only the host can spin the wheel";
+    } else if (!hasEntries) {
+        spinDisabledReason = "Add meals before spinning";
+    }
 
     if (isLoading) {
         return (
@@ -254,14 +306,31 @@ export default function Shared() {
         );
     }
 
-    console.log("Session:", session);
-
     return (
         <div className="max-w-6xl mx-auto space-y-6">
             <p className="text-sm text-muted-foreground">
                 Create a session, invite friends, add meals, and spin to decide
                 what to eat.
             </p>
+
+            {sessionLocked && (
+                <div className="flex items-start gap-3 rounded-lg border border-primary/30 bg-primary/10 px-4 py-3 text-sm">
+                    <PartyPopper
+                        className="mt-0.5 h-4 w-4 shrink-0 text-primary"
+                        aria-hidden="true"
+                    />
+                    <div>
+                        <p className="font-medium text-foreground">
+                            {displayWinner
+                                ? `${displayWinner.displayName}'s pick — ${displayWinner.foodName} — won the spin.`
+                                : "A winner has been picked."}
+                        </p>
+                        <p className="text-muted-foreground">
+                            This session is complete and now read-only.
+                        </p>
+                    </div>
+                </div>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
                 <div className="space-y-4">
@@ -381,7 +450,9 @@ export default function Shared() {
                                     segments={wheelSegments}
                                     spinTrigger={spinTrigger}
                                     onSpinRequest={requestSpin}
-                                    canSpin={isHost && hasEntries}
+                                    canSpin={
+                                        isHost && hasEntries && !sessionLocked
+                                    }
                                     spinDisabledReason={spinDisabledReason}
                                 />
                             ) : (
@@ -418,7 +489,7 @@ export default function Shared() {
                                 </>
                             )}
 
-                            {hasEntries && (
+                            {hasEntries && !sessionLocked && (
                                 <p className="text-xs text-muted-foreground -mt-2 pb-1">
                                     Only the host can spin the wheel.
                                 </p>
@@ -433,38 +504,55 @@ export default function Shared() {
                     <SessionParticipants
                         participants={participants}
                         hostUserId={session.hostUserId}
-                        isHost={isHost}
+                        // Host can remove participants — but not after the
+                        // session is locked.
+                        isHost={isHost && !sessionLocked}
                         onRemoveParticipant={handleRemoveParticipant}
                         isLoading={isLoading}
                         error={error}
                     />
 
-                    <MealEntryForm canAddMore={canAddMore} onAdd={addFood} />
+                    {/* Adding meals is gone entirely once a winner is picked. */}
+                    {!sessionLocked && (
+                        <>
+                            <MealEntryForm
+                                canAddMore={canAddMore}
+                                onAdd={addFood}
+                            />
 
-                    <PastMealsSearch
-                        addedLabels={addedLabels}
-                        canAddMore={canAddMore}
-                        onAdd={addFood}
-                        onRemoveByLabel={(label) => {
-                            const entry = entries.find(
-                                (p) =>
-                                    p.id === currentParticipantId &&
-                                    p.foodName.toLowerCase() ===
-                                        label.toLowerCase()
-                            );
-                            if (entry) removeEntry(entry.id);
-                        }}
-                    />
+                            <PastMealsSearch
+                                addedLabels={addedLabels}
+                                canAddMore={canAddMore}
+                                onAdd={addFood}
+                                onRemoveByLabel={(label) => {
+                                    const entry = entries.find(
+                                        (p) =>
+                                            p.id === currentParticipantId &&
+                                            p.foodName.toLowerCase() ===
+                                                label.toLowerCase()
+                                    );
+                                    if (entry) removeEntry(entry.id);
+                                }}
+                            />
+                        </>
+                    )}
 
                     <WheelSegments
                         segments={segmentRows}
                         onRemove={removeEntry}
                         onClearAll={clearAllEntries}
-                        canClearAll={isHost}
+                        canClearAll={isHost && !sessionLocked}
                         emptyMessage="No meals added yet. Each participant adds one."
                     />
                 </div>
             </div>
+
+            <SpinWinnerDialog
+                open={winnerDialogOpen}
+                onOpenChangeAction={setWinnerDialogOpen}
+                displayName={realtimeWinner?.displayName ?? ""}
+                foodName={realtimeWinner?.foodName ?? ""}
+            />
         </div>
     );
 }

@@ -36,6 +36,16 @@ export type JoinSpinSessionResponse = {
     participantToken: string | null;
 };
 
+/** The winning participant, as picked by `POST /spin-sessions/spin/{sessionId}`. */
+export type SpinWinner = {
+    id: string;
+    sessionId: string;
+    userId: string;
+    displayName: string;
+    foodName: string;
+    createdAt: string;
+};
+
 export type SpinSession = {
     /** The only identifier participants join by — it's the `/spin/[session_id]` slug. */
     id: string;
@@ -45,6 +55,8 @@ export type SpinSession = {
     expiresAt: Date;
     createdAt: Date;
     spinParticipants: SpinSessionParticipant[];
+    /** Omitted entirely by the backend until a winner has been picked. */
+    winner?: SpinWinner;
 };
 
 /** Body for the `PUT /spin-sessions/{sessionId}/me/food` upsert-food-choice request. */
@@ -70,9 +82,9 @@ export type UseSharedSessionReturn = {
     /** Host-only: clears every participant's food choice. */
     clearAllEntries: () => void;
     /**
-     * Host-only: sends a spin request to the backend.
-     * TODO: no winner-result field exists on `SpinSession` yet — wire this up
-     * once the backend adds one.
+     * Host-only: asks the backend to pick a winner. The result arrives for
+     * every participant over the session WebSocket as a `spin.completed`
+     * event (see `useSpinRealtime`), not from this call's response.
      */
     requestSpin: () => void;
 };

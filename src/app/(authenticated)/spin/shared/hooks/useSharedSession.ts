@@ -4,8 +4,12 @@ import { useCallback } from "react";
 import type { SpinSession, UseSharedSessionReturn } from "../types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getActiveSession } from "@/apis/spin/queries";
-import { upsertParticipantFoodAsMember } from "@/apis/spin/mutations";
+import {
+    pickSpinWinner,
+    upsertParticipantFoodAsMember,
+} from "@/apis/spin/mutations";
 import { User } from "@supabase/supabase-js";
+import { toast } from "@/lib/notifications";
 
 export function useSharedSession(user: User | null): UseSharedSessionReturn {
     const queryClient = useQueryClient();
@@ -81,9 +85,20 @@ export function useSharedSession(user: User | null): UseSharedSessionReturn {
         // TODO: wire clear-all mutation.
     }, [isHost]);
 
+    const { mutate: pickWinnerMutation } = useMutation({
+        mutationFn: (sessionId: string) => pickSpinWinner(sessionId),
+        // The winner is delivered to every participant (host included) via the
+        // `spin.completed` WebSocket event, which drives the wheel animation
+        // and the winner dialog — so there's nothing to do with the response
+        // here beyond letting realtime invalidation refresh the session.
+        onError: () =>
+            toast.error("Couldn't spin the wheel. Please try again."),
+    });
+
     const requestSpin = useCallback(() => {
-        // TODO: wire host spin mutation once the backend exposes a winner.
-    }, []);
+        if (!isHost || !spinSession) return;
+        pickWinnerMutation(spinSession.id);
+    }, [isHost, spinSession, pickWinnerMutation]);
 
     return {
         session: spinSession ?? null,

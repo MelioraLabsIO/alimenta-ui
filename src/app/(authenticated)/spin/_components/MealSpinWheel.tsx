@@ -18,7 +18,9 @@ const WHEEL_COLORS = [
     "#4ade80",
 ];
 
-const SPIN_DURATION_MS = 3500;
+/** Length of the wheel's landing animation. Exported so callers can time
+ *  follow-up UI (e.g. a winner dialog) to when the wheel comes to rest. */
+export const SPIN_DURATION_MS = 3500;
 const SPIN_ROTATIONS = 6;
 const MAX_LABEL_LENGTH = 10;
 const PRIMARY_COLOR = "#58d1a0";
@@ -338,10 +340,7 @@ export function MealSpinWheel({
             </div>
 
             {/* Spin button */}
-            <Tooltip
-                label={tooltipLabel}
-                disabled={!tooltipLabel}
-            >
+            <Tooltip label={tooltipLabel} disabled={!tooltipLabel}>
                 <Button
                     onClick={handleSpin}
                     disabled={buttonDisabled}
