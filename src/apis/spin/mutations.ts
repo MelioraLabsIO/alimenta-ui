@@ -33,6 +33,23 @@ export async function joinSpinSessionAsGuest(
     );
 }
 
+/**
+ * Host-only: asks the backend to pick a winner for the session. The chosen
+ * participant is returned, and the backend also broadcasts a `spin.completed`
+ * event over the session WebSocket so every participant animates the same
+ * result (see `useSpinRealtime`).
+ */
+export async function pickSpinWinner(
+    sessionId: string
+): Promise<SpinSessionParticipant> {
+    return apiFetch<SpinSessionParticipant>(
+        `/api/v1/spin-sessions/spin/${sessionId}`,
+        {
+            method: "POST",
+        }
+    );
+}
+
 /** Removes another participant by ID — a host-only action. */
 export function deleteSpinParticipant(
     sessionId: string,

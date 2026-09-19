@@ -12,10 +12,11 @@ import {
     SpinSessionParticipant,
 } from "@/app/(authenticated)/spin/shared/types";
 import { Container } from "@mantine/core";
-import { Unlink as LinkOff } from "lucide-react";
+import { PartyPopper, Unlink as LinkOff } from "lucide-react";
 import { Card, CardContent } from "@/components/mantine/ui";
 import { useRouter } from "next/navigation";
 import { routes } from "@/lib/routes";
+import { isSpinSessionComplete } from "@/app/(authenticated)/spin/shared/session-lock";
 
 export function SharedSessionView() {
     const profile = useProfileStore((state) => state.profile);
@@ -44,7 +45,7 @@ export function SharedSessionView() {
     // resolved from their own auth), never in the guest room below.
     const alreadyJoinedAsMember = Boolean(
         profile &&
-            session?.spinParticipants.some((p) => p.userId === profile.id)
+        session?.spinParticipants.some((p) => p.userId === profile.id)
     );
 
     useEffect(() => {
@@ -132,6 +133,35 @@ export function SharedSessionView() {
                         Taking you to your session…
                     </p>
                 </div>
+            </Container>
+        );
+    }
+
+    /*
+     * A winner was already picked before this visitor joined — the session is
+     * read-only now, so there's nothing to join. Anyone already in the session
+     * still gets the room below (it renders its own locked state).
+     */
+    if (!resolvedParticipant && isSpinSessionComplete(session)) {
+        return (
+            <Container size="sm" className="py-8 px-4">
+                <Card className="border-border/50 bg-card/60">
+                    <CardContent className="flex flex-col items-center gap-3 p-8 text-center">
+                        <PartyPopper
+                            className="h-10 w-10 text-muted-foreground/40"
+                            aria-hidden="true"
+                        />
+                        <div className="space-y-1">
+                            <p className="text-sm font-semibold">
+                                This session has already finished
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                                The wheel has been spun and a winner picked, so
+                                the session is closed to new participants.
+                            </p>
+                        </div>
+                    </CardContent>
+                </Card>
             </Container>
         );
     }

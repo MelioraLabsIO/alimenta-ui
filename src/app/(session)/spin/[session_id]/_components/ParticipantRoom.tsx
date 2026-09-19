@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
-import { Dices, LogOut } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Dices, LogOut, PartyPopper } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
     AlertDialog,
@@ -31,7 +31,14 @@ import {
 import { SessionShareCard } from "@/app/(authenticated)/spin/shared/components/SessionShareCard";
 import { SessionParticipants } from "@/app/(authenticated)/spin/shared/components/SessionParticipants";
 import { WheelSegments } from "@/app/(authenticated)/spin/_components/WheelSegments";
-import { MealSpinWheel } from "@/app/(authenticated)/spin/_components/MealSpinWheel";
+import {
+    MealSpinWheel,
+    SPIN_DURATION_MS,
+    type SpinTrigger,
+} from "@/app/(authenticated)/spin/_components/MealSpinWheel";
+import { SpinWinnerDialog } from "@/app/(authenticated)/spin/_components/SpinWinnerDialog";
+import { useSpinRealtime } from "@/app/(authenticated)/spin/shared/hooks/useSpinRealtime";
+import { isSpinSessionComplete } from "@/app/(authenticated)/spin/shared/session-lock";
 import {
     MAX_WHEEL_SEGMENTS,
     MealEntryForm,
@@ -69,6 +76,17 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
         `spin:${session.id}:participant-token`
     );
     const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
+    const [winnerDialogOpen, setWinnerDialogOpen] = useState(false);
+
+    // Guests can't spin, but they watch the host's spin play out in realtime:
+    // the backend broadcasts `spin.completed`, and everyone's wheel animates
+    // to the same winner.
+    const { winner: realtimeWinner, spinSeq } = useSpinRealtime(session.id);
+
+    // The live event only exists for someone connected at spin time; on
+    // reload (or a late join) the winner comes back from the session GET
+    // response instead. Prefer the realtime one since it can't be stale.
+    const displayWinner = realtimeWinner ?? session.winner ?? null;
 
     /********************************************* MUTATIONS ************************************************/
     // Guest self-removal: identified by their session-stored participant
@@ -157,20 +175,51 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
         [entries]
     );
 
+    // Frozen the moment a winner is picked — via the persisted `status` on a
+    // reload, or the live `spin.completed` event within the session.
+    const sessionLocked = isSpinSessionComplete(
+        session,
+        Boolean(realtimeWinner)
+    );
+
     // A guest can only ever remove their own entry — removing anyone else's,
     // and clearing the board, are host-only and the host is never in here.
+    // Nobody removes anything once the session is locked.
     const segmentRows = entries.map((entry) => ({
         id: entry.id,
         label: entry.displayName,
         sublabel: entry.foodName,
-        canRemove: entry.id === participant.id,
+        canRemove: !sessionLocked && entry.id === participant.id,
     }));
 
     const canAddMore = entries.length < MAX_WHEEL_SEGMENTS;
     const hasEntries = wheelSegments.length > 0;
 
     // Guests can never spin — only the session host can.
-    const spinDisabledReason = "Only the host can spin the wheel";
+    const spinDisabledReason = sessionLocked
+        ? "A winner has been picked — this session is complete"
+        : "Only the host can spin the wheel";
+
+    // Land the wheel on the participant the backend chose. `spinSeq` bumps
+    // once per `spin.completed` event and drives the re-animation.
+    const spinTrigger: SpinTrigger | null = useMemo(() => {
+        if (!realtimeWinner || spinSeq === 0) return null;
+        const winnerIndex = entries.findIndex(
+            (entry) => entry.id === realtimeWinner.id
+        );
+        if (winnerIndex === -1) return null;
+        return { seq: spinSeq, winnerIndex };
+    }, [realtimeWinner, spinSeq, entries]);
+
+    // Reveal the winner dialog once the wheel has come to rest.
+    useEffect(() => {
+        if (spinSeq === 0 || !realtimeWinner) return;
+        const timer = setTimeout(
+            () => setWinnerDialogOpen(true),
+            SPIN_DURATION_MS + 150
+        );
+        return () => clearTimeout(timer);
+    }, [spinSeq, realtimeWinner]);
 
     const handleAddEntry = useCallback(
         (label: string) => upsertFoodMutation(label),
@@ -200,6 +249,25 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
                     once everyone&apos;s in.
                 </p>
             </header>
+
+            {sessionLocked && (
+                <div className="flex items-start gap-3 rounded-lg border border-primary/30 bg-primary/10 px-4 py-3 text-sm">
+                    <PartyPopper
+                        className="mt-0.5 h-4 w-4 shrink-0 text-primary"
+                        aria-hidden="true"
+                    />
+                    <div>
+                        <p className="font-medium text-foreground">
+                            {displayWinner
+                                ? `${displayWinner.displayName}'s pick — ${displayWinner.foodName} — won the spin.`
+                                : "A winner has been picked."}
+                        </p>
+                        <p className="text-muted-foreground">
+                            This session is complete and now read-only.
+                        </p>
+                    </div>
+                </div>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
                 <div className="space-y-4">
@@ -277,6 +345,7 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
                             {hasEntries ? (
                                 <MealSpinWheel
                                     segments={wheelSegments}
+                                    spinTrigger={spinTrigger}
                                     onSpinRequest={handleRequestSpin}
                                     canSpin={false}
                                     spinDisabledReason={spinDisabledReason}
@@ -304,10 +373,13 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
                         hostUserId={session.hostUserId}
                     />
 
-                    <MealEntryForm
-                        canAddMore={canAddMore}
-                        onAdd={handleAddEntry}
-                    />
+                    {/* No adding a meal once a winner is picked. */}
+                    {!sessionLocked && (
+                        <MealEntryForm
+                            canAddMore={canAddMore}
+                            onAdd={handleAddEntry}
+                        />
+                    )}
 
                     <WheelSegments
                         segments={segmentRows}
@@ -318,6 +390,13 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
                     />
                 </div>
             </div>
+
+            <SpinWinnerDialog
+                open={winnerDialogOpen}
+                onOpenChangeAction={setWinnerDialogOpen}
+                displayName={realtimeWinner?.displayName ?? ""}
+                foodName={realtimeWinner?.foodName ?? ""}
+            />
         </div>
     );
 }
