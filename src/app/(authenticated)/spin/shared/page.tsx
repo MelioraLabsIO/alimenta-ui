@@ -337,7 +337,7 @@ export default function Shared() {
                     <Card className="border-border/50 bg-card/60">
                         <CardContent className="p-5 flex flex-col items-center gap-4">
                             <SessionShareCard
-                                sessionId={session.id}
+                                session={session}
                                 isHost={isHost}
                             />
 

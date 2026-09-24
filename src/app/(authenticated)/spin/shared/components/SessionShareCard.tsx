@@ -15,10 +15,11 @@ import {
     DialogTrigger,
 } from "@/components/mantine/ui";
 import { Stack } from "@mantine/core";
+import type { SpinSession } from "../types";
+import { isSpinSessionComplete } from "../session-lock";
 
 interface SessionShareCardProps {
-    /** The session's ID — the only thing needed to join, and the `/spin/[session_id]` slug of the join link. */
-    sessionId: string;
+    session: SpinSession;
     joinUrl?: string;
     isHost: boolean;
 }
@@ -28,14 +29,15 @@ interface SessionShareCardProps {
  * the left column of the Shared layout.
  */
 export function SessionShareCard({
-    sessionId,
+    session,
     joinUrl,
     isHost,
 }: SessionShareCardProps) {
     const [shareDialogOpen, setShareDialogOpen] = useState(false);
     const [copiedLink, setCopiedLink] = useState(false);
 
-    const joinPath = routes.spinSession(sessionId);
+    const sessionComplete = isSpinSessionComplete(session);
+    const joinPath = routes.spinSession(session.id);
     const resolvedJoinUrl =
         joinUrl && joinUrl.trim().length > 0
             ? joinUrl
@@ -66,6 +68,7 @@ export function SessionShareCard({
                             size="sm"
                             className="gap-1.5"
                             aria-label="Share session QR code"
+                            disabled={copiedLink || sessionComplete}
                         >
                             <Share2 className="h-3.5 w-3.5" />
                             Share
