@@ -1,17 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { ActionIcon, Avatar, Box, Menu, Stack, Text } from "@mantine/core";
 import { User } from "lucide-react";
-import {
-    Avatar,
-    Button,
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/mantine/ui";
 import { logout } from "@/app/(public)/login/actions";
 import { useProfileStore } from "@/stores/profile.store";
 import { getProfileInitials } from "@/lib/profile";
@@ -20,6 +11,9 @@ import { getProfileInitials } from "@/lib/profile";
  * Avatar button opening the account menu: who you're signed in as, links into
  * settings, and sign out. Sign out calls the `logout` server action, which
  * clears the Supabase session and redirects.
+ *
+ * On `md` and up the sidebar shows the user instead, so this only renders on
+ * small screens.
  *
  * The profile is fetched once by `AuthUserProvider` and only read from the
  * store here, so the first render happens before it arrives — every field
@@ -37,53 +31,47 @@ export function HeaderUserMenu() {
         (profileError ? "Profile unavailable" : "Loading…");
 
     return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="rounded-full app-avatar-button"
-                    aria-label={
-                        profile
-                            ? `Account menu for ${profile.displayName}`
-                            : "Account menu"
-                    }
-                >
-                    <Avatar className="h-7 w-7 text-xs">
-                        {initials || (
-                            <User className="h-3.5 w-3.5" aria-hidden="true" />
-                        )}
-                    </Avatar>
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col gap-0.5">
-                        <span className="font-semibold text-sm">
-                            {displayName}
-                        </span>
-                        {profile?.email && (
-                            <span className="text-xs text-muted-foreground">
-                                {profile.email}
-                            </span>
-                        )}
-                    </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                    <Link href="/settings">Profile</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                    <Link href="/settings">Settings</Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                    className="text-destructive cursor-pointer"
-                    onSelect={() => logout()}
-                >
-                    Sign out
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
+        <Box hiddenFrom="md">
+            <Menu position="bottom-end" width={200}>
+                <Menu.Target>
+                    <ActionIcon
+                        aria-label={
+                            profile
+                                ? `Account menu for ${profile.displayName}`
+                                : "Account menu"
+                        }
+                    >
+                        <Avatar size={28} fz={11}>
+                            {initials || <User size={14} aria-hidden="true" />}
+                        </Avatar>
+                    </ActionIcon>
+                </Menu.Target>
+                <Menu.Dropdown>
+                    <Menu.Label>
+                        <Stack gap={2}>
+                            <Text fz="sm" fw={600} c="var(--tx)">
+                                {displayName}
+                            </Text>
+                            {profile?.email && (
+                                <Text fz="xs" c="var(--tx3)">
+                                    {profile.email}
+                                </Text>
+                            )}
+                        </Stack>
+                    </Menu.Label>
+                    <Menu.Divider />
+                    <Menu.Item component={Link} href="/settings">
+                        Profile
+                    </Menu.Item>
+                    <Menu.Item component={Link} href="/settings">
+                        Settings
+                    </Menu.Item>
+                    <Menu.Divider />
+                    <Menu.Item color="rose" onClick={() => logout()}>
+                        Sign out
+                    </Menu.Item>
+                </Menu.Dropdown>
+            </Menu>
+        </Box>
     );
 }

@@ -1,21 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/mantine/ui";
-import { Button } from "@/components/mantine/ui";
-import { Utensils, Sparkles } from "lucide-react";
-import {
+    Button,
+    Group,
+    Modal,
+    Stack,
     Tabs,
-    TabsContent,
-    TabsList,
-    TabsTrigger,
-} from "@/components/mantine/ui";
+    Text,
+    ThemeIcon,
+} from "@mantine/core";
+import { Pencil, Plus, Sparkles } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Meal } from "@/core/types/models/meal";
 import { ManualForm } from "@/app/(authenticated)/log/ManualForm/ManualForm";
@@ -24,11 +19,17 @@ import { NaturalLanguageForm } from "@/app/(authenticated)/log/NaturalLanguageFo
 interface LogMealDialogProps {
     mealToEdit?: Meal | null;
     onOpenChange?: (open: boolean) => void;
+    /**
+     * Custom opener rendered in place of the default "Log meal" button.
+     * Receives a function that opens the dialog. Ignored while editing.
+     */
+    renderTrigger?: (open: () => void) => ReactNode;
 }
 
 export function LogMealDialog({
     mealToEdit,
     onOpenChange,
+    renderTrigger,
 }: LogMealDialogProps) {
     const [open, setOpen] = useState(false);
 
@@ -46,76 +47,79 @@ export function LogMealDialog({
         onOpenChange?.(newOpen);
     };
 
+    const openDialog = () => handleOpenChange(true);
+
     return (
-        <Dialog open={open} onOpenChangeAction={handleOpenChange}>
-            {!mealToEdit && (
-                <DialogTrigger asChild>
-                    <Button className="gap-2">
-                        <Utensils className="h-4 w-4" /> Log Meal
-                    </Button>
-                </DialogTrigger>
-            )}
-            <DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col p-0">
-                <DialogHeader className="p-6 pb-0">
-                    <DialogTitle>
-                        {mealToEdit ? "Edit Meal" : "Log Meal"}
-                    </DialogTitle>
-                </DialogHeader>
-                <div className="flex-1 overflow-hidden flex flex-col p-6 pt-2">
-                    <Tabs
-                        defaultValue="manual"
-                        className="flex-1 flex flex-col overflow-hidden"
+        <>
+            {!mealToEdit &&
+                (renderTrigger ? (
+                    renderTrigger(openDialog)
+                ) : (
+                    <Button
+                        leftSection={<Plus size={16} />}
+                        onClick={openDialog}
                     >
-                        <TabsList className="w-full sm:w-auto shrink-0">
-                            <TabsTrigger
-                                value="manual"
-                                className="flex-1 sm:flex-none"
+                        Log meal
+                    </Button>
+                ))}
+            <Modal
+                opened={open}
+                onClose={() => handleOpenChange(false)}
+                title={mealToEdit ? "Edit meal" : "Log meal"}
+                size={680}
+            >
+                <Tabs defaultValue="manual">
+                    <Tabs.List>
+                        <Tabs.Tab
+                            value="manual"
+                            leftSection={<Pencil size={15} />}
+                        >
+                            Manual
+                        </Tabs.Tab>
+                        {!mealToEdit && (
+                            <Tabs.Tab
+                                value="natural"
+                                leftSection={<Sparkles size={15} />}
                             >
-                                Manual
-                            </TabsTrigger>
-                            {!mealToEdit && (
-                                <TabsTrigger
-                                    value="natural"
-                                    className="flex-1 sm:flex-none"
-                                >
-                                    Natural Language
-                                </TabsTrigger>
-                            )}
-                        </TabsList>
+                                Natural language
+                            </Tabs.Tab>
+                        )}
+                    </Tabs.List>
 
-                        <div className="flex-1 mt-4 overflow-y-auto pr-2">
-                            <TabsContent value="manual" className="mt-0 pb-4">
-                                <ManualForm
-                                    prefill={mealToEdit || undefined}
-                                    onSuccess={() => {
-                                        handleOpenChange(false);
-                                        queryClient.invalidateQueries({
-                                            queryKey: ["meals"],
-                                        });
-                                    }}
-                                />
-                            </TabsContent>
+                    <Tabs.Panel value="manual" pt={18}>
+                        <ManualForm
+                            prefill={mealToEdit || undefined}
+                            onSuccess={() => {
+                                handleOpenChange(false);
+                                queryClient.invalidateQueries({
+                                    queryKey: ["meals"],
+                                });
+                            }}
+                        />
+                    </Tabs.Panel>
 
-                            <TabsContent value="natural" className="mt-0 pb-4">
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-2 text-sm font-semibold">
-                                        <Sparkles className="h-4 w-4 text-emerald-400" />
-                                        AI-Powered Parsing
-                                    </div>
-                                    <NaturalLanguageForm
-                                        onSuccess={() => {
-                                            handleOpenChange(false);
-                                            queryClient.invalidateQueries({
-                                                queryKey: ["meals"],
-                                            });
-                                        }}
-                                    />
-                                </div>
-                            </TabsContent>
-                        </div>
-                    </Tabs>
-                </div>
-            </DialogContent>
-        </Dialog>
+                    <Tabs.Panel value="natural" pt={18}>
+                        <Stack gap={16}>
+                            <Group gap={8} wrap="nowrap">
+                                <ThemeIcon size={28} radius={9}>
+                                    <Sparkles size={14} />
+                                </ThemeIcon>
+                                <Text fz={14} fw={600}>
+                                    AI-powered parsing
+                                </Text>
+                            </Group>
+                            <NaturalLanguageForm
+                                onSuccess={() => {
+                                    handleOpenChange(false);
+                                    queryClient.invalidateQueries({
+                                        queryKey: ["meals"],
+                                    });
+                                }}
+                            />
+                        </Stack>
+                    </Tabs.Panel>
+                </Tabs>
+            </Modal>
+        </>
     );
 }

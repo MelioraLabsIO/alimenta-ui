@@ -1,14 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
+import { Box, Button, Group, Paper, Stack, Text } from "@mantine/core";
 import { Plus } from "lucide-react";
-import {
-    Button,
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from "@/components/mantine/ui";
 import { Autocomplete } from "@/components/foods/autocomplete";
 import type { FoodSearchItem } from "@/apis/food/queries";
 
@@ -17,13 +11,25 @@ export const MAX_WHEEL_SEGMENTS = 10;
 interface MealEntryFormProps {
     canAddMore: boolean;
     onAdd: (label: string) => void;
+    /** Card heading. Personal mode says "Add to the wheel", guests "Your pick". */
+    title?: string;
+    /**
+     * Rendered under the input row, inside the same card — Personal mode
+     * drops its "From your recent meals" chips in here.
+     */
+    children?: ReactNode;
 }
 
 /**
  * Card that lets the user search the food catalog or type a free-form meal
  * name to add a segment to the wheel. Shared by Personal and Shared modes.
  */
-export function MealEntryForm({ canAddMore, onAdd }: MealEntryFormProps) {
+export function MealEntryForm({
+    canAddMore,
+    onAdd,
+    title = "Add to the wheel",
+    children,
+}: MealEntryFormProps) {
     const [selectedFood, setSelectedFood] = useState<FoodSearchItem | null>(
         null
     );
@@ -46,41 +52,41 @@ export function MealEntryForm({ canAddMore, onAdd }: MealEntryFormProps) {
     }
 
     return (
-        <Card className="border-border/50 bg-card/60">
-            <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                    <Plus className="h-4 w-4 text-primary" />
-                    Add meal manually
-                </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-                <div className="flex gap-2 items-start">
-                    <div className="flex-1 min-w-0">
+        <Paper p={18} style={{ border: "1px solid var(--bd)" }}>
+            <Stack gap={12}>
+                <Text fw={700} fz={15}>
+                    {title}
+                </Text>
+                <Group gap={8} align="flex-start" wrap="nowrap">
+                    <Box flex={1} miw={0}>
                         <Autocomplete
                             key={autocompleteKey}
                             value={selectedFood}
                             onChange={handleFoodSelect}
                             onInputChange={setTypedInput}
-                            placeholder="Search or type a meal name…"
+                            placeholder="Type any meal…"
                         />
-                    </div>
+                    </Box>
                     <Button
                         onClick={handleAddTyped}
                         disabled={!typedInput.trim() || !canAddMore}
-                        size="sm"
-                        className="shrink-0 mt-0.5"
+                        h={44}
+                        px={16}
+                        radius={14}
+                        leftSection={<Plus size={15} />}
                         aria-label="Add typed meal to wheel"
+                        style={{ flexShrink: 0 }}
                     >
-                        <Plus className="h-4 w-4" />
                         Add
                     </Button>
-                </div>
+                </Group>
                 {!canAddMore && (
-                    <p className="mt-1.5 text-xs text-muted-foreground">
+                    <Text fz={12} c="var(--tx3)">
                         Maximum {MAX_WHEEL_SEGMENTS} segments reached.
-                    </p>
+                    </Text>
                 )}
-            </CardContent>
-        </Card>
+                {children}
+            </Stack>
+        </Paper>
     );
 }

@@ -2,15 +2,16 @@
 
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Lock } from "lucide-react";
 import {
     Button,
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-    Input,
-} from "@/components/mantine/ui";
+    Center,
+    Group,
+    Loader,
+    Stack,
+    Text,
+    TextInput,
+} from "@mantine/core";
+import { Check, Plus, Search } from "lucide-react";
 import { getRecentMeals } from "@/apis/meal/queries";
 
 interface PastMealsSearchProps {
@@ -22,9 +23,9 @@ interface PastMealsSearchProps {
 }
 
 /**
- * Card showing the user's recent meals so they can quickly add/remove them
- * from the wheel. Shared by Personal and Shared modes.
- * Only rendered for authenticated users (this component always assumes auth).
+ * "From your recent meals" chips so the user can quickly add/remove them
+ * from the wheel. Rendered inside `MealEntryForm`'s card. Shared by Personal
+ * and Shared modes — only for authenticated users (this always assumes auth).
  */
 export function PastMealsSearch({
     addedLabels,
@@ -62,78 +63,83 @@ export function PastMealsSearch({
         addedLabels.some((l) => l.toLowerCase() === title.toLowerCase());
 
     return (
-        <Card className="border-border/50 bg-card/60">
-            <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                    <Lock className="h-4 w-4 text-primary" />
-                    Search past meals
-                </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0 space-y-3">
-                <Input
-                    placeholder="Search meals…"
+        <Stack gap={8}>
+            <Group justify="space-between" align="center" gap={8}>
+                <Text fz={12} c="var(--tx3)">
+                    From your recent meals
+                </Text>
+                <TextInput
+                    size="xs"
+                    w={{ base: "100%", xs: 180 }}
+                    placeholder="Filter meals…"
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e) => setSearchQuery(e.currentTarget.value)}
+                    leftSection={<Search size={13} />}
                     aria-label="Search past meals"
                 />
-                <div
-                    className="max-h-48 overflow-y-auto space-y-1 pr-1"
-                    role="list"
-                    aria-label="Past meals"
-                >
-                    {isLoadingMeals ? (
-                        <div
-                            className="flex items-center justify-center py-6"
-                            aria-label="Loading past meals"
-                        >
-                            <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                        </div>
-                    ) : filteredPastMeals.length === 0 ? (
-                        <p className="py-4 text-center text-xs text-muted-foreground">
-                            {searchQuery
-                                ? "No meals match your search."
-                                : "No past meals found."}
-                        </p>
-                    ) : (
-                        filteredPastMeals.map((title) => {
-                            const added = isAdded(title);
-                            return (
-                                <div
-                                    key={title}
-                                    role="listitem"
-                                    className="flex items-center justify-between rounded-md px-2 py-1.5 hover:bg-muted/50 transition-colors"
-                                >
-                                    <span className="text-sm truncate flex-1">
-                                        {title}
-                                    </span>
-                                    <Button
-                                        variant={
-                                            added ? "secondary" : "outline"
-                                        }
-                                        size="sm"
-                                        className="h-6 text-xs px-2 shrink-0 ml-2"
-                                        aria-label={
-                                            added
-                                                ? `Remove ${title} from wheel`
-                                                : `Add ${title} to wheel`
-                                        }
-                                        onClick={() => {
-                                            if (added) {
-                                                onRemoveByLabel(title);
-                                            } else {
-                                                onAdd(title);
-                                            }
-                                        }}
-                                        disabled={!added && !canAddMore}
-                                    >
-                                        {added ? "Remove" : "Add"}
-                                    </Button>
-                                </div>
-                            );
-                        })
-                    )}
-                </div>
-            </CardContent>
-        </Card>
+            </Group>
+            {isLoadingMeals ? (
+                <Center py={12} aria-label="Loading past meals">
+                    <Loader size="sm" />
+                </Center>
+            ) : filteredPastMeals.length === 0 ? (
+                <Text fz={12} c="var(--tx3)" py={8} ta="center">
+                    {searchQuery
+                        ? "No meals match your search."
+                        : "No past meals found."}
+                </Text>
+            ) : (
+                <Group gap={6} role="list" aria-label="Past meals">
+                    {filteredPastMeals.map((title) => {
+                        const added = isAdded(title);
+                        return (
+                            <Button
+                                key={title}
+                                role="listitem"
+                                variant={added ? "light" : "default"}
+                                size="sm"
+                                h={34}
+                                px={12}
+                                fw={500}
+                                maw="100%"
+                                leftSection={
+                                    added ? (
+                                        <Check size={13} />
+                                    ) : (
+                                        <Plus size={13} />
+                                    )
+                                }
+                                aria-label={
+                                    added
+                                        ? `Remove ${title} from wheel`
+                                        : `Add ${title} to wheel`
+                                }
+                                onClick={() => {
+                                    if (added) {
+                                        onRemoveByLabel(title);
+                                    } else {
+                                        onAdd(title);
+                                    }
+                                }}
+                                disabled={!added && !canAddMore}
+                                styles={{
+                                    root: {
+                                        border: added
+                                            ? "1px solid color-mix(in srgb, var(--ac) 35%, transparent)"
+                                            : undefined,
+                                    },
+                                    label: {
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                    },
+                                }}
+                            >
+                                {title}
+                            </Button>
+                        );
+                    })}
+                </Group>
+            )}
+        </Stack>
     );
 }

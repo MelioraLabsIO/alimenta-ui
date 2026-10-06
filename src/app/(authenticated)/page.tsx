@@ -3,42 +3,72 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import {
+    ActionIcon,
+    Anchor,
+    Box,
+    Card,
+    Flex,
+    Group,
+    Paper,
+    SimpleGrid,
+    Skeleton,
+    Stack,
+    Text,
+    ThemeIcon,
+    Tooltip,
+    UnstyledButton,
+} from "@mantine/core";
+import {
+    Apple,
+    ArrowRight,
+    Copy,
+    Eye,
+    Moon,
+    Pencil,
+    Plus,
+    Sparkles,
+    Sun,
+    Sunrise,
+    TrendingUp,
+    Utensils,
+    Zap,
+    type LucideIcon,
+} from "lucide-react";
 import { mealsRepo } from "@/apis/meal/mealsRepo";
 import { getTopFood } from "@/apis/insights/queries";
 import { getRecentMeals } from "@/apis/meal/queries";
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from "@/components/mantine/ui";
-import { Badge } from "@/components/mantine/ui";
-import { Button } from "@/components/mantine/ui";
 import { CaloriesChart } from "@/components/charts/calories-chart";
 import { MacrosChart } from "@/components/charts/macros-chart";
 import { MoodScatterChart } from "@/components/charts/mood-scatter-chart";
-import {
-    Flame,
-    Utensils,
-    TrendingUp,
-    Zap,
-    Copy,
-    Pencil,
-    Eye,
-    Sparkles,
-    ArrowUpRight,
-} from "lucide-react";
-import { toast } from "@/lib/notifications";
-import { Meal } from "@/core/types/models/meal";
 import { LogMealDialog } from "@/components/meals/log-meal-dialog";
+import { toast } from "@/lib/notifications";
+import { EMealType, Meal } from "@/core/types/models/meal";
 
-const MEAL_TYPE_COLORS: Record<string, string> = {
-    Breakfast: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-    Lunch: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-    Dinner: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-    Snack: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-    Other: "bg-muted text-muted-foreground",
+const MEAL_TYPE_META: Record<
+    EMealType,
+    { label: string; color: string; Icon: LucideIcon }
+> = {
+    [EMealType.BREAKFAST]: {
+        label: "Breakfast",
+        color: "amber",
+        Icon: Sunrise,
+    },
+    [EMealType.LUNCH]: { label: "Lunch", color: "alimenta", Icon: Sun },
+    [EMealType.DINNER]: { label: "Dinner", color: "sky", Icon: Moon },
+    [EMealType.SNACK]: { label: "Snack", color: "rose", Icon: Apple },
+    [EMealType.OTHER]: { label: "Other", color: "gray", Icon: Utensils },
 };
+
+const TABULAR = { fontVariantNumeric: "tabular-nums" } as const;
+
+function isSameDay(a: Date, b: Date) {
+    return (
+        a.getFullYear() === b.getFullYear() &&
+        a.getMonth() === b.getMonth() &&
+        a.getDate() === b.getDate()
+    );
+}
 
 function MealRow({
     meal,
@@ -47,56 +77,143 @@ function MealRow({
     meal: Meal;
     onDuplicate: (id: string) => void;
 }) {
+    const meta = MEAL_TYPE_META[meal.type] ?? MEAL_TYPE_META[EMealType.OTHER];
+    const { Icon } = meta;
+    const time = meal.mealTime
+        ? new Date(meal.mealTime).toLocaleString("en-US", {
+              month: "short",
+              day: "numeric",
+              hour: "numeric",
+              minute: "2-digit",
+          })
+        : null;
+    const kcal = meal.nutrition?.calories
+        ? `${Math.round(meal.nutrition.calories)} kcal`
+        : "";
+
     return (
-        <div className="flex items-center gap-3 py-3">
-            <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{meal.title}</p>
-                <p className="text-xs text-muted-foreground">
-                    {meal.mealTime &&
-                        new Date(meal.mealTime).toLocaleString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            hour: "numeric",
-                            minute: "2-digit",
-                        })}
-                    {meal.nutrition?.calories
-                        ? ` · ${Math.round(meal.nutrition.calories)} kcal`
-                        : ""}
-                </p>
-            </div>
-            <Badge
-                variant="outline"
-                className={`text-[10px] capitalize shrink-0 ${MEAL_TYPE_COLORS[meal.type]}`}
+        <Box
+            p={12}
+            style={{
+                borderRadius: 16,
+                border: "1px solid var(--bd2)",
+                background: "var(--sf)",
+            }}
+        >
+            <Group gap={12} wrap="nowrap">
+                <ThemeIcon size={40} radius={13} color={meta.color}>
+                    <Icon size={17} />
+                </ThemeIcon>
+                <Box flex={1} miw={0}>
+                    <Text fz={12} c="var(--tx3)" truncate="end">
+                        {meta.label}
+                        {time ? ` · ${time}` : ""}
+                    </Text>
+                    <Text fw={600} mt={2} truncate="end">
+                        {meal.title}
+                    </Text>
+                </Box>
+                {kcal && (
+                    <Text
+                        fz={13}
+                        c="var(--tx2)"
+                        style={{ ...TABULAR, whiteSpace: "nowrap" }}
+                    >
+                        {kcal}
+                    </Text>
+                )}
+                <Group gap={2} wrap="nowrap">
+                    <Tooltip label="View in history">
+                        <ActionIcon
+                            component={Link}
+                            href="/history"
+                            variant="subtle"
+                            size={30}
+                            aria-label="View in history"
+                        >
+                            <Eye size={14} />
+                        </ActionIcon>
+                    </Tooltip>
+                    <Tooltip label="Duplicate">
+                        <ActionIcon
+                            variant="subtle"
+                            size={30}
+                            aria-label="Duplicate meal"
+                            onClick={() => onDuplicate(meal.id)}
+                        >
+                            <Copy size={14} />
+                        </ActionIcon>
+                    </Tooltip>
+                    <Tooltip label="Edit">
+                        <ActionIcon
+                            component={Link}
+                            href="/log"
+                            variant="subtle"
+                            size={30}
+                            aria-label="Edit meal"
+                        >
+                            <Pencil size={14} />
+                        </ActionIcon>
+                    </Tooltip>
+                </Group>
+            </Group>
+        </Box>
+    );
+}
+
+function StatTile({
+    icon,
+    color,
+    label,
+    value,
+    sub,
+}: {
+    icon: LucideIcon;
+    color: string;
+    label: string;
+    value: string;
+    sub?: string;
+}) {
+    const Icon = icon;
+    return (
+        <Paper
+            radius={16}
+            p={12}
+            bg="var(--sf2)"
+            shadow="none"
+            withBorder={false}
+            miw={0}
+        >
+            <Group gap={6} wrap="nowrap">
+                <ThemeIcon size={22} radius={7} color={color}>
+                    <Icon size={12} />
+                </ThemeIcon>
+                <Text fz={11} c="var(--tx3)" truncate="end">
+                    {label}
+                </Text>
+            </Group>
+            <Text
+                fz={18}
+                fw={700}
+                lh={1.1}
+                mt={8}
+                truncate="end"
+                style={{ letterSpacing: "-0.02em", ...TABULAR }}
             >
-                {meal.type}
-            </Badge>
-            <div className="flex gap-1 shrink-0">
-                <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
-                    <Link href="/history">
-                        <Eye className="h-3.5 w-3.5" />
-                    </Link>
-                </Button>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7"
-                    onClick={() => onDuplicate(meal.id)}
-                >
-                    <Copy className="h-3.5 w-3.5" />
-                </Button>
-                <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
-                    <Link href="/log">
-                        <Pencil className="h-3.5 w-3.5" />
-                    </Link>
-                </Button>
-            </div>
-        </div>
+                {value}
+            </Text>
+            <Text fz={11} c="var(--tx3)" mt={2} truncate="end" mih={16}>
+                {sub ?? ""}
+            </Text>
+        </Paper>
     );
 }
 
 export default function DashboardPage() {
     const meals = useMemo(() => mealsRepo.list(), []);
-    const { data: recentMeals = [] } = useQuery<Meal[]>({
+    const { data: recentMeals = [], isPending: recentMealsPending } = useQuery<
+        Meal[]
+    >({
         queryKey: ["recent-meals"],
         queryFn: () => getRecentMeals(),
     });
@@ -114,6 +231,29 @@ export default function DashboardPage() {
         from.setHours(0, 0, 0, 0);
         return meals.filter((m) => m.mealTime && new Date(m.mealTime) >= from);
     }, [meals]);
+
+    const todayMeals = useMemo(() => {
+        const now = new Date();
+        return meals.filter(
+            (m) => m.mealTime && isSameDay(new Date(m.mealTime), now)
+        );
+    }, [meals]);
+
+    const todayCalories = useMemo(
+        () =>
+            Math.round(
+                todayMeals.reduce(
+                    (sum, m) => sum + (m.nutrition?.calories ?? 0),
+                    0
+                )
+            ),
+        [todayMeals]
+    );
+
+    const weekTotal = useMemo(
+        () => Math.round(weeklyCalories.reduce((s, d) => s + d.calories, 0)),
+        [weeklyCalories]
+    );
 
     const avgCalories = useMemo(() => {
         const days = weeklyCalories.filter((d) => d.calories > 0);
@@ -149,199 +289,258 @@ export default function DashboardPage() {
     }
 
     return (
-        <div className="max-w-6xl mx-auto space-y-6">
-            <div className="dashboard-hero flex flex-col gap-5 rounded-2xl border border-border/50 p-5 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                        <Sparkles className="h-3.5 w-3.5" />
-                        Today&apos;s overview
-                    </div>
-                    <h1 className="text-3xl font-bold tracking-tight">
-                        Dashboard
-                    </h1>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                        {new Date().toLocaleDateString("en-US", {
-                            weekday: "long",
-                            month: "long",
-                            day: "numeric",
-                        })}
-                    </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                    <LogMealDialog />
-                </div>
-            </div>
+        <Flex wrap="wrap" gap={12} maw={1152} mx="auto">
+            {/* ---------------------------------------------------- Today */}
+            <Card
+                style={{
+                    flex: "5 1 360px",
+                    minWidth: 0,
+                    display: "flex",
+                    flexDirection: "column",
+                }}
+            >
+                <Group justify="space-between" align="center">
+                    <Text fw={700} fz={17} lts="-0.01em">
+                        Today
+                    </Text>
+                    <Text fz={12} c="var(--tx3)">
+                        {todayMeals.length} of 3 meals
+                    </Text>
+                </Group>
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                {[
-                    {
-                        label: "Meals this week",
-                        value: thisWeekMeals.length,
-                        icon: <Utensils className="h-4 w-4 text-emerald-400" />,
-                        sub: "logged",
-                        accent: "from-emerald-400/28 to-teal-500/10",
-                        ring: "bg-emerald-400/12",
-                    },
-                    {
-                        label: "Avg calories/day",
-                        value: avgCalories ? `${avgCalories}` : "—",
-                        icon: <Flame className="h-4 w-4 text-orange-400" />,
-                        sub: "kcal",
-                        accent: "from-orange-400/24 to-rose-500/10",
-                        ring: "bg-orange-400/12",
-                    },
-                    {
-                        label: "Top food",
-                        value: topFoodData?.title ?? "—",
-                        icon: <TrendingUp className="h-4 w-4 text-blue-400" />,
-                        sub: topFoodData?.foodCount
-                            ? `${topFoodData.foodCount} times`
-                            : "",
-                        accent: "from-blue-400/24 to-cyan-500/10",
-                        ring: "bg-blue-400/12",
-                    },
-                    {
-                        label: "Streak",
-                        value: `${streak}d`,
-                        icon: <Zap className="h-4 w-4 text-yellow-400" />,
-                        sub: "consecutive days",
-                        accent: "from-yellow-400/24 to-amber-500/10",
-                        ring: "bg-yellow-400/12",
-                    },
-                ].map((kpi) => (
-                    <Card
-                        key={kpi.label}
-                        className="kpi-card overflow-hidden border-border/50 bg-card/60"
-                    >
-                        <div
-                            className={`pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r ${kpi.accent}`}
-                        />
-                        <CardContent className="p-4">
-                            <div className="flex items-center justify-between mb-2">
-                                <span className="text-xs font-medium text-muted-foreground">
-                                    {kpi.label}
-                                </span>
-                                <div
-                                    className={`w-8 h-8 rounded-lg ${kpi.ring} flex items-center justify-center`}
-                                >
-                                    {kpi.icon}
-                                </div>
-                            </div>
-                            <p className="text-2xl font-bold tracking-tight truncate">
-                                {kpi.value}
-                            </p>
-                            <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
-                                {kpi.sub}
-                                <ArrowUpRight className="h-3 w-3 opacity-50" />
-                            </p>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <Card className="lg:col-span-2 border-border/50 bg-card/60">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-semibold">
-                            Weekly Calories
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <CaloriesChart data={weeklyCalories} />
-                    </CardContent>
-                </Card>
-                <Card className="border-border/50 bg-card/60">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-semibold">
-                            Macro Breakdown
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <MacrosChart data={weeklyMacros} />
-                    </CardContent>
-                </Card>
-            </div>
-
-            {/* Mood scatter + recent meals */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <Card className="border-border/50 bg-card/60">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-semibold">
-                            Mood vs Energy
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <MoodScatterChart data={moodData} />
-                    </CardContent>
-                </Card>
-
-                <Card className="lg:col-span-2 border-border/50 bg-card/60">
-                    <CardHeader className="pb-2 flex flex-row items-center justify-between">
-                        <CardTitle className="text-sm font-semibold">
-                            Recent Meals
-                        </CardTitle>
-                        <Link href="/history">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-xs h-7"
+                <Box mt={20} mb={22}>
+                    <MacrosChart data={weeklyMacros} label="This week">
+                        <Box>
+                            <Text
+                                fz={36}
+                                fw={700}
+                                lh={1}
+                                style={{ letterSpacing: "-0.04em", ...TABULAR }}
                             >
-                                View all
-                            </Button>
-                        </Link>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                        {recentMeals.length === 0 ? (
-                            <div className="py-8 text-center text-sm text-muted-foreground">
-                                No meals logged yet.{" "}
-                                <Link
-                                    href="/log"
-                                    className="text-primary underline"
+                                {todayCalories.toLocaleString()}
+                                <Text
+                                    component="span"
+                                    fz={14}
+                                    fw={500}
+                                    c="var(--tx3)"
+                                    ml={5}
+                                    style={{ letterSpacing: 0 }}
                                 >
-                                    Log your first meal
-                                </Link>
-                            </div>
-                        ) : (
-                            <div className="divide-y divide-border/50">
-                                {recentMeals.map((meal) => (
-                                    <MealRow
-                                        key={meal.id}
-                                        meal={meal}
-                                        onDuplicate={handleDuplicate}
-                                    />
-                                ))}
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
-            </div>
+                                    kcal
+                                </Text>
+                            </Text>
+                            <Text fz={12} c="var(--tx3)" mt={6}>
+                                vs.{" "}
+                                {avgCalories
+                                    ? avgCalories.toLocaleString()
+                                    : "—"}{" "}
+                                daily average
+                            </Text>
+                        </Box>
+                    </MacrosChart>
+                </Box>
 
-            {/* Insight highlight */}
-            <Card className="border-emerald-500/20 bg-gradient-to-br from-emerald-950/40 to-teal-950/20">
-                <CardContent className="p-5 flex gap-4 items-start">
-                    <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                        <Sparkles className="h-4 w-4 text-emerald-400" />
-                    </div>
-                    <div>
-                        <p className="text-sm font-semibold text-emerald-300 mb-1">
-                            Weekly Insight
-                        </p>
-                        <p className="text-sm text-muted-foreground leading-relaxed">
-                            Your highest energy days this week followed meals
-                            rich in protein and complex carbs — like your{" "}
-                            <span className="text-foreground font-medium">
-                                Salmon & Roasted Veggies
-                            </span>{" "}
-                            and{" "}
-                            <span className="text-foreground font-medium">
-                                Oatmeal with Banana
-                            </span>
-                            . Consider making these a regular part of your
-                            routine.
-                        </p>
-                    </div>
-                </CardContent>
+                <SimpleGrid cols={3} spacing={8}>
+                    <StatTile
+                        icon={Utensils}
+                        color="alimenta"
+                        label="Meals this week"
+                        value={String(thisWeekMeals.length)}
+                        sub="logged"
+                    />
+                    <StatTile
+                        icon={Zap}
+                        color="amber"
+                        label="Streak"
+                        value={`${streak}d`}
+                        sub="consecutive days"
+                    />
+                    <StatTile
+                        icon={TrendingUp}
+                        color="sky"
+                        label="Top food"
+                        value={topFoodData?.title ?? "—"}
+                        sub={
+                            topFoodData?.foodCount
+                                ? `${topFoodData.foodCount} times`
+                                : undefined
+                        }
+                    />
+                </SimpleGrid>
+
+                <Stack gap={8} mt={22} flex={1}>
+                    <Group justify="space-between" align="baseline">
+                        <Text fz={12} fw={600} c="var(--tx3)">
+                            Recent meals
+                        </Text>
+                        <Anchor
+                            component={Link}
+                            href="/history"
+                            fz={12}
+                            fw={600}
+                            c="var(--ac)"
+                        >
+                            View all
+                        </Anchor>
+                    </Group>
+
+                    {recentMealsPending
+                        ? [0, 1, 2].map((i) => (
+                              <Skeleton key={i} h={66} radius={16} />
+                          ))
+                        : recentMeals.map((meal) => (
+                              <MealRow
+                                  key={meal.id}
+                                  meal={meal}
+                                  onDuplicate={handleDuplicate}
+                              />
+                          ))}
+
+                    <LogMealDialog
+                        renderTrigger={(open) => (
+                            <UnstyledButton
+                                onClick={open}
+                                w="100%"
+                                p={12}
+                                style={{
+                                    borderRadius: 16,
+                                    border: "1px dashed var(--bd2)",
+                                    transition:
+                                        "transform 160ms, background 160ms",
+                                }}
+                            >
+                                <Group gap={12} wrap="nowrap">
+                                    <ThemeIcon
+                                        size={40}
+                                        radius={13}
+                                        color="gray"
+                                        style={{
+                                            backgroundColor: "var(--sf2)",
+                                            color: "var(--tx3)",
+                                        }}
+                                    >
+                                        <Plus size={17} />
+                                    </ThemeIcon>
+                                    <Box flex={1} miw={0}>
+                                        <Text fz={12} c="var(--tx3)">
+                                            {recentMeals.length
+                                                ? "Next meal · not logged yet"
+                                                : "Nothing logged yet"}
+                                        </Text>
+                                        <Text fw={600} mt={2} c="var(--tx2)">
+                                            {recentMeals.length
+                                                ? "Add a meal"
+                                                : "Log your first meal"}
+                                        </Text>
+                                    </Box>
+                                </Group>
+                            </UnstyledButton>
+                        )}
+                    />
+                </Stack>
             </Card>
-        </div>
+
+            {/* ------------------------------------------------ Right column */}
+            <Stack gap={12} style={{ flex: "7 1 440px", minWidth: 0 }}>
+                <Card
+                    style={{
+                        flex: 1,
+                        minHeight: 300,
+                        display: "flex",
+                        flexDirection: "column",
+                    }}
+                >
+                    <Group justify="space-between" align="baseline">
+                        <Text fw={700} fz={17} lts="-0.01em">
+                            This week
+                        </Text>
+                        <Text fz={12} c="var(--tx3)" style={TABULAR}>
+                            {weekTotal.toLocaleString()} kcal total
+                        </Text>
+                    </Group>
+                    <Box mt={18} flex={1}>
+                        <CaloriesChart data={weeklyCalories} />
+                    </Box>
+                </Card>
+
+                <Flex wrap="wrap" gap={12}>
+                    <Card
+                        p={20}
+                        style={{
+                            flex: "4 1 260px",
+                            minWidth: 0,
+                            minHeight: 220,
+                            display: "flex",
+                            flexDirection: "column",
+                        }}
+                    >
+                        <Text fw={700} fz={16}>
+                            Mood by meal
+                        </Text>
+                        <Text fz={12} c="var(--tx3)" mt={2}>
+                            Stronger green means a better mood
+                        </Text>
+                        <MoodScatterChart data={moodData} />
+                    </Card>
+
+                    <Box
+                        p={1}
+                        style={{
+                            flex: "3 1 220px",
+                            minWidth: 0,
+                            borderRadius: 24,
+                            background: "var(--gradient-accent)",
+                            boxShadow: "var(--sh)",
+                        }}
+                    >
+                        <UnstyledButton
+                            component={Link}
+                            href="/insights"
+                            w="100%"
+                            h="100%"
+                            p={20}
+                            style={{
+                                borderRadius: 23,
+                                background: "var(--sf)",
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: 12,
+                            }}
+                        >
+                            <ThemeIcon>
+                                <Sparkles size={16} />
+                            </ThemeIcon>
+                            <Text fz={12} fw={600} c="var(--tx3)">
+                                Weekly insight
+                            </Text>
+                            <Text
+                                fw={700}
+                                fz={16}
+                                lh={1.3}
+                                style={{
+                                    letterSpacing: "-0.015em",
+                                    textWrap: "pretty",
+                                }}
+                            >
+                                Your highest energy days this week followed
+                                meals rich in protein and complex carbs — like
+                                your Salmon & Roasted Veggies and Oatmeal with
+                                Banana.
+                            </Text>
+                            <Text fz={12} c="var(--tx2)" lh={1.5}>
+                                Consider making these a regular part of your
+                                routine.
+                            </Text>
+                            <Group gap={4} mt="auto" wrap="nowrap">
+                                <Text fz={12} fw={600} c="var(--ac)">
+                                    See insights
+                                </Text>
+                                <ArrowRight size={13} color="var(--ac)" />
+                            </Group>
+                        </UnstyledButton>
+                    </Box>
+                </Flex>
+            </Stack>
+        </Flex>
     );
 }

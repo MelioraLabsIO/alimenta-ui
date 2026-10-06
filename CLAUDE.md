@@ -103,49 +103,48 @@ kebab-case, so copying a sibling filename there gives the wrong answer. App Rout
 files keep their reserved lowercase names (`page.tsx`, `layout.tsx`, `route.ts`, …), and
 barrels stay `index.ts`.
 
-## UI layer: Mantine + Tailwind
+## UI layer: Mantine only
 
-Mantine v9 is the component library; Tailwind v4 handles layout and color utilities.
-`src/components/mantine/ui.tsx` is a barrel of shadcn-shaped wrappers over Mantine — always
-import UI primitives from `@/components/mantine/ui`, never `@mantine/core` directly (except
-layout helpers like `Container`/`Stack`).
+Mantine v9 is the component library and the **only** way UI is built or styled:
 
-### Tailwind utilities silently lose to Mantine CSS
+- Import components from `@mantine/core` directly (`Box`, `Stack`, `Group`, `Flex`,
+  `Paper`, `Card`, `Text`, `Title`, `Button`, `ActionIcon`, `ThemeIcon`, `Avatar`,
+  `TextInput`, `Tabs`, `Modal`, …). There is no wrapper barrel any more.
+- **No raw HTML tags** in components — `Box`/`Text`/`Title`/`UnstyledButton` instead
+  (`Box component="section"` when semantics matter; an inline `<svg>` drawing is fine).
+- **No `className`, no Tailwind utilities, no CSS modules, no new CSS.** Style with Mantine
+  style props (`p`, `bg`, `c`, `fz`, `fw`, `w`, `radius`, `pos`, `hiddenFrom`, responsive
+  objects like `w={{ base: "100%", md: 220 }}`), the `style` prop, or `styles={{ root: {…} }}`
+  for inner parts. Mantine v9 has no `sx`; these are its equivalents.
+- Tokens are CSS custom properties from `src/app/globals.css`, used as `bg="var(--sf)"`,
+  `c="var(--tx2)"`: `--bg --sf --sf2` (page / card / inset), `--tx --tx2 --tx3` (text
+  tiers), `--bd --bd2` (borders), `--ac --act --acs` (accent, ink on accent, tint),
+  `--bl --am --ro` (blue, amber, rose), `--glass`, `--sh`, `--wash`, `--gradient-accent`,
+  `--ink-on-gradient`. Tint any token with `color-mix(in srgb, var(--am) 16%, transparent)`.
+  Mantine color names: `alimenta` (primary green), `sky`, `amber`, `rose`, `gray`.
 
-Mantine's `styles.css` is **unlayered**; Tailwind v4 emits utilities into `@layer utilities`.
-Unlayered rules win at equal specificity, so **any Tailwind utility setting a property Mantine
-already sets on that element is ignored** — no error, it just doesn't apply.
+### Where styling lives
 
-Known cases:
-
-- `Button` sets `width: auto` → `w-full` does nothing. Use the `fullWidth` prop.
-- `Avatar` is deliberately a plain element, not Mantine's, because Mantine's `--avatar-size`
-  (and its `min-width`) overrode every `h-*`/`w-*` and its placeholder painted a second
-  background. Size it with Tailwind classes; it has no default size.
-
-When a Tailwind class mysteriously has no effect on a Mantine component, check
-`node_modules/@mantine/core/styles.css` for that property before debugging further, and prefer
-the Mantine prop.
-
-There is no `tailwind-merge`/`cn` helper — wrappers concatenate `className` strings. Avoid
-baking default utilities into a wrapper when callers set the same property; whichever class
-Tailwind emitted last wins, not the caller's.
-
-### Other wrapper quirks
-
-- `Input` is Mantine `TextInput`: `className` lands on the **wrapper**, not the input. Use the
-  `error` prop for invalid state — a `border-*` class won't reach the field.
-- Disclosure components (`Dialog`, `Sheet`, `AlertDialog`) take `onOpenChangeAction`, not
-  `onOpenChange`.
-- `Button`'s `asChild` only merges `className` and `onClick`; it does not apply Mantine button
-  styling. For a link that looks like a button use `component="a"` with `href`.
-
-Theme tokens live in `src/lib/mantine/theme.ts` (Mantine `alimenta` palette) and
-`src/app/globals.css` (CSS custom properties bridged into Tailwind via `@theme inline`, plus
-app-shell classes like `.app-header` and `.brand-mark`). Dark mode is the default and keys off
-`[data-mantine-color-scheme]`, wired as Tailwind's `dark:` variant.
-
-Cards across the app share `className="border-border/50 bg-card/60"`.
+- `src/lib/mantine/theme.ts` — the global theme: palettes, radius/shadow scales, Geist type,
+  and per-component `defaultProps` / `vars` / `styles`. Button variants: `filled` (green
+  CTA with glow, default), `default` (bordered secondary), `subtle` (ghost), `surface`
+  (`--sf2` chip), `glass` (translucent round control), `gradient`, `light`; `ActionIcon`
+  defaults to a 42px glass circle; `ThemeIcon` is the 34px accent icon tile; `Card`/`Paper`
+  are the 24px-radius `--sf` cards; `Tabs` are pill tabs in a glass track. The theme
+  contains functions, so it is only imported by `src/providers/MantineThemeProvider.tsx`
+  (`"use client"`) — never from a server component.
+- `src/app/globals.css` — only tokens, the bridge from Mantine's global variables onto
+  them, and keyframes (`alm-in`, `alm-pop`, `alm-shake`, `alm-bounce`, `alm-pulse`,
+  `alm-spin`, used via `style={{ animation: … }}`). It also sets the cascade-layer order
+  `theme, base, mantine, components, utilities` and imports Mantine's `styles.layer.css`
+  files, so Mantine wins over Tailwind's preflight but loses to utilities if one is used.
+- App shell: `src/components/layout/AppShellLayout.tsx` (Mantine `AppShell`, floating glass
+  navbar), `sidebar-nav.tsx` (`NavLink`s), `app-header/AppHeader.tsx`. The header renders
+  each route's kicker + title from `src/lib/page-headings.ts` — **pages do not render
+  their own `<h1>`**. `(session)` pages have no shell and render `Brand` themselves.
+- Hover states cannot be expressed inline; rely on components that have them (`Button`,
+  `ActionIcon`, `NavLink`, `Menu.Item`, `Tabs`) rather than hand-rolled rows.
+- Toasts: `toast.success/error/info/undo` from `@/lib/notifications`.
 
 ## Formatting
 

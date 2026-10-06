@@ -1,14 +1,7 @@
 "use client";
 
+import { Button, Modal, Stack, Text, ThemeIcon } from "@mantine/core";
 import { PartyPopper } from "lucide-react";
-import {
-    Button,
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/mantine/ui";
 
 interface SpinWinnerDialogProps {
     open: boolean;
@@ -31,35 +24,63 @@ export function SpinWinnerDialog({
     foodName,
 }: SpinWinnerDialogProps) {
     return (
-        <Dialog open={open} onOpenChangeAction={onOpenChangeAction}>
-            <DialogContent className="sm:max-w-md">
-                <div className="flex flex-col items-center gap-4 py-2 text-center">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
-                        <PartyPopper className="h-8 w-8" aria-hidden="true" />
-                    </div>
+        <Modal
+            opened={open}
+            onClose={() => onOpenChangeAction(false)}
+            size={420}
+            padding={0}
+            withCloseButton={false}
+            aria-label="Spin result"
+        >
+            <Stack
+                align="center"
+                gap={14}
+                ta="center"
+                pt={40}
+                px={32}
+                pb={32}
+                style={{
+                    background:
+                        "radial-gradient(400px 220px at 50% 0%, var(--acs), transparent)",
+                }}
+            >
+                <ThemeIcon
+                    variant="gradient"
+                    size={80}
+                    radius={999}
+                    style={{ boxShadow: "0 16px 40px rgba(59,214,146,0.35)" }}
+                >
+                    <PartyPopper size={36} aria-hidden="true" />
+                </ThemeIcon>
 
-                    <DialogHeader className="space-y-1">
-                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                            The wheel has spoken
-                        </p>
-                        <DialogTitle className="text-2xl font-bold text-foreground">
-                            {foodName || "—"}
-                        </DialogTitle>
-                        <DialogDescription className="text-sm text-muted-foreground">
-                            {displayName
-                                ? `${displayName}'s pick won the spin — that's what we're eating!`
-                                : "That's what we're eating!"}
-                        </DialogDescription>
-                    </DialogHeader>
+                <Text
+                    fz={12}
+                    fw={700}
+                    lts="0.06em"
+                    tt="uppercase"
+                    c="var(--ac)"
+                >
+                    The wheel has spoken
+                </Text>
+                <Text fz={34} fw={700} lts="-0.04em" lh={1.05}>
+                    {foodName || "—"}
+                </Text>
+                <Text fz={14} c="var(--tx2)">
+                    {displayName
+                        ? `${displayName}'s pick won the spin — that's what we're eating!`
+                        : "That's what we're eating!"}
+                </Text>
 
-                    <Button
-                        className="mt-2 min-w-[120px]"
-                        onClick={() => onOpenChangeAction(false)}
-                    >
-                        Sounds good
-                    </Button>
-                </div>
-            </DialogContent>
-        </Dialog>
+                <Button
+                    mt={8}
+                    size="lg"
+                    px={28}
+                    fw={700}
+                    onClick={() => onOpenChangeAction(false)}
+                >
+                    Sounds good
+                </Button>
+            </Stack>
+        </Modal>
     );
 }

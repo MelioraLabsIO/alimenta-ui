@@ -1,10 +1,11 @@
 "use client";
 
-import { X } from "lucide-react";
-import { Badge, Button } from "@/components/mantine/ui";
+import { ActionIcon, Box, Group, Text } from "@mantine/core";
+import { Plus, X } from "lucide-react";
 import { Autocomplete } from "@/components/foods/autocomplete";
 import type { FoodSearchItem } from "@/apis/food/queries";
-import { Text } from "@mantine/core";
+import { SettingsGroup } from "./SettingsGroup";
+import { tint } from "./settings-types";
 
 type PreferenceTagInputProps = {
     label: string;
@@ -14,8 +15,11 @@ type PreferenceTagInputProps = {
     onSelectedFoodChangeAction: (food: FoodSearchItem) => void;
     onAddItemAction: () => void;
     onRemoveItemAction: (item: string) => void;
+    /** Design token the group is tinted with, e.g. `"var(--am)"`. */
+    accent?: string;
 };
 
+/** One "Dislikes" / "Allergies" group: tinted chips plus a search-to-add row. */
 export function PreferenceTagInput({
     label,
     placeholder,
@@ -24,46 +28,62 @@ export function PreferenceTagInput({
     onSelectedFoodChangeAction,
     onAddItemAction,
     onRemoveItemAction,
+    accent = "var(--ac)",
 }: PreferenceTagInputProps) {
     return (
-        <div className="space-y-2">
-            <Text size={"md"}>{label}</Text>
-            <div className="flex min-h-8 flex-wrap gap-2">
+        <SettingsGroup label={label} padded>
+            <Group gap={6} mih={32}>
                 {items.map((item) => (
-                    <Badge
+                    <Group
                         key={item}
-                        variant="secondary"
-                        className="gap-1 pr-1 text-xs"
+                        gap={4}
+                        wrap="nowrap"
+                        h={32}
+                        pl={12}
+                        pr={6}
+                        bg={tint(accent)}
+                        c={accent}
+                        style={{ borderRadius: 10 }}
                     >
-                        {item}
-                        <button
+                        <Text fz={13} fw={600} c="inherit">
+                            {item}
+                        </Text>
+                        <ActionIcon
                             type="button"
+                            variant="transparent"
+                            size={22}
+                            radius={999}
+                            aria-label={`Remove ${item}`}
+                            style={{ color: "inherit" }}
                             onClick={() => onRemoveItemAction(item)}
-                            className="ml-0.5 rounded-full hover:bg-muted-foreground/20 p-0.5"
                         >
-                            <X className="h-2.5 w-2.5" />
-                        </button>
-                    </Badge>
+                            <X size={12} />
+                        </ActionIcon>
+                    </Group>
                 ))}
-            </div>
-            <div className="flex items-stretch gap-2">
-                <div className="flex-1">
+            </Group>
+
+            <Group gap={6} wrap="nowrap" align="stretch" mt={12}>
+                <Box style={{ flex: 1, minWidth: 0 }}>
                     <Autocomplete
                         value={selectedFood}
                         placeholder={placeholder}
                         onChange={onSelectedFoodChangeAction}
                     />
-                </div>
-                <Button
-                    variant="outline"
-                    size="md"
+                </Box>
+                <ActionIcon
+                    type="button"
+                    variant="surface"
+                    size={44}
+                    radius={12}
+                    bg="var(--sf)"
+                    aria-label={`Add ${label.toLowerCase()}`}
                     onClick={onAddItemAction}
                     disabled={!selectedFood}
-                    className="h-auto gap-1 px-3"
                 >
-                    Add
-                </Button>
-            </div>
-        </div>
+                    <Plus size={15} />
+                </ActionIcon>
+            </Group>
+        </SettingsGroup>
     );
 }

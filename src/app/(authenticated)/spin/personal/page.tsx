@@ -1,13 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { Flex, Stack } from "@mantine/core";
 import { Dices, Trophy, UtensilsCrossed } from "lucide-react";
-import { Card, CardContent } from "@/components/mantine/ui";
 import {
     WheelInstructions,
     type WheelInstructionStep,
 } from "@/app/(authenticated)/spin/_components/WheelInstructions";
-
 import {
     MAX_WHEEL_SEGMENTS,
     MealEntryForm,
@@ -16,7 +15,9 @@ import { PastMealsSearch } from "@/app/(authenticated)/spin/_components/PastMeal
 import { WheelSegments } from "@/app/(authenticated)/spin/_components/WheelSegments";
 import {
     MealSpinWheel,
-    WheelSegment,
+    WheelCard,
+    WheelEmptyState,
+    type WheelSegment,
 } from "@/app/(authenticated)/spin/_components/MealSpinWheel";
 
 const INSTRUCTION_STEPS: WheelInstructionStep[] = [
@@ -74,51 +75,41 @@ export default function Personal() {
     }));
 
     return (
-        <div className="max-w-6xl mx-auto space-y-6">
-            <p className="text-sm text-muted-foreground">
-                Build your wheel, then spin to decide what to eat.
-            </p>
+        <Flex wrap="wrap" gap={12} align="flex-start">
+            {/* Wheel */}
+            <Stack gap={12} style={{ flex: "7 1 440px", minWidth: 0 }}>
+                <WheelCard>
+                    {segments.length === 0 ? (
+                        <WheelEmptyState
+                            title="Your wheel is empty"
+                            description="Add at least two meals on the right to spin."
+                        />
+                    ) : (
+                        <MealSpinWheel segments={segments} />
+                    )}
+                </WheelCard>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-                {/* Wheel */}
-                <div className="space-y-4">
-                    <Card className="border-border/50 bg-card/60">
-                        <CardContent className="p-5 flex flex-col items-center gap-4">
-                            {segments.length === 0 ? (
-                                <div className="py-12 text-center space-y-2">
-                                    <Dices className="h-12 w-12 mx-auto text-muted-foreground/40" />
-                                    <p className="text-sm text-muted-foreground">
-                                        Add meals on the right to start
-                                        spinning.
-                                    </p>
-                                </div>
-                            ) : (
-                                <MealSpinWheel segments={segments} />
-                            )}
-                        </CardContent>
-                    </Card>
+                <WheelInstructions steps={INSTRUCTION_STEPS} />
+            </Stack>
 
-                    <WheelInstructions steps={INSTRUCTION_STEPS} />
-                </div>
-
-                {/* Controls */}
-                <div className="space-y-4">
-                    <MealEntryForm canAddMore={canAddMore} onAdd={addSegment} />
+            {/* Controls */}
+            <Stack gap={12} style={{ flex: "5 1 360px", minWidth: 0 }}>
+                <MealEntryForm canAddMore={canAddMore} onAdd={addSegment}>
                     <PastMealsSearch
                         addedLabels={addedLabels}
                         canAddMore={canAddMore}
                         onAdd={addSegment}
                         onRemoveByLabel={removeSegmentByLabel}
                     />
-                    <WheelSegments
-                        segments={segmentRows}
-                        onRemove={removeSegmentById}
-                        onClearAll={() => setSegments([])}
-                        canClearAll={true}
-                        emptyMessage="No meals yet. Add one above to build your wheel."
-                    />
-                </div>
-            </div>
-        </div>
+                </MealEntryForm>
+                <WheelSegments
+                    segments={segmentRows}
+                    onRemove={removeSegmentById}
+                    onClearAll={() => setSegments([])}
+                    canClearAll={true}
+                    emptyMessage="No meals yet. Add one above to build your wheel."
+                />
+            </Stack>
+        </Flex>
     );
 }

@@ -1,7 +1,20 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
+import {
+    Box,
+    Button,
+    Center,
+    Loader,
+    Paper,
+    Stack,
+    Text,
+    ThemeIcon,
+} from "@mantine/core";
+import { Link2Off, PartyPopper } from "lucide-react";
 import { JoinSpinSessionForm } from "./JoinSpinSessionForm";
 import { useProfileStore } from "@/stores/profile.store";
 import { ParticipantRoom } from "@/app/(session)/spin/[session_id]/_components/ParticipantRoom";
@@ -11,12 +24,92 @@ import {
     SpinSession,
     SpinSessionParticipant,
 } from "@/app/(authenticated)/spin/shared/types";
-import { Container } from "@mantine/core";
-import { PartyPopper, Unlink as LinkOff } from "lucide-react";
-import { Card, CardContent } from "@/components/mantine/ui";
-import { useRouter } from "next/navigation";
 import { routes } from "@/lib/routes";
 import { isSpinSessionComplete } from "@/app/(authenticated)/spin/shared/session-lock";
+import { Brand } from "@/components/layout/Brand";
+
+/** Full-height centering for the single-panel states (loading, join, dead link). */
+function CenteredScreen({ children }: { children: ReactNode }) {
+    return (
+        <Center mih="100dvh" p={24}>
+            <Stack w="100%" maw={460} gap={20} align="center">
+                {children}
+            </Stack>
+        </Center>
+    );
+}
+
+/** The 460px "nothing to join here" panel: big gradient tile, title, body, actions. */
+function NoticePanel({
+    icon,
+    gradient,
+    shadow,
+    title,
+    body,
+    caption,
+    children,
+}: {
+    icon: ReactNode;
+    gradient: { from: string; to: string; deg: number };
+    shadow: string;
+    title: string;
+    body: string;
+    caption?: string;
+    children: ReactNode;
+}) {
+    return (
+        <Paper
+            w="100%"
+            radius={28}
+            pt={40}
+            px={32}
+            pb={32}
+            style={{
+                border: "1px solid var(--bd)",
+                animation: "alm-in 500ms cubic-bezier(.2,.8,.2,1)",
+            }}
+        >
+            <Stack align="center" gap={14} ta="center">
+                <ThemeIcon
+                    variant="gradient"
+                    gradient={gradient}
+                    size={80}
+                    radius={24}
+                    style={{ boxShadow: shadow, color: "#fff" }}
+                >
+                    {icon}
+                </ThemeIcon>
+                <Text fz={26} fw={700} lts="-0.035em" lh={1.15} mt={4}>
+                    {title}
+                </Text>
+                <Text fz={14} c="var(--tx2)" lh={1.55}>
+                    {body}
+                </Text>
+                <Stack w="100%" gap={8} mt={8}>
+                    {children}
+                </Stack>
+                {caption && (
+                    <Text fz={12} c="var(--tx3)">
+                        {caption}
+                    </Text>
+                )}
+            </Stack>
+        </Paper>
+    );
+}
+
+function LoadingScreen({ label }: { label: string }) {
+    return (
+        <CenteredScreen>
+            <Stack align="center" gap={12} py={96} role="status">
+                <Loader />
+                <Text fz={13} c="var(--tx2)">
+                    {label}
+                </Text>
+            </Stack>
+        </CenteredScreen>
+    );
+}
 
 export function SharedSessionView() {
     const profile = useProfileStore((state) => state.profile);
@@ -81,60 +174,48 @@ export function SharedSessionView() {
 
     if (sessionNotFound) {
         return (
-            <Container size="sm" className="py-8 px-4">
-                <Card className="border-border/50 bg-card/60">
-                    <CardContent className="flex flex-col items-center gap-3 p-8 text-center">
-                        <LinkOff
-                            className="h-10 w-10 text-muted-foreground/40"
-                            aria-hidden="true"
-                        />
-                        <div className="space-y-1">
-                            <p className="text-sm font-semibold">
-                                This link isn&apos;t valid anymore
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                                The session may have ended or expired. Ask the
-                                host for a new one.
-                            </p>
-                        </div>
-                    </CardContent>
-                </Card>
-            </Container>
+            <CenteredScreen>
+                <NoticePanel
+                    icon={<Link2Off size={34} aria-hidden="true" />}
+                    gradient={{ from: "rose", to: "amber", deg: 135 }}
+                    shadow="0 16px 40px color-mix(in srgb, var(--ro) 30%, transparent)"
+                    title="This invite link has expired"
+                    body="The session may have ended, or the host started a new one. Ask them to send you a fresh link."
+                    caption={routes.spinSession(sessionId)}
+                >
+                    <Button
+                        component={Link}
+                        href={routes.home()}
+                        h={48}
+                        radius={16}
+                        fullWidth
+                        fw={700}
+                    >
+                        Go to Alimenta
+                    </Button>
+                    <Button
+                        component={Link}
+                        href={routes.spinShared()}
+                        variant="default"
+                        h={48}
+                        radius={16}
+                        fullWidth
+                    >
+                        Start my own session
+                    </Button>
+                </NoticePanel>
+            </CenteredScreen>
         );
     }
 
     if (isLoadingSession || isLoadingParticipant || !session) {
-        return (
-            <Container size="sm" className="py-8 px-4">
-                <div
-                    className="flex flex-col items-center gap-3 py-24"
-                    role="status"
-                >
-                    <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                    <p className="text-sm text-muted-foreground">
-                        Loading session…
-                    </p>
-                </div>
-            </Container>
-        );
+        return <LoadingScreen label="Loading session…" />;
     }
 
     // Redirecting to `/spin/shared` (see the effect above) — render its own
     // loading state rather than flashing the join form for an instant first.
     if (alreadyJoinedAsMember) {
-        return (
-            <Container size="sm" className="py-8 px-4">
-                <div
-                    className="flex flex-col items-center gap-3 py-24"
-                    role="status"
-                >
-                    <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                    <p className="text-sm text-muted-foreground">
-                        Taking you to your session…
-                    </p>
-                </div>
-            </Container>
-        );
+        return <LoadingScreen label="Taking you to your session…" />;
     }
 
     /*
@@ -144,25 +225,36 @@ export function SharedSessionView() {
      */
     if (!resolvedParticipant && isSpinSessionComplete(session)) {
         return (
-            <Container size="sm" className="py-8 px-4">
-                <Card className="border-border/50 bg-card/60">
-                    <CardContent className="flex flex-col items-center gap-3 p-8 text-center">
-                        <PartyPopper
-                            className="h-10 w-10 text-muted-foreground/40"
-                            aria-hidden="true"
-                        />
-                        <div className="space-y-1">
-                            <p className="text-sm font-semibold">
-                                This session has already finished
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                                The wheel has been spun and a winner picked, so
-                                the session is closed to new participants.
-                            </p>
-                        </div>
-                    </CardContent>
-                </Card>
-            </Container>
+            <CenteredScreen>
+                <NoticePanel
+                    icon={<PartyPopper size={34} aria-hidden="true" />}
+                    gradient={{ from: "alimenta", to: "sky", deg: 135 }}
+                    shadow="0 16px 40px rgba(59,214,146,0.35)"
+                    title="This session has already finished"
+                    body="The wheel has been spun and a winner picked, so the session is closed to new participants."
+                >
+                    <Button
+                        component={Link}
+                        href={routes.home()}
+                        h={48}
+                        radius={16}
+                        fullWidth
+                        fw={700}
+                    >
+                        Go to Alimenta
+                    </Button>
+                    <Button
+                        component={Link}
+                        href={routes.spinShared()}
+                        variant="default"
+                        h={48}
+                        radius={16}
+                        fullWidth
+                    >
+                        Start my own session
+                    </Button>
+                </NoticePanel>
+            </CenteredScreen>
         );
     }
 
@@ -171,13 +263,16 @@ export function SharedSessionView() {
      */
     if (!resolvedParticipant) {
         return (
-            <Container size="sm" className="py-8 px-4">
-                <JoinSpinSessionForm
-                    session={session}
-                    currentUser={profile}
-                    onJoinedAction={handleParticipantJoined}
-                />
-            </Container>
+            <CenteredScreen>
+                <Brand />
+                <Box w="100%">
+                    <JoinSpinSessionForm
+                        session={session}
+                        currentUser={profile}
+                        onJoinedAction={handleParticipantJoined}
+                    />
+                </Box>
+            </CenteredScreen>
         );
     }
 
@@ -186,16 +281,13 @@ export function SharedSessionView() {
      *
      * Account capabilities can be enabled based on `user`.
      */
-    // Wider than the states above: the room is a two-column grid, and `sm`
-    // (~540px) never lets `lg:grid-cols-2` open up. This matches the
-    // authenticated spin layout's container.
     return (
-        <Container size="lg" className="py-8 px-4">
+        <Box maw={1040} mx="auto" pt={20} px={24} pb={40}>
             <ParticipantRoom
                 session={session}
                 participant={resolvedParticipant}
                 onLeftAction={handleParticipantLeft}
             />
-        </Container>
+        </Box>
     );
 }

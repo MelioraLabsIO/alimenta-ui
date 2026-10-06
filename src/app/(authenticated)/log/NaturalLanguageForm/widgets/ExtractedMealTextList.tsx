@@ -1,22 +1,52 @@
+import { Paper, Stack, Text } from "@mantine/core";
+
 type ExtractedMealTextListProps = {
     title: string;
     items: string[];
+    /** `neutral` = hairline-bordered box, `amber` = tinted "Quick question" box. */
+    tone?: "neutral" | "amber";
 };
 
-export function ExtractedMealTextList({title, items}: ExtractedMealTextListProps) {
+export function ExtractedMealTextList({
+    title,
+    items,
+    tone = "neutral",
+}: ExtractedMealTextListProps) {
     if (items.length === 0) {
         return null;
     }
 
+    const isAmber = tone === "amber";
+
     return (
-        <div>
-            <p className="text-xs text-muted-foreground mb-2">{title}</p>
-            <div className="space-y-1">
+        <Paper
+            radius={16}
+            px={14}
+            py={12}
+            shadow="none"
+            withBorder={false}
+            bg={
+                isAmber
+                    ? "color-mix(in srgb, var(--am) 10%, transparent)"
+                    : "transparent"
+            }
+            style={{ border: isAmber ? "none" : "1px solid var(--bd)" }}
+        >
+            <Text
+                fz={12}
+                fw={600}
+                c={isAmber ? "var(--am)" : "var(--tx2)"}
+                mb={6}
+            >
+                {title}
+            </Text>
+            <Stack gap={4}>
                 {items.map((item) => (
-                    <p key={item} className="text-sm text-muted-foreground">{item}</p>
+                    <Text key={item} fz={13} lh={1.5}>
+                        {item}
+                    </Text>
                 ))}
-            </div>
-        </div>
+            </Stack>
+        </Paper>
     );
 }
-

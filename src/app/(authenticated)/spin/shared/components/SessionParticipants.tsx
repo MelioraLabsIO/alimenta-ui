@@ -1,20 +1,37 @@
 "use client";
 
-import { X } from "lucide-react";
 import {
+    ActionIcon,
     Avatar,
-    Badge,
-    Button,
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
+    Box,
+    Group,
+    Paper,
     Skeleton,
-} from "@/components/mantine/ui";
+    Stack,
+    Text,
+    Tooltip,
+} from "@mantine/core";
+import { Crown, X } from "lucide-react";
 import type { SpinSessionParticipant } from "../types";
 import { getInitialsFromName } from "@/lib/profile";
 
 const MAX_PARTICIPANTS = 10;
+
+/** Monogram gradients, cycled by join order so each person gets a colour. */
+export const AVATAR_GRADIENTS = [
+    { from: "alimenta", to: "sky", deg: 135 },
+    { from: "rose", to: "amber", deg: 135 },
+    { from: "sky", to: "alimenta", deg: 135 },
+    { from: "amber", to: "alimenta", deg: 135 },
+    { from: "alimenta", to: "rose", deg: 135 },
+];
+
+export function avatarGradient(index: number) {
+    return AVATAR_GRADIENTS[
+        ((index % AVATAR_GRADIENTS.length) + AVATAR_GRADIENTS.length) %
+            AVATAR_GRADIENTS.length
+    ];
+}
 
 interface SessionParticipantsProps {
     participants: SpinSessionParticipant[];
@@ -26,62 +43,87 @@ interface SessionParticipantsProps {
     error?: string | null;
 }
 
-function ParticipantAvatar({
+function ParticipantRow({
     participant,
+    index,
     hostUserId,
     canRemove,
     onRemove,
 }: {
     participant: SpinSessionParticipant;
+    index: number;
     hostUserId: string;
     canRemove: boolean;
     onRemove?: (participantId: string) => void;
 }) {
     const isParticipantHost =
         participant.userId !== "" && participant.userId === hostUserId;
+    const pick = participant.foodName?.trim();
 
     return (
-        <li className="flex items-center gap-3 py-1">
-            {/* Avatar */}
-            <Avatar className="h-8 w-8 text-xs">
+        <Group
+            role="listitem"
+            gap={12}
+            wrap="nowrap"
+            p={8}
+            style={{ borderRadius: 14 }}
+        >
+            <Avatar size={36} fz={12} gradient={avatarGradient(index)}>
                 {getInitialsFromName(participant.displayName)}
             </Avatar>
 
-            {/* Name */}
-            <span className="flex-1 text-sm font-medium truncate">
-                {participant.displayName}
-            </span>
+            <Box flex={1} miw={0}>
+                <Group gap={6} wrap="nowrap">
+                    <Text fw={600} fz={14} truncate>
+                        {participant.displayName}
+                    </Text>
+                    {isParticipantHost && (
+                        <Crown
+                            size={12}
+                            color="var(--am)"
+                            aria-label="Session host"
+                            style={{ flexShrink: 0 }}
+                        />
+                    )}
+                </Group>
+                <Text fz={12} c={pick ? "var(--tx2)" : "var(--tx3)"} truncate>
+                    {pick ?? "Still choosing…"}
+                </Text>
+            </Box>
 
-            {/* Host badge */}
-            {isParticipantHost && (
-                <Badge
-                    variant="outline"
-                    className="text-[10px] border-emerald-500/30 text-emerald-400 shrink-0"
-                    aria-label="Session host"
-                >
-                    Host
-                </Badge>
-            )}
+            <Tooltip label={pick ? "Picked" : "Still choosing"}>
+                <Box
+                    w={8}
+                    h={8}
+                    style={{
+                        borderRadius: 999,
+                        flexShrink: 0,
+                        background: pick ? "var(--ac)" : "var(--bd2)",
+                    }}
+                    aria-hidden="true"
+                />
+            </Tooltip>
 
             {/* Remove participant — host only, can't remove themselves */}
             {canRemove && !isParticipantHost && (
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 shrink-0 text-muted-foreground hover:text-destructive"
+                <ActionIcon
+                    variant="subtle"
+                    size={30}
+                    radius={9}
+                    c="var(--tx3)"
                     onClick={() => onRemove?.(participant.id)}
                     aria-label={`Remove ${participant.displayName}`}
                 >
-                    <X className="h-3.5 w-3.5" />
-                </Button>
+                    <X size={14} />
+                </ActionIcon>
             )}
-        </li>
+        </Group>
     );
 }
 
 /**
- * Right-column card showing all participants connected to the shared session.
- * Supports empty, loading, and error states.
+ * "Who's in" card showing all participants connected to the shared session,
+ * with each person's pick. Supports empty, loading, and error states.
  */
 export function SessionParticipants({
     participants,
@@ -92,52 +134,49 @@ export function SessionParticipants({
     error,
 }: SessionParticipantsProps) {
     return (
-        <Card className="border-border/50 bg-card/60">
-            <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                    <CardTitle className="text-sm font-semibold">
-                        Session participants
-                    </CardTitle>
-                    {!isLoading && !error && (
-                        <Badge variant="secondary" className="text-xs">
-                            {participants.length} / {MAX_PARTICIPANTS}
-                        </Badge>
-                    )}
-                </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-                {isLoading ? (
-                    <ul className="space-y-2" aria-label="Loading participants">
-                        {[1, 2, 3].map((i) => (
-                            <li
-                                key={i}
-                                className="flex items-center gap-3 py-1"
-                            >
-                                <Skeleton className="h-8 w-8 rounded-full" />
-                                <Skeleton className="h-4 w-24 rounded" />
-                            </li>
-                        ))}
-                    </ul>
-                ) : error ? (
-                    <p className="text-sm text-destructive py-2">{error}</p>
-                ) : participants.length === 0 ? (
-                    <p className="text-sm text-muted-foreground py-2">
-                        No participants yet. Share the link to invite others.
-                    </p>
-                ) : (
-                    <ul className="space-y-1" aria-label="Session participants">
-                        {participants.map((p) => (
-                            <ParticipantAvatar
-                                key={p.id}
-                                participant={p}
-                                hostUserId={hostUserId}
-                                canRemove={isHost}
-                                onRemove={onRemoveParticipant}
-                            />
-                        ))}
-                    </ul>
+        <Paper p={18} style={{ border: "1px solid var(--bd)" }}>
+            <Group justify="space-between" align="center" mb={12}>
+                <Text fw={700} fz={15}>
+                    Who&apos;s in
+                </Text>
+                {!isLoading && !error && (
+                    <Text fz={12} c="var(--tx3)">
+                        {participants.length} of {MAX_PARTICIPANTS}
+                    </Text>
                 )}
-            </CardContent>
-        </Card>
+            </Group>
+
+            {isLoading ? (
+                <Stack gap={6} aria-label="Loading participants">
+                    {[1, 2, 3].map((i) => (
+                        <Group key={i} gap={12} p={8} wrap="nowrap">
+                            <Skeleton h={36} w={36} radius={999} />
+                            <Skeleton h={14} w={120} radius={999} />
+                        </Group>
+                    ))}
+                </Stack>
+            ) : error ? (
+                <Text fz={13} c="var(--ro)" py={8}>
+                    {error}
+                </Text>
+            ) : participants.length === 0 ? (
+                <Text fz={13} c="var(--tx3)" py={8}>
+                    No participants yet. Share the link to invite others.
+                </Text>
+            ) : (
+                <Stack gap={6} role="list" aria-label="Session participants">
+                    {participants.map((p, i) => (
+                        <ParticipantRow
+                            key={p.id}
+                            participant={p}
+                            index={i}
+                            hostUserId={hostUserId}
+                            canRemove={isHost}
+                            onRemove={onRemoveParticipant}
+                        />
+                    ))}
+                </Stack>
+            )}
+        </Paper>
     );
 }

@@ -1,52 +1,93 @@
 "use client";
 
-type Props = { data: { name: string; value: number }[] };
+import type { ReactNode } from "react";
+import { Box, Group, RingProgress, Stack, Text } from "@mantine/core";
 
-const COLORS = ["#58d1a0", "#60a5fa", "#fbbf24"];
+type Props = {
+    data: { name: string; value: number }[];
+    /** Optional caption above the macro figures (e.g. "This week"). */
+    label?: string;
+    /** Rendered above the macro figures — the design's big kcal stat. */
+    children?: ReactNode;
+};
 
-export function MacrosChart({data}: Props) {
-    const total = data.reduce((sum, item) => sum + item.value, 0) || 1;
-    const radius = 56;
-    const circumference = 2 * Math.PI * radius;
-    const segments = data.reduce<{ item: Props["data"][number]; length: number; offset: number }[]>((acc, item) => {
-        const previousOffset = acc.reduce((sum, segment) => sum + segment.length, 0);
-        return [...acc, {item, length: (item.value / total) * circumference, offset: previousOffset}];
-    }, []);
+const COLORS = ["var(--ac)", "var(--bl)", "var(--am)"];
+const SIZE = 128;
+const THICKNESS = 10;
+const RING_GAP = 3;
+
+/**
+ * Three nested rings (protein / carbs / fat), each sized against the largest
+ * macro, with the figures beside them. Mirrors the design's `todayRings`.
+ */
+export function MacrosChart({ data, label, children }: Props) {
+    const max = Math.max(...data.map((item) => item.value), 1);
 
     return (
-        <div className="flex h-[200px] items-center justify-center gap-6">
-            <svg viewBox="0 0 160 160" className="h-40 w-40 -rotate-90">
-                <circle cx="80" cy="80" r={radius} fill="none" stroke="var(--muted)" strokeWidth="18"/>
-                {segments.map(({item, length, offset}, index) => (
-                        <circle
+        <Group gap={22} align="center" wrap="nowrap">
+            <Box pos="relative" w={SIZE} h={SIZE} style={{ flexShrink: 0 }}>
+                {data.map((item, index) => {
+                    const size = SIZE - index * 2 * (THICKNESS + RING_GAP);
+                    const inset = (SIZE - size) / 2;
+                    const color = COLORS[index % COLORS.length];
+                    return (
+                        <RingProgress
                             key={item.name}
-                            cx="80"
-                            cy="80"
-                            r={radius}
-                            fill="none"
-                            stroke={COLORS[index % COLORS.length]}
-                            strokeWidth="18"
-                            strokeLinecap="round"
-                            strokeDasharray={`${length} ${circumference - length}`}
-                            strokeDashoffset={-offset}
+                            pos="absolute"
+                            top={inset}
+                            left={inset}
+                            size={size}
+                            thickness={THICKNESS}
+                            roundCaps
+                            rootColor="var(--sf2)"
+                            sections={[
+                                {
+                                    value: (item.value / max) * 92,
+                                    color,
+                                    tooltip: `${item.name} · ${Math.round(item.value)}g`,
+                                },
+                            ]}
                         />
-                ))}
-                <text x="80" y="76" textAnchor="middle" className="rotate-90 fill-foreground text-[20px] font-bold" transform="rotate(90 80 80)">
-                    {Math.round(total)}g
-                </text>
-                <text x="80" y="94" textAnchor="middle" className="rotate-90 fill-muted-foreground text-[10px]" transform="rotate(90 80 80)">
-                    total
-                </text>
-            </svg>
-            <div className="space-y-2">
-                {data.map((item, index) => (
-                    <div key={item.name} className="flex items-center gap-2 text-xs">
-                        <span className="h-2.5 w-2.5 rounded-full" style={{backgroundColor: COLORS[index % COLORS.length]}}/>
-                        <span className="text-muted-foreground">{item.name}</span>
-                        <span className="font-semibold text-foreground">{item.value}g</span>
-                    </div>
-                ))}
-            </div>
-        </div>
+                    );
+                })}
+            </Box>
+            <Stack gap={12} miw={0}>
+                {children}
+                <Box>
+                    {label && (
+                        <Text fz={11} c="var(--tx3)" mb={6}>
+                            {label}
+                        </Text>
+                    )}
+                    <Group gap={16}>
+                        {data.map((item, index) => (
+                            <Box key={item.name} fz={12}>
+                                <Group gap={5} wrap="nowrap">
+                                    <Box
+                                        w={7}
+                                        h={7}
+                                        bg={COLORS[index % COLORS.length]}
+                                        style={{ borderRadius: 999 }}
+                                    />
+                                    <Text fz={12} c="var(--tx3)">
+                                        {item.name}
+                                    </Text>
+                                </Group>
+                                <Text
+                                    fw={700}
+                                    fz={14}
+                                    mt={3}
+                                    style={{
+                                        fontVariantNumeric: "tabular-nums",
+                                    }}
+                                >
+                                    {Math.round(item.value)}g
+                                </Text>
+                            </Box>
+                        ))}
+                    </Group>
+                </Box>
+            </Stack>
+        </Group>
     );
 }

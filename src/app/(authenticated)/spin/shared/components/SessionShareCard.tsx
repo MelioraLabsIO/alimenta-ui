@@ -2,19 +2,18 @@
 
 import { useState } from "react";
 import QRCode from "react-qr-code";
-import { Check, Copy, Crown, Share2 } from "lucide-react";
-import { routes } from "@/lib/routes";
 import {
-    Badge,
+    Box,
     Button,
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/mantine/ui";
-import { Stack } from "@mantine/core";
+    Group,
+    Modal,
+    Paper,
+    Stack,
+    Text,
+    UnstyledButton,
+} from "@mantine/core";
+import { Check, Copy, Crown, Share2, Users } from "lucide-react";
+import { routes } from "@/lib/routes";
 import type { SpinSession } from "../types";
 import { isSpinSessionComplete } from "../session-lock";
 
@@ -22,16 +21,23 @@ interface SessionShareCardProps {
     session: SpinSession;
     joinUrl?: string;
     isHost: boolean;
+    /** Host only: "End session" — opens the caller's delete confirmation. */
+    onEndSession?: () => void;
+    /** Non-host members: "Leave" — opens the caller's leave confirmation. */
+    onLeave?: () => void;
 }
 
 /**
- * Displays the QR share dialog trigger and a host indicator badge. Lives in
- * the left column of the Shared layout.
+ * Gradient-border session card: the QR tile (tap to enlarge), who you are in
+ * this session, the join link and the copy / end / leave actions. Lives at
+ * the top of the right column of the Shared layout and in the guest room.
  */
 export function SessionShareCard({
     session,
     joinUrl,
     isHost,
+    onEndSession,
+    onLeave,
 }: SessionShareCardProps) {
     const [shareDialogOpen, setShareDialogOpen] = useState(false);
     const [copiedLink, setCopiedLink] = useState(false);
@@ -44,6 +50,7 @@ export function SessionShareCard({
             : typeof window !== "undefined"
               ? `${window.location.origin}${joinPath}`
               : joinPath.slice(1);
+    const displayLink = resolvedJoinUrl.replace(/^https?:\/\//, "");
 
     async function handleCopyJoinLink() {
         try {
@@ -55,87 +62,186 @@ export function SessionShareCard({
         }
     }
 
+    const copyIcon = copiedLink ? <Check size={13} /> : <Copy size={13} />;
+    const copyLabel = copiedLink ? "Copied" : "Copy link";
+
     return (
-        <div className="w-full space-y-3">
-            <div className="flex items-center justify-between gap-2">
-                <Dialog
-                    open={shareDialogOpen}
-                    onOpenChangeAction={setShareDialogOpen}
-                >
-                    <DialogTrigger asChild>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="gap-1.5"
+        <>
+            <Box
+                p={1.5}
+                style={{
+                    borderRadius: 24,
+                    background: "var(--gradient-accent)",
+                    boxShadow: "var(--sh)",
+                }}
+            >
+                <Paper radius={22.5} p={18} shadow="none">
+                    <Group gap={16} align="center" wrap="nowrap">
+                        <UnstyledButton
+                            onClick={() => setShareDialogOpen(true)}
+                            disabled={sessionComplete}
                             aria-label="Share session QR code"
-                            disabled={copiedLink || sessionComplete}
+                            w={92}
+                            h={92}
+                            p={8}
+                            bg="#fff"
+                            style={{
+                                flexShrink: 0,
+                                borderRadius: 14,
+                                transition: "transform 160ms",
+                                opacity: sessionComplete ? 0.5 : 1,
+                            }}
                         >
-                            <Share2 className="h-3.5 w-3.5" />
-                            Share
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-sm">
-                        <DialogHeader>
-                            <DialogTitle>
-                                <em>Share</em> this session
-                            </DialogTitle>
-                            <DialogDescription>
-                                Ask others to scan this QR code, or send them
-                                the join link below.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className="flex flex-col items-center gap-3 py-1">
-                            <div
-                                className="rounded-lg bg-white p-3 mt-4"
-                                aria-label="QR code to join this session"
+                            <QRCode
+                                value={resolvedJoinUrl}
+                                size={76}
+                                style={{ display: "block" }}
+                            />
+                        </UnstyledButton>
+
+                        <Box flex={1} miw={0}>
+                            {isHost ? (
+                                <Group
+                                    gap={6}
+                                    wrap="nowrap"
+                                    fz={12}
+                                    fw={700}
+                                    c="var(--am)"
+                                >
+                                    <Crown size={13} aria-hidden="true" />
+                                    You&apos;re the host
+                                </Group>
+                            ) : (
+                                <Group
+                                    gap={6}
+                                    wrap="nowrap"
+                                    fz={12}
+                                    fw={700}
+                                    c="var(--ac)"
+                                >
+                                    <Users size={13} aria-hidden="true" />
+                                    You&apos;re in
+                                </Group>
+                            )}
+                            <Text fw={700} fz={16} mt={4}>
+                                Shared session
+                            </Text>
+                            <Text
+                                fz={12}
+                                c="var(--tx3)"
+                                mt={2}
+                                style={{ wordBreak: "break-all" }}
                             >
-                                <QRCode value={resolvedJoinUrl} size={192} />
-                            </div>
-                            <p className="text-xs text-muted-foreground break-all text-center">
-                                {resolvedJoinUrl}
-                            </p>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="gap-1.5"
-                                onClick={handleCopyJoinLink}
-                                aria-label={
-                                    copiedLink
-                                        ? "Join link copied"
-                                        : "Copy join link"
-                                }
-                            >
-                                {copiedLink ? (
-                                    <Check className="h-3.5 w-3.5 text-primary" />
-                                ) : (
-                                    <Copy className="h-3.5 w-3.5" />
+                                {displayLink}
+                            </Text>
+                            <Group gap={6} mt={10}>
+                                <Button
+                                    variant="surface"
+                                    size="xs"
+                                    leftSection={copyIcon}
+                                    onClick={handleCopyJoinLink}
+                                    aria-label={
+                                        copiedLink
+                                            ? "Join link copied"
+                                            : "Copy join link"
+                                    }
+                                >
+                                    {copyLabel}
+                                </Button>
+                                <Button
+                                    variant="subtle"
+                                    size="xs"
+                                    c="var(--tx3)"
+                                    leftSection={<Share2 size={13} />}
+                                    onClick={() => setShareDialogOpen(true)}
+                                    disabled={sessionComplete}
+                                    aria-label="Share session QR code"
+                                >
+                                    Share
+                                </Button>
+                                {isHost && onEndSession && (
+                                    <Button
+                                        variant="subtle"
+                                        size="xs"
+                                        c="var(--tx3)"
+                                        onClick={onEndSession}
+                                        aria-label="End session"
+                                    >
+                                        End session
+                                    </Button>
                                 )}
-                                {copiedLink ? "Copied link" : "Copy join link"}
-                            </Button>
-                        </div>
-                    </DialogContent>
-                </Dialog>
+                                {!isHost && onLeave && (
+                                    <Button
+                                        variant="subtle"
+                                        size="xs"
+                                        c="var(--tx3)"
+                                        onClick={onLeave}
+                                        aria-label="Leave session"
+                                    >
+                                        Leave
+                                    </Button>
+                                )}
+                            </Group>
+                        </Box>
+                    </Group>
+                </Paper>
+            </Box>
 
-                {isHost && (
-                    <Badge
-                        variant="outline"
-                        className="border-yellow-500/40 text-yellow-400 bg-yellow-500/10 gap-1.5 text-xs"
+            <Modal
+                opened={shareDialogOpen}
+                onClose={() => setShareDialogOpen(false)}
+                size={380}
+                padding={30}
+                aria-label="Share this session"
+            >
+                <Stack align="center" gap={14} ta="center">
+                    <Text fz={22} fw={700} lts="-0.025em">
+                        Invite friends
+                    </Text>
+                    <Text fz={14} c="var(--tx2)">
+                        Scan to join, or send the link.
+                    </Text>
+                    <Box
+                        w={220}
+                        h={220}
+                        p={16}
+                        bg="#fff"
+                        style={{ borderRadius: 22 }}
+                        aria-label="QR code to join this session"
                     >
-                        <Stack
-                            gap={5}
-                            align="center"
-                            style={{ flexDirection: "row" }}
-                        >
-                            <Crown className="h-3 w-3" aria-hidden="true" />
-                            You are the host
-                        </Stack>
-                    </Badge>
-                )}
-            </div>
-
-            <p className="text-xs text-muted-foreground">
-                Use Share to show the join QR code.
-            </p>
-        </div>
+                        <QRCode
+                            value={resolvedJoinUrl}
+                            size={188}
+                            style={{ display: "block" }}
+                        />
+                    </Box>
+                    <Text
+                        fz={13}
+                        c="var(--tx3)"
+                        style={{ wordBreak: "break-all" }}
+                    >
+                        {displayLink}
+                    </Text>
+                    <Button
+                        h={44}
+                        px={22}
+                        fw={700}
+                        leftSection={
+                            copiedLink ? (
+                                <Check size={15} />
+                            ) : (
+                                <Copy size={15} />
+                            )
+                        }
+                        onClick={handleCopyJoinLink}
+                        aria-label={
+                            copiedLink ? "Join link copied" : "Copy join link"
+                        }
+                    >
+                        {copiedLink ? "Copied link" : "Copy link"}
+                    </Button>
+                </Stack>
+            </Modal>
+        </>
     );
 }

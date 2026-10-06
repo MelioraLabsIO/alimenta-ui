@@ -1,14 +1,5 @@
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/mantine/ui";
-import { Group } from "@mantine/core";
+import { Button, Group, Modal, Stack, Text, ThemeIcon } from "@mantine/core";
+import { Trash2 } from "lucide-react";
 
 interface BulkDeleteConfirmDialogProps {
     open: boolean;
@@ -23,39 +14,49 @@ export function BulkDeleteConfirmDialog({
     count,
     onConfirm,
 }: BulkDeleteConfirmDialogProps) {
+    const noun = `${count} meal${count !== 1 ? "s" : ""}`;
+
     return (
-        <AlertDialog open={open} onOpenChangeAction={onOpenChange}>
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>
-                        Delete {count} meal{count !== 1 ? "s" : ""}?
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
+        <Modal
+            opened={open}
+            onClose={() => onOpenChange(false)}
+            size={420}
+            title={`Delete ${noun}?`}
+        >
+            <Stack gap={18}>
+                <Group gap={14} wrap="nowrap" align="flex-start">
+                    <ThemeIcon color="rose" size={44} radius={14}>
+                        <Trash2 size={18} />
+                    </ThemeIcon>
+                    <Text fz={14} c="var(--tx2)" lh={1.5}>
                         You are about to permanently delete{" "}
-                        <strong>
-                            {count} meal{count !== 1 ? "s" : ""}
-                        </strong>
-                        . This action cannot be undone and the deleted meal
+                        <Text component="span" fw={700} c="var(--tx)">
+                            {noun}
+                        </Text>
+                        . This cannot be undone and the deleted meal
                         {count !== 1 ? "s" : ""} cannot be retrieved. It may
                         also affect your nutrition statistics and reports.
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
+                    </Text>
+                </Group>
 
-                <AlertDialogFooter className={"justify-between mt-4"}>
-                    <Group gap="xs" className="w-full">
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            onClick={onConfirm}
-                        >
-                            Delete{" "}
-                            <em>
-                                {count} meal{count !== 1 ? "s" : ""}
-                            </em>
-                        </AlertDialogAction>
-                    </Group>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
+                <Group gap={8} justify="flex-end">
+                    <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => onOpenChange(false)}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        color="rose"
+                        size="sm"
+                        leftSection={<Trash2 size={14} />}
+                        onClick={onConfirm}
+                    >
+                        Delete {noun}
+                    </Button>
+                </Group>
+            </Stack>
+        </Modal>
     );
 }

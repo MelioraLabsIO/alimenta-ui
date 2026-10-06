@@ -1,31 +1,86 @@
 "use client";
 
+import { Box, Progress, Stack, Text } from "@mantine/core";
+
 type Props = { data: { food: string; count: number }[] };
 
-const COLORS = ["#58d1a0", "#60a5fa", "#fbbf24", "#ff91b5", "#8be4bd", "#93c5fd"];
+/** Per-row bar colours, cycling in the design's order. */
+const COLORS = [
+    "var(--ac)",
+    "var(--bl)",
+    "var(--am)",
+    "var(--ro)",
+    "#a78bfa",
+    "#2dd4bf",
+    "#fb923c",
+];
 
-export function TopFoodsChart({data}: Props) {
+/**
+ * "Your most eaten": one row per food — fixed-width label, a 12px pill track
+ * with a gradient fill that eases in row by row, and a tabular count.
+ */
+export function TopFoodsChart({ data }: Props) {
     const max = Math.max(...data.map((item) => item.count), 1);
 
+    if (data.length === 0) {
+        return (
+            <Box
+                h={220}
+                display="flex"
+                style={{ alignItems: "center", justifyContent: "center" }}
+            >
+                <Text fz={13} c="var(--tx3)" ta="center">
+                    Log meals to see your top foods.
+                </Text>
+            </Box>
+        );
+    }
+
     return (
-        <div className="flex h-[220px] flex-col justify-center gap-3">
-            {data.length === 0 ? (
-                <p className="text-center text-sm text-muted-foreground">Log meals to see your top foods.</p>
-            ) : data.map((item, index) => (
-                <div key={item.food} className="grid grid-cols-[110px_1fr_28px] items-center gap-3 text-xs">
-                    <span className="truncate text-muted-foreground">{item.food}</span>
-                    <div className="h-2.5 overflow-hidden rounded-full bg-muted">
-                        <div
-                            className="h-full rounded-full"
-                            style={{
-                                width: `${Math.max(8, (item.count / max) * 100)}%`,
-                                background: `linear-gradient(90deg, ${COLORS[index % COLORS.length]}, color-mix(in srgb, ${COLORS[index % COLORS.length]} 42%, transparent))`,
+        <Stack gap={10} mt={16}>
+            {data.map((item, index) => {
+                const color = COLORS[index % COLORS.length];
+                return (
+                    <Box
+                        key={item.food}
+                        fz={13}
+                        style={{
+                            display: "grid",
+                            gridTemplateColumns: "120px minmax(0, 1fr) 24px",
+                            alignItems: "center",
+                            gap: 12,
+                        }}
+                    >
+                        <Text fz={13} c="var(--tx)" truncate="end">
+                            {item.food}
+                        </Text>
+                        <Progress
+                            value={Math.max(8, (item.count / max) * 100)}
+                            size={12}
+                            radius={999}
+                            transitionDuration={800}
+                            aria-label={`${item.food}: ${item.count}`}
+                            styles={{
+                                section: {
+                                    borderRadius: 999,
+                                    background: `linear-gradient(90deg, ${color}, color-mix(in srgb, ${color} 42%, transparent))`,
+                                    transitionTimingFunction:
+                                        "cubic-bezier(.2,.8,.2,1)",
+                                    transitionDelay: `${index * 60}ms`,
+                                },
                             }}
                         />
-                    </div>
-                    <span className="font-semibold text-foreground">{item.count}</span>
-                </div>
-            ))}
-        </div>
+                        <Text
+                            fz={13}
+                            fw={700}
+                            ta="right"
+                            style={{ fontVariantNumeric: "tabular-nums" }}
+                        >
+                            {item.count}
+                        </Text>
+                    </Box>
+                );
+            })}
+        </Stack>
     );
 }
