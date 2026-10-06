@@ -2,27 +2,26 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
+    Box,
+    Button,
+    Center,
+    Flex,
+    Group,
+    Loader,
+    Modal,
+    Paper,
+    Stack,
+    Text,
+    Tooltip,
+} from "@mantine/core";
+import {
     Dices,
     Link2,
     LogOut,
     PartyPopper,
-    Trash2,
+    RotateCcw,
     UtensilsCrossed,
 } from "lucide-react";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    Button,
-    Card,
-    CardContent,
-} from "@/components/mantine/ui";
-import { Tooltip } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import {
@@ -47,6 +46,8 @@ import {
     MealSpinWheel,
     SPIN_DURATION_MS,
     SpinTrigger,
+    WheelCard,
+    WheelEmptyState,
 } from "@/app/(authenticated)/spin/_components/MealSpinWheel";
 import { SpinWinnerDialog } from "@/app/(authenticated)/spin/_components/SpinWinnerDialog";
 import { isSpinSessionComplete } from "@/app/(authenticated)/spin/shared/session-lock";
@@ -284,223 +285,138 @@ export default function Shared() {
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center py-24">
-                <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-            </div>
+            <Center py={96}>
+                <Loader />
+            </Center>
         );
     }
 
     if (!session) {
         return (
-            <div className="max-w-6xl mx-auto space-y-6">
-                <p className="text-sm text-muted-foreground">
-                    Create a session, invite friends, add meals, and spin to
-                    decide what to eat.
-                </p>
-
-                <CreateSessionView
-                    isCreatingSession={isCreatingSession}
-                    onCreateSession={handleCreateSession}
-                />
-            </div>
+            <CreateSessionView
+                isCreatingSession={isCreatingSession}
+                onCreateSession={handleCreateSession}
+            />
         );
     }
 
     return (
-        <div className="max-w-6xl mx-auto space-y-6">
-            <p className="text-sm text-muted-foreground">
-                Create a session, invite friends, add meals, and spin to decide
-                what to eat.
-            </p>
-
+        <Stack gap={12}>
             {sessionLocked && (
-                <div className="flex items-start gap-3 rounded-lg border border-primary/30 bg-primary/10 px-4 py-3 text-sm">
-                    <PartyPopper
-                        className="mt-0.5 h-4 w-4 shrink-0 text-primary"
-                        aria-hidden="true"
-                    />
-                    <div>
-                        <p className="font-medium text-foreground">
-                            {displayWinner
-                                ? `${displayWinner.displayName}'s pick — ${displayWinner.foodName} — won the spin.`
-                                : "A winner has been picked."}
-                        </p>
-                        <p className="text-muted-foreground">
-                            This session is complete and now read-only.
-                        </p>
-                    </div>
-                </div>
+                <Paper
+                    radius={18}
+                    px={18}
+                    py={14}
+                    shadow="none"
+                    bg="var(--acs)"
+                    style={{
+                        border: "1px solid color-mix(in srgb, var(--ac) 35%, transparent)",
+                    }}
+                >
+                    <Group gap={12} align="center" wrap="nowrap">
+                        <PartyPopper
+                            size={18}
+                            color="var(--ac)"
+                            aria-hidden="true"
+                            style={{ flexShrink: 0 }}
+                        />
+                        <Box flex={1} miw={0}>
+                            <Text component="span" fw={700}>
+                                {displayWinner
+                                    ? `${displayWinner.displayName}'s pick, ${displayWinner.foodName}, won the spin.`
+                                    : "A winner has been picked."}
+                            </Text>
+                            <Text component="span" c="var(--tx2)" ml={6}>
+                                This session is now read-only.
+                            </Text>
+                        </Box>
+                        {isHost ? (
+                            <Button
+                                size="sm"
+                                h={40}
+                                px={18}
+                                leftSection={<RotateCcw size={15} />}
+                                onClick={() => setDeleteSessionDialogOpen(true)}
+                                style={{ flexShrink: 0 }}
+                            >
+                                Start a new session
+                            </Button>
+                        ) : (
+                            <Button
+                                size="sm"
+                                h={40}
+                                px={18}
+                                variant="default"
+                                leftSection={<LogOut size={15} />}
+                                onClick={() => setLeaveDialogOpen(true)}
+                                style={{ flexShrink: 0 }}
+                            >
+                                Leave session
+                            </Button>
+                        )}
+                    </Group>
+                </Paper>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-                <div className="space-y-4">
-                    <Card className="border-border/50 bg-card/60">
-                        <CardContent className="p-5 flex flex-col items-center gap-4">
-                            <SessionShareCard
-                                session={session}
-                                isHost={isHost}
+            <Flex wrap="wrap" gap={12} align="flex-start">
+                <Stack gap={12} style={{ flex: "7 1 440px", minWidth: 0 }}>
+                    <WheelCard>
+                        {hasEntries ? (
+                            <MealSpinWheel
+                                segments={wheelSegments}
+                                spinTrigger={spinTrigger}
+                                onSpinRequest={requestSpin}
+                                canSpin={isHost && hasEntries && !sessionLocked}
+                                spinDisabledReason={spinDisabledReason}
                             />
-
-                            {isHost ? (
-                                <div className="flex items-center gap-1.5 -mt-2">
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="h-6 px-2 gap-1 text-muted-foreground hover:text-destructive"
-                                        onClick={() =>
-                                            setDeleteSessionDialogOpen(true)
-                                        }
-                                        aria-label="Delete session"
-                                    >
-                                        <Trash2 className="h-3.5 w-3.5" />
-                                        Delete session
-                                    </Button>
-                                </div>
-                            ) : (
-                                <div className="flex items-center gap-1.5 -mt-2">
-                                    <p className="text-xs text-muted-foreground">
-                                        You&apos;re a participant in this
-                                        session
-                                    </p>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-6 w-6 text-muted-foreground hover:text-destructive"
-                                        onClick={() => setLeaveDialogOpen(true)}
-                                        aria-label="Leave session"
-                                    >
-                                        <LogOut className="h-3.5 w-3.5" />
-                                    </Button>
-                                </div>
-                            )}
-
-                            <AlertDialog
-                                open={leaveDialogOpen}
-                                onOpenChangeAction={setLeaveDialogOpen}
-                            >
-                                <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                        <AlertDialogTitle>
-                                            Leave this session?
-                                        </AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            You&apos;ll be removed from the
-                                            session and your food choice, if
-                                            any, will be cleared. You can rejoin
-                                            later with the same join link.
-                                        </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter
-                                        style={{
-                                            marginTop: "1.5rem",
-                                            display: "flex",
-                                            justifyContent: "flex-end",
-                                            gap: "0.5rem",
-                                        }}
-                                    >
-                                        <AlertDialogCancel>
-                                            Cancel
-                                        </AlertDialogCancel>
-                                        <AlertDialogAction
-                                            onClick={handleConfirmLeaveSession}
-                                        >
-                                            Leave session
-                                        </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
-
-                            <AlertDialog
-                                open={deleteSessionDialogOpen}
-                                onOpenChangeAction={setDeleteSessionDialogOpen}
-                            >
-                                <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                        <AlertDialogTitle>
-                                            Delete this session?
-                                        </AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            This ends the session for everyone
-                                            and can&apos;t be undone. All
-                                            participants will be removed.
-                                        </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter
-                                        style={{
-                                            marginTop: "1.5rem",
-                                            display: "flex",
-                                            justifyContent: "flex-end",
-                                            gap: "0.5rem",
-                                        }}
-                                    >
-                                        <AlertDialogCancel>
-                                            Cancel
-                                        </AlertDialogCancel>
-                                        <AlertDialogAction
-                                            onClick={handleConfirmDeleteSession}
-                                        >
-                                            Delete session
-                                        </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
-
-                            {hasEntries ? (
-                                <MealSpinWheel
-                                    segments={wheelSegments}
-                                    spinTrigger={spinTrigger}
-                                    onSpinRequest={requestSpin}
-                                    canSpin={
-                                        isHost && hasEntries && !sessionLocked
-                                    }
-                                    spinDisabledReason={spinDisabledReason}
+                        ) : (
+                            <>
+                                <WheelEmptyState
+                                    title="Your wheel is empty"
+                                    description="Waiting for participants to add their meals…"
                                 />
-                            ) : (
-                                <>
-                                    <div className="py-12 text-center space-y-2">
-                                        <Dices className="h-12 w-12 mx-auto text-muted-foreground/40" />
-                                        <p className="text-sm text-muted-foreground">
-                                            Waiting for participants to add
-                                            their meals…
-                                        </p>
-                                    </div>
-                                    <div className="flex flex-col items-center gap-1.5 pb-2">
-                                        <Tooltip
-                                            label={spinDisabledReason ?? ""}
-                                            disabled={!spinDisabledReason}
-                                        >
-                                            <Button
-                                                disabled
-                                                className="gap-2 min-w-30"
-                                                aria-disabled
-                                                aria-label={
-                                                    spinDisabledReason ??
-                                                    "Spin the wheel"
-                                                }
-                                            >
-                                                <Dices className="h-4 w-4" />
-                                                Spin!
-                                            </Button>
-                                        </Tooltip>
-                                        <p className="text-xs text-muted-foreground">
-                                            Only the host can spin the wheel.
-                                        </p>
-                                    </div>
-                                </>
-                            )}
+                                <Tooltip
+                                    label={spinDisabledReason ?? ""}
+                                    disabled={!spinDisabledReason}
+                                >
+                                    <Button
+                                        disabled
+                                        variant="gradient"
+                                        size="xl"
+                                        miw={200}
+                                        fw={700}
+                                        leftSection={<Dices size={19} />}
+                                        aria-disabled
+                                        aria-label={
+                                            spinDisabledReason ??
+                                            "Spin the wheel"
+                                        }
+                                    >
+                                        Spin!
+                                    </Button>
+                                </Tooltip>
+                            </>
+                        )}
 
-                            {hasEntries && !sessionLocked && (
-                                <p className="text-xs text-muted-foreground -mt-2 pb-1">
-                                    Only the host can spin the wheel.
-                                </p>
-                            )}
-                        </CardContent>
-                    </Card>
+                        {!sessionLocked && (
+                            <Text fz={12} c="var(--tx3)" mt={-10}>
+                                Only the host can spin.
+                                {isHost ? " That's you." : ""}
+                            </Text>
+                        )}
+                    </WheelCard>
 
                     <WheelInstructions steps={INSTRUCTION_STEPS} />
-                </div>
+                </Stack>
 
-                <div className="space-y-4">
+                <Stack gap={12} style={{ flex: "5 1 360px", minWidth: 0 }}>
+                    <SessionShareCard
+                        session={session}
+                        isHost={isHost}
+                        onEndSession={() => setDeleteSessionDialogOpen(true)}
+                        onLeave={() => setLeaveDialogOpen(true)}
+                    />
+
                     <SessionParticipants
                         participants={participants}
                         hostUserId={session.hostUserId}
@@ -514,12 +430,11 @@ export default function Shared() {
 
                     {/* Adding meals is gone entirely once a winner is picked. */}
                     {!sessionLocked && (
-                        <>
-                            <MealEntryForm
-                                canAddMore={canAddMore}
-                                onAdd={addFood}
-                            />
-
+                        <MealEntryForm
+                            canAddMore={canAddMore}
+                            onAdd={addFood}
+                            title="Your pick"
+                        >
                             <PastMealsSearch
                                 addedLabels={addedLabels}
                                 canAddMore={canAddMore}
@@ -534,7 +449,7 @@ export default function Shared() {
                                     if (entry) removeEntry(entry.id);
                                 }}
                             />
-                        </>
+                        </MealEntryForm>
                     )}
 
                     <WheelSegments
@@ -544,8 +459,55 @@ export default function Shared() {
                         canClearAll={isHost && !sessionLocked}
                         emptyMessage="No meals added yet. Each participant adds one."
                     />
-                </div>
-            </div>
+                </Stack>
+            </Flex>
+
+            <Modal
+                opened={leaveDialogOpen}
+                onClose={() => setLeaveDialogOpen(false)}
+                title="Leave this session?"
+                size={420}
+            >
+                <Text fz={14} c="var(--tx2)">
+                    You&apos;ll be removed from the session and your food
+                    choice, if any, will be cleared. You can rejoin later with
+                    the same join link.
+                </Text>
+                <Group justify="flex-end" gap={8} mt={24}>
+                    <Button
+                        variant="default"
+                        onClick={() => setLeaveDialogOpen(false)}
+                    >
+                        Cancel
+                    </Button>
+                    <Button onClick={handleConfirmLeaveSession}>
+                        Leave session
+                    </Button>
+                </Group>
+            </Modal>
+
+            <Modal
+                opened={deleteSessionDialogOpen}
+                onClose={() => setDeleteSessionDialogOpen(false)}
+                title="End this session?"
+                size={420}
+            >
+                <Text fz={14} c="var(--tx2)">
+                    This ends the session for everyone and can&apos;t be undone.
+                    All participants will be removed.
+                </Text>
+                <Group justify="flex-end" gap={8} mt={24}>
+                    <Button
+                        variant="default"
+                        onClick={() => setDeleteSessionDialogOpen(false)}
+                    >
+                        Cancel
+                    </Button>
+                    <Button color="rose" onClick={handleConfirmDeleteSession}>
+                        End session
+                    </Button>
+                </Group>
+            </Modal>
 
             <SpinWinnerDialog
                 open={winnerDialogOpen}
@@ -553,6 +515,6 @@ export default function Shared() {
                 displayName={realtimeWinner?.displayName ?? ""}
                 foodName={realtimeWinner?.foodName ?? ""}
             />
-        </div>
+        </Stack>
     );
 }

@@ -1,22 +1,29 @@
 "use client";
 
+import { TextInput } from "@mantine/core";
 import { Search } from "lucide-react";
-import { Input } from "@/components/mantine/ui";
 
 /**
- * Global search field. Presentational for now — it holds no value and has no
+ * Global search pill. Presentational for now — it holds no value and has no
  * change handler, so typing in it does nothing until a search backend exists.
  */
 export function HeaderSearch() {
     return (
-        <div className="flex-1 max-w-md">
-            <Input
-                placeholder="Search meals, foods…"
-                leftSection={
-                    <Search className="h-3.5 w-3.5 text-muted-foreground" />
-                }
-                className="app-search"
-            />
-        </div>
+        <TextInput
+            placeholder="Search meals, foods"
+            leftSection={<Search size={15} />}
+            aria-label="Search"
+            w={250}
+            radius="999px"
+            visibleFrom="lg"
+            styles={{
+                input: {
+                    height: 42,
+                    backgroundColor: "var(--glass)",
+                    borderColor: "var(--bd)",
+                    backdropFilter: "blur(20px)",
+                },
+            }}
+        />
     );
 }

@@ -1,15 +1,13 @@
 // src/app/layout.tsx
-import type {Metadata} from "next";
-import {Geist, Geist_Mono} from "next/font/google";
-import {ColorSchemeScript, MantineProvider} from "@mantine/core";
-import {Notifications} from "@mantine/notifications";
-import {alimentaTheme} from "@/lib/mantine/theme";
-import "@mantine/core/styles.css";
-import "@mantine/dates/styles.css";
-import "@mantine/notifications/styles.css";
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import { ColorSchemeScript } from "@mantine/core";
+// Mantine's stylesheets are imported from globals.css (as `styles.layer.css`)
+// so they land in the `mantine` cascade layer — see the note at its top.
 import "./globals.css";
+import MantineThemeProvider from "@/providers/MantineThemeProvider";
 import ReactQueryProvider from "@/providers/QueryProvider";
-import {ReactQueryDevtools} from "@tanstack/react-query-devtools";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import AuthUserProvider from "@/providers/AuthUserProvider";
 
 const geistSans = Geist({
@@ -28,24 +26,25 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-                                       children,
-                                   }: Readonly<{ children: React.ReactNode }>) {
+    children,
+}: Readonly<{ children: React.ReactNode }>) {
     return (
         <html lang="en" suppressHydrationWarning>
-        <head>
-            <ColorSchemeScript defaultColorScheme="dark"/>
-        </head>
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <MantineProvider theme={alimentaTheme} defaultColorScheme="dark">
-            <ReactQueryProvider>
-                <AuthUserProvider>
-                    {children}
-                    <Notifications position="top-right"/>
-                    <ReactQueryDevtools initialIsOpen={false} />
-                </AuthUserProvider>
-            </ReactQueryProvider>
-        </MantineProvider>
-        </body>
+            <head>
+                <ColorSchemeScript defaultColorScheme="dark" />
+            </head>
+            <body
+                className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+            >
+                <MantineThemeProvider>
+                    <ReactQueryProvider>
+                        <AuthUserProvider>
+                            {children}
+                            <ReactQueryDevtools initialIsOpen={false} />
+                        </AuthUserProvider>
+                    </ReactQueryProvider>
+                </MantineThemeProvider>
+            </body>
         </html>
     );
 }

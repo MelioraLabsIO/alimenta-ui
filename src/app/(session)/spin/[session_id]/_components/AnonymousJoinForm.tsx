@@ -1,10 +1,11 @@
 "use client";
 
+import { useCallback } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Box, Button, Divider, Stack, Text, TextInput } from "@mantine/core";
 import { LogIn } from "lucide-react";
-import { Button, Input } from "@/components/mantine/ui";
 import {
     JoinSpinSessionResponse,
     SpinSession,
@@ -18,7 +19,6 @@ import {
     joinSpinSessionSchema,
     type JoinSpinSessionSchema,
 } from "@/contracts/spin/join-spin-session.schema";
-import { useCallback } from "react";
 
 /**
  * Guest half of the join screen: pick a display name, or bail out to sign in.
@@ -69,49 +69,49 @@ export function AnonymousJoinForm({
     );
 
     return (
-        <div className="space-y-4">
-            <form
+        <Stack gap={16}>
+            <Box
+                component="form"
                 onSubmit={handleSubmit(handleJoinAsGuest)}
                 noValidate
-                className="space-y-3"
             >
-                <div className="space-y-1.5">
-                    <label
-                        htmlFor="displayName"
-                        className="text-xs font-medium text-muted-foreground"
-                    >
-                        Your name
-                    </label>
-                    {/* Mantine's `error` marks the input itself; a class on
-                        `Input` would only reach the wrapper element. */}
-                    <Input
+                <Stack gap={12}>
+                    <TextInput
                         id="displayName"
+                        label="Your name"
                         placeholder="How should we call you?"
                         error={errors.displayName?.message}
                         {...register("displayName")}
                     />
-                </div>
 
-                <Button
-                    type="submit"
-                    size="lg"
-                    fullWidth
-                    loading={isPending}
-                    leftSection={<LogIn className="h-4 w-4" />}
-                >
-                    {isPending ? "Joining…" : "Join session"}
-                </Button>
-            </form>
+                    <Button
+                        type="submit"
+                        size="lg"
+                        radius={16}
+                        fullWidth
+                        fw={700}
+                        loading={isPending}
+                        leftSection={<LogIn size={16} />}
+                    >
+                        {isPending ? "Joining…" : "Join session"}
+                    </Button>
+                </Stack>
+            </Box>
 
-            <div className="flex items-center gap-3">
-                <span className="h-px flex-1 bg-border/60" />
-                <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                    or
-                </span>
-                <span className="h-px flex-1 bg-border/60" />
-            </div>
+            <Divider
+                label="or"
+                labelPosition="center"
+                styles={{
+                    label: {
+                        fontSize: 11,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.06em",
+                        color: "var(--tx3)",
+                    },
+                }}
+            />
 
-            <div className="space-y-1.5 text-center">
+            <Stack gap={6} ta="center">
                 <Button
                     component="a"
                     href={routes.login({
@@ -119,15 +119,17 @@ export function AnonymousJoinForm({
                             autojoin: true,
                         }),
                     })}
-                    variant="outline"
+                    variant="default"
+                    size="lg"
+                    radius={16}
                     fullWidth
                 >
                     Sign in to Alimenta
                 </Button>
-                <p className="text-xs text-muted-foreground">
+                <Text fz={12} c="var(--tx3)">
                     Signing in joins you under your account name.
-                </p>
-            </div>
-        </div>
+                </Text>
+            </Stack>
+        </Stack>
     );
 }

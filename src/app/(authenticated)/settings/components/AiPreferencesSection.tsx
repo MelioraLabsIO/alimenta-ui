@@ -1,87 +1,138 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles } from "lucide-react";
 import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-    Text,
+    Box,
+    Button,
+    Group,
+    Stack,
     Switch,
-} from "@/components/mantine/ui";
+    Text,
+    ThemeIcon,
+} from "@mantine/core";
+import { Check, ListChecks, Sparkles } from "lucide-react";
+import { SettingsGroup, SettingsRow } from "./SettingsGroup";
 
-const AI_PREFERENCE_ITEMS = [
+type PreferenceKey = "autoExtract" | "askBeforeSave";
+
+const AI_PREFERENCE_ITEMS: {
+    key: PreferenceKey;
+    label: string;
+    description: string;
+    icon: typeof Sparkles;
+}[] = [
     {
-        id: "auto-extract",
-        label: "Auto-extract nutrition from journal",
-        description:
-            "Automatically parse nutrition data when you log a meal via natural language.",
+        key: "autoExtract",
+        label: "Auto-extract nutrition",
+        description: "Estimate nutrition when you describe a meal in words.",
+        icon: Sparkles,
     },
     {
-        id: "ask-before-save",
-        label: "Ask before saving parsed meals",
-        description:
-            "Show a confirmation step before saving AI-parsed meals to your history.",
+        key: "askBeforeSave",
+        label: "Ask before saving",
+        description: "Show the extracted meal for review before it is saved.",
+        icon: ListChecks,
     },
-] as const;
+];
 
+/** "AI & suggestions" tab: quick pill toggles, then the same switches as rows. */
 export function AiPreferencesSection() {
-    const [preferences, setPreferences] = useState({
+    const [preferences, setPreferences] = useState<
+        Record<PreferenceKey, boolean>
+    >({
         autoExtract: true,
         askBeforeSave: false,
     });
 
-    function handlePreferenceChange(
-        key: keyof typeof preferences,
-        checked: boolean
-    ) {
+    function toggle(key: PreferenceKey, checked?: boolean) {
         setPreferences((prev) => ({
             ...prev,
-            [key]: checked,
+            [key]: checked ?? !prev[key],
         }));
     }
 
     return (
-        <Card className="border-border/50 bg-card/60">
-            <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-emerald-400" /> AI
-                    Preferences
-                </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+        <Stack gap={10}>
+            <Text
+                fz={11}
+                fw={600}
+                c="var(--tx3)"
+                pl={16}
+                tt="uppercase"
+                lts="0.07em"
+            >
+                AI helps with
+            </Text>
+            <Group gap={8} pl={4}>
                 {AI_PREFERENCE_ITEMS.map((item) => {
-                    const stateKey =
-                        item.id === "auto-extract"
-                            ? "autoExtract"
-                            : "askBeforeSave";
+                    const on = preferences[item.key];
+                    const Icon = on ? Check : item.icon;
 
                     return (
-                        <div
-                            key={item.id}
-                            className="flex items-start justify-between gap-4"
+                        <Button
+                            key={item.key}
+                            type="button"
+                            size="sm"
+                            h={40}
+                            variant={on ? "light" : "default"}
+                            c={on ? "var(--ac)" : "var(--tx3)"}
+                            leftSection={<Icon size={15} />}
+                            onClick={() => toggle(item.key)}
+                            aria-pressed={on}
+                            style={{
+                                borderColor: on
+                                    ? "color-mix(in srgb, var(--ac) 45%, transparent)"
+                                    : undefined,
+                                borderWidth: 1,
+                                borderStyle: "solid",
+                                transition: "all 160ms",
+                            }}
                         >
-                            <div className="flex-1">
-                                <Text className="text-sm font-medium cursor-pointer">
-                                    {item.label}
-                                </Text>
-                                <p className="text-xs text-muted-foreground mt-0.5">
-                                    {item.description}
-                                </p>
-                            </div>
-                            <Switch
-                                id={item.id}
-                                checked={preferences[stateKey]}
-                                onCheckedChange={(checked) =>
-                                    handlePreferenceChange(stateKey, checked)
-                                }
-                                className="shrink-0 mt-0.5"
-                            />
-                        </div>
+                            {item.label}
+                        </Button>
                     );
                 })}
-            </CardContent>
-        </Card>
+            </Group>
+
+            <SettingsGroup label="">
+                {AI_PREFERENCE_ITEMS.map((item, index) => {
+                    const checked = preferences[item.key];
+                    const Icon = item.icon;
+
+                    return (
+                        <SettingsRow
+                            key={item.key}
+                            last={index === AI_PREFERENCE_ITEMS.length - 1}
+                            onClick={() => toggle(item.key)}
+                        >
+                            <ThemeIcon size={32} radius={10}>
+                                <Icon size={15} />
+                            </ThemeIcon>
+                            <Box py={12} style={{ flex: 1, minWidth: 0 }}>
+                                <Text fw={500}>{item.label}</Text>
+                                <Text fz={12} c="var(--tx3)" mt={2}>
+                                    {item.description}
+                                </Text>
+                            </Box>
+                            <Box
+                                style={{ flexShrink: 0 }}
+                                onClick={(event) => event.stopPropagation()}
+                            >
+                                <Switch
+                                    aria-label={item.label}
+                                    checked={checked}
+                                    onChange={(event) =>
+                                        toggle(
+                                            item.key,
+                                            event.currentTarget.checked
+                                        )
+                                    }
+                                />
+                            </Box>
+                        </SettingsRow>
+                    );
+                })}
+            </SettingsGroup>
+        </Stack>
     );
 }

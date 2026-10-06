@@ -1,16 +1,22 @@
-import {Button} from "@/components/mantine/ui";
+import { Button, Group } from "@mantine/core";
+import { ArrowLeft } from "lucide-react";
 
 type BackToPreviewButtonProps = {
     onBack: () => void;
 };
 
-export function BackToPreviewButton({onBack}: BackToPreviewButtonProps) {
+export function BackToPreviewButton({ onBack }: BackToPreviewButtonProps) {
     return (
-        <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={onBack} className="gap-1.5 text-xs">
-                ← Back to preview
+        <Group gap={8}>
+            <Button
+                type="button"
+                variant="subtle"
+                size="xs"
+                onClick={onBack}
+                leftSection={<ArrowLeft size={14} />}
+            >
+                Back to preview
             </Button>
-        </div>
+        </Group>
     );
 }
-

@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
     Badge,
+    Box,
     Combobox,
+    Group,
     Loader,
     Text,
     TextInput,
@@ -71,29 +73,29 @@ export function Autocomplete({
 
     const options = data.map((food) => (
         <Combobox.Option value={food.id} key={food.id}>
-            <div className="flex min-w-0 items-center justify-between gap-3">
-                <div className="min-w-0">
+            <Group justify="space-between" gap={12} wrap="nowrap" miw={0}>
+                <Box miw={0}>
                     <Text size="sm" fw={500} truncate>
                         {food.name}
                     </Text>
-                    <Text size="xs" c="dimmed" truncate>
+                    <Text size="xs" c="var(--tx3)" truncate>
                         {food.brandName ?? "Generic food"}
                         {typeof food.caloriesPer100g === "number"
                             ? ` · ${food.caloriesPer100g} kcal / 100g`
                             : ""}
                     </Text>
-                </div>
+                </Box>
                 {food.source && (
                     <Badge
                         size="xs"
                         variant="light"
                         color="alimenta"
-                        className="shrink-0"
+                        style={{ flexShrink: 0 }}
                     >
                         {food.source}
                     </Badge>
                 )}
-            </div>
+            </Group>
         </Combobox.Option>
     ));
 
@@ -116,9 +118,7 @@ export function Autocomplete({
                     value={search}
                     error={error}
                     placeholder={placeholder}
-                    leftSection={
-                        <Search className="h-4 w-4 text-muted-foreground" />
-                    }
+                    leftSection={<Search size={16} />}
                     rightSection={isFetching ? <Loader size={16} /> : null}
                     onChange={(event) => {
                         setSearch(event.currentTarget.value);

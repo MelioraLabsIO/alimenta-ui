@@ -5,12 +5,38 @@ import { useEffect, useState } from "react";
 
 import { redirect } from "next/navigation";
 import { EMealType, EMealUnit, Meal } from "@/core/types/models/meal";
-import { Button } from "@/components/mantine/ui";
-import { Input } from "@/components/mantine/ui";
-import { Text } from "@/components/mantine/ui";
-import { Separator } from "@/components/mantine/ui";
-import { Select } from "@mantine/core";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import {
+    ActionIcon,
+    Badge,
+    Box,
+    Button,
+    Flex,
+    Group,
+    NumberInput,
+    Paper,
+    Select,
+    SimpleGrid,
+    Stack,
+    Text,
+    TextInput,
+    ThemeIcon,
+    UnstyledButton,
+} from "@mantine/core";
+import {
+    Apple,
+    Check,
+    CircleAlert,
+    Clock,
+    Minus,
+    Moon,
+    Plus,
+    Sun,
+    Sunrise,
+    Trash2,
+    Utensils,
+    WifiOff,
+    type LucideIcon,
+} from "lucide-react";
 import {
     type Control,
     Controller,
@@ -64,6 +90,58 @@ const UNITS: EMealUnit[] = [
     EMealUnit.SMALL,
 ];
 
+/**
+ * Design colouring for each meal type: Mantine palette name for `color=`
+ * props, the matching CSS token for borders/tints, and the lucide glyph.
+ * Shared with the natural-language widgets.
+ */
+export type MealTypeMeta = {
+    label: string;
+    color: string;
+    token: string;
+    Icon: LucideIcon;
+};
+
+export const MEAL_TYPE_META: Record<EMealType, MealTypeMeta> = {
+    [EMealType.BREAKFAST]: {
+        label: "Breakfast",
+        color: "amber",
+        token: "var(--am)",
+        Icon: Sunrise,
+    },
+    [EMealType.LUNCH]: {
+        label: "Lunch",
+        color: "alimenta",
+        token: "var(--ac)",
+        Icon: Sun,
+    },
+    [EMealType.DINNER]: {
+        label: "Dinner",
+        color: "sky",
+        token: "var(--bl)",
+        Icon: Moon,
+    },
+    [EMealType.SNACK]: {
+        label: "Snack",
+        color: "rose",
+        token: "var(--ro)",
+        Icon: Apple,
+    },
+    [EMealType.OTHER]: {
+        label: "Other",
+        color: "gray",
+        token: "var(--tx3)",
+        Icon: Utensils,
+    },
+};
+
+export function getMealTypeMeta(
+    value: string | null | undefined
+): MealTypeMeta {
+    const normalized = (value ?? "").trim().toUpperCase() as EMealType;
+    return MEAL_TYPE_META[normalized] ?? MEAL_TYPE_META[EMealType.OTHER];
+}
+
 // ─── Manual Form ─────────────────────────────────────────────────────────────
 
 type MealFormInput = z.input<typeof mealSchema>;
@@ -75,6 +153,63 @@ function formatDateTimeLocal(value: string | Date): string {
         date.getTime() - date.getTimezoneOffset() * 60000
     );
     return localDate.toISOString().slice(0, 16);
+}
+
+function formatWhen(value: unknown): string {
+    if (!value) return "Not set";
+    const date = value instanceof Date ? value : new Date(String(value));
+    if (Number.isNaN(date.getTime())) return "Not set";
+    return date.toLocaleString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+    });
+}
+
+const TILE_MOTION = "transform 160ms, border-color 160ms, background 160ms";
+
+function MealTypeTile({
+    type,
+    active,
+    onSelect,
+}: {
+    type: EMealType;
+    active: boolean;
+    onSelect: () => void;
+}) {
+    const meta = MEAL_TYPE_META[type];
+    return (
+        <UnstyledButton
+            type="button"
+            onClick={onSelect}
+            aria-pressed={active}
+            h={96}
+            p={14}
+            c="var(--tx)"
+            style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start",
+                justifyContent: "space-between",
+                borderRadius: 18,
+                border: `1.5px solid ${active ? meta.token : "var(--bd)"}`,
+                background: active
+                    ? `color-mix(in srgb, ${meta.token} 10%, transparent)`
+                    : "var(--sf2)",
+                whiteSpace: "nowrap",
+                transition: TILE_MOTION,
+            }}
+        >
+            <ThemeIcon variant={active ? "filled" : "light"} color={meta.color}>
+                <meta.Icon size={16} />
+            </ThemeIcon>
+            <Text fw={600} fz={14} lh={1.2}>
+                {meta.label}
+            </Text>
+        </UnstyledButton>
+    );
 }
 
 export function ManualForm({
@@ -123,6 +258,9 @@ export function ManualForm({
         name: "items",
     });
     const watchedItems = useWatch({ control, name: "items" });
+    const watchedTitle = useWatch({ control, name: "title" });
+    const watchedType = useWatch({ control, name: "type" });
+    const watchedMealTime = useWatch({ control, name: "mealTime" });
     const devToolControl = control as unknown as Control<MealFormInput>;
 
     useEffect(() => {
@@ -130,7 +268,12 @@ export function ManualForm({
     }, []);
 
     /********************************************* MUTATIONS ************************************************/
-    const { mutate: mutateCreate, isPending: isCreatingPending } = useMutation({
+    const {
+        mutate: mutateCreate,
+        isPending: isCreatingPending,
+        isSuccess: isCreateSuccess,
+        isError: isCreateError,
+    } = useMutation({
         mutationKey: ["save-meal"],
         mutationFn: async (data: SaveMealDTO) => {
             return saveMeal(data);
@@ -150,7 +293,12 @@ export function ManualForm({
         },
     });
 
-    const { mutate: mutateEdit, isPending: isEditingPending } = useMutation({
+    const {
+        mutate: mutateEdit,
+        isPending: isEditingPending,
+        isSuccess: isEditSuccess,
+        isError: isEditError,
+    } = useMutation({
         mutationKey: ["edit-meal"],
         mutationFn: async (data: SaveMealDTO) => {
             if (!prefill?.id) {
@@ -177,6 +325,8 @@ export function ManualForm({
     });
 
     const isPending = isCreatingPending || isEditingPending;
+    const isSaved = isCreateSuccess || isEditSuccess;
+    const saveFailed = isCreateError || isEditError;
 
     /********************************************* HANDLERS ************************************************/
     function handleCreate(data: SaveMealDTO) {
@@ -195,333 +345,618 @@ export function ManualForm({
         }
     }
 
+    function stepQuantity(index: number, delta: number) {
+        const current = Number(watchedItems?.[index]?.quantity);
+        const base = Number.isFinite(current) ? current : 0;
+        setValue(
+            `items.${index}.quantity`,
+            Math.max(0, Math.round((base + delta) * 100) / 100),
+            { shouldDirty: true, shouldValidate: true }
+        );
+    }
+
     // const sliderLabel = (v: number) => ["", "Poor", "Fair", "Okay", "Good", "Great"][v] ?? "";
+
+    /********************************************* DERIVED ************************************************/
+    const selectedType = getMealTypeMeta(watchedType);
+    const namedFoods = (watchedItems ?? []).filter(
+        (item) => (item?.foodName ?? "").trim().length > 0
+    );
+    const itemsErrorMessage =
+        errors.items?.root?.message ||
+        (Array.isArray(errors.items) &&
+        errors.items.some((foodError) => foodError?.foodName)
+            ? "All food items need a name"
+            : "");
+    const saving = isSubmitting || isPending;
+    const saveLabel = saving ? "Saving…" : isSaved ? "Saved" : "Save meal";
 
     return (
         <>
-            <form
+            <Box
+                component="form"
                 onSubmit={handleSubmit(handleSave)}
-                className="space-y-6"
                 noValidate
             >
-                <div>
-                    {/* Basic info */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-1.5">
-                            <Text>
-                                Meal title{" "}
-                                <span className="text-destructive">*</span>
-                            </Text>
-                            <Input
-                                id="title"
-                                placeholder="e.g. Avocado Toast & Eggs"
-                                className={
-                                    errors.title ? "border-destructive" : ""
-                                }
-                                {...register("title")}
-                            />
-                            {errors.title && (
-                                <p className="text-xs text-destructive">
-                                    {errors.title.message}
-                                </p>
-                            )}
-                        </div>
-                        <div className="space-y-1.5">
-                            <Text>
-                                Date & time{" "}
-                                <span className="text-destructive">*</span>
-                            </Text>
-                            <Input
-                                id="date"
-                                type="datetime-local"
-                                className={
-                                    errors.mealTime ? "border-destructive" : ""
-                                }
-                                {...register("mealTime")}
-                            />
-                            {errors.mealTime && (
-                                <p className="text-xs text-destructive">
-                                    {errors.mealTime.message}
-                                </p>
-                            )}
-                        </div>
-                        <div className="space-y-1.5">
-                            <Text>Meal type</Text>
-                            <Controller
-                                control={control}
-                                name="type"
-                                render={({ field }) => (
-                                    <Select
-                                        value={field.value}
-                                        onChange={(selected) =>
-                                            selected && field.onChange(selected)
-                                        }
-                                        data={MEAL_TYPES.map((t) => ({
-                                            value: t,
-                                            label: t,
-                                        }))}
-                                        placeholder="Select meal type"
-                                    />
-                                )}
-                            />
-                            {errors.type && (
-                                <p className="text-xs text-destructive">
-                                    {errors.type.message}
-                                </p>
-                            )}
-                        </div>
-                    </div>
-
-                    <Separator className="my-4" />
-
-                    {/* Foods */}
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                            <Text>
-                                Foods{" "}
-                                <span className="text-destructive">*</span>
-                            </Text>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => addItem({ ...emptyFood() })}
-                                className="gap-1.5 h-7 text-xs"
-                                type="button"
-                            >
-                                <Plus className="h-3 w-3" /> Add food
-                            </Button>
-                        </div>
-                        {errors.items && (
-                            <p className="text-xs text-destructive">
-                                {errors.items.root?.message ||
-                                    (Array.isArray(errors.items) &&
-                                    errors.items.some(
-                                        (foodError) => foodError?.foodName
-                                    )
-                                        ? "All food items need a name"
-                                        : "")}
-                            </p>
-                        )}
-                        <div className="space-y-2">
-                            {items.map((food, index) => (
-                                <div key={food.id} className="space-y-1">
-                                    <div className="grid grid-cols-[1fr_auto] gap-2 sm:flex sm:items-center">
-                                        <Controller
-                                            control={control}
-                                            name={
-                                                `items.${index}.foodName` as const
-                                            }
-                                            render={({ field }) => (
-                                                <div className="col-span-2 min-w-0 sm:col-span-1 sm:flex-1">
-                                                    <Autocomplete
-                                                        value={
-                                                            field.value
-                                                                ? ({
-                                                                      id:
-                                                                          watchedItems?.[
-                                                                              index
-                                                                          ]
-                                                                              ?.foodSourceId ??
-                                                                          food.foodSourceId,
-                                                                      name: field.value,
-                                                                  } satisfies FoodSearchItem)
-                                                                : null
-                                                        }
-                                                        error={Boolean(
-                                                            errors.items?.[
-                                                                index
-                                                            ]?.foodName
-                                                        )}
-                                                        onChange={(
-                                                            selectedFood
-                                                        ) => {
-                                                            field.onChange(
-                                                                selectedFood.name
-                                                            );
-                                                            setValue(
-                                                                `items.${index}.foodSourceId`,
-                                                                selectedFood.id,
-                                                                {
-                                                                    shouldDirty: true,
-                                                                    shouldValidate: true,
-                                                                }
-                                                            );
-                                                            setValue(
-                                                                `items.${index}.foodSource`,
-                                                                "catalog",
-                                                                {
-                                                                    shouldDirty: true,
-                                                                    shouldValidate: true,
-                                                                }
-                                                            );
-                                                        }}
-                                                    />
-                                                </div>
-                                            )}
-                                        />
-                                        <div className="flex gap-2 min-w-0 sm:contents">
-                                            <Input
-                                                type="number"
-                                                min={0}
-                                                step="0.01"
-                                                className="min-w-0 flex-1 sm:w-24 sm:flex-none"
-                                                aria-label={`Quantity for ${watchedItems?.[index]?.foodName || "food"}`}
-                                                {...register(
-                                                    `items.${index}.quantity` as const,
-                                                    { valueAsNumber: true }
-                                                )}
-                                            />
-                                            <Controller
-                                                control={control}
-                                                name={
-                                                    `items.${index}.unit` as const
-                                                }
-                                                render={({ field }) => (
-                                                    <Select
-                                                        value={field.value}
-                                                        onChange={(selected) =>
-                                                            selected &&
-                                                            field.onChange(
-                                                                selected
-                                                            )
-                                                        }
-                                                        data={UNITS.map(
-                                                            (u) => ({
-                                                                value: u,
-                                                                label: u,
-                                                            })
-                                                        )}
-                                                        className="min-w-0 flex-1 sm:w-24 sm:flex-none"
-                                                    />
-                                                )}
-                                            />
-                                        </div>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-8 w-8 self-center text-muted-foreground hover:text-destructive shrink-0"
-                                            onClick={() => removeItem(index)}
-                                            disabled={items.length === 1}
-                                            type="button"
+                <Flex wrap="wrap" gap={12} align="flex-start">
+                    {/* ── Left column ─────────────────────────────── */}
+                    <Stack gap={12} style={{ flex: "8 1 520px", minWidth: 0 }}>
+                        {/* Basic info */}
+                        <Paper p={22}>
+                            <Stack gap={18}>
+                                <Text fw={700} fz={16}>
+                                    What kind of meal?
+                                </Text>
+                                <Controller
+                                    control={control}
+                                    name="type"
+                                    render={({ field }) => (
+                                        <SimpleGrid
+                                            cols={{ base: 2, sm: 5 }}
+                                            spacing={10}
                                         >
-                                            <Trash2 className="h-3.5 w-3.5" />
+                                            {MEAL_TYPES.map((t) => (
+                                                <MealTypeTile
+                                                    key={t}
+                                                    type={t}
+                                                    active={field.value === t}
+                                                    onSelect={() =>
+                                                        field.onChange(t)
+                                                    }
+                                                />
+                                            ))}
+                                        </SimpleGrid>
+                                    )}
+                                />
+                                {errors.type && (
+                                    <Text fz={12} fw={500} c="var(--ro)">
+                                        {errors.type.message}
+                                    </Text>
+                                )}
+                                <Flex wrap="wrap" gap={12}>
+                                    <TextInput
+                                        id="title"
+                                        size="lg"
+                                        label="Meal name"
+                                        placeholder="e.g. Avocado Toast & Eggs"
+                                        error={errors.title?.message}
+                                        style={{
+                                            flex: "1.6 1 220px",
+                                            minWidth: 0,
+                                        }}
+                                        {...register("title")}
+                                    />
+                                    <TextInput
+                                        id="date"
+                                        size="lg"
+                                        type="datetime-local"
+                                        label="When"
+                                        leftSection={<Clock size={15} />}
+                                        error={errors.mealTime?.message}
+                                        style={{
+                                            flex: "1 1 200px",
+                                            minWidth: 0,
+                                        }}
+                                        styles={{ input: { fontSize: 15 } }}
+                                        {...register("mealTime")}
+                                    />
+                                </Flex>
+                            </Stack>
+                        </Paper>
+
+                        {/* Foods */}
+                        <Paper p={22}>
+                            <Stack gap={12}>
+                                <Group justify="space-between" align="center">
+                                    <Text fw={700} fz={16}>
+                                        Foods
+                                    </Text>
+                                    <Text fz={12} c="var(--tx3)">
+                                        {items.length}{" "}
+                                        {items.length === 1 ? "item" : "items"}
+                                    </Text>
+                                </Group>
+
+                                {itemsErrorMessage && (
+                                    <Paper
+                                        radius={16}
+                                        p={16}
+                                        shadow="none"
+                                        withBorder={false}
+                                        bg="color-mix(in srgb, var(--ro) 7%, transparent)"
+                                        style={{
+                                            border: "1.5px dashed var(--ro)",
+                                            animation: "alm-shake 400ms ease",
+                                        }}
+                                    >
+                                        <Group gap={12} wrap="nowrap">
+                                            <ThemeIcon
+                                                size={38}
+                                                radius={12}
+                                                variant="light"
+                                                color="rose"
+                                            >
+                                                <CircleAlert size={17} />
+                                            </ThemeIcon>
+                                            <Box miw={0}>
+                                                <Text fw={600} c="var(--ro)">
+                                                    {itemsErrorMessage}
+                                                </Text>
+                                                <Text
+                                                    fz={12}
+                                                    c="var(--tx3)"
+                                                    mt={2}
+                                                >
+                                                    Pick a food from the catalog
+                                                    for every row.
+                                                </Text>
+                                            </Box>
+                                        </Group>
+                                    </Paper>
+                                )}
+
+                                {items.map((food, index) => {
+                                    const quantityError =
+                                        errors.items?.[index]?.quantity
+                                            ?.message;
+                                    const foodLabel =
+                                        watchedItems?.[index]?.foodName ||
+                                        "food";
+
+                                    return (
+                                        <Paper
+                                            key={food.id}
+                                            radius={16}
+                                            p={10}
+                                            pl={14}
+                                            bg="var(--sf2)"
+                                            shadow="none"
+                                            withBorder={false}
+                                        >
+                                            <Flex
+                                                gap={12}
+                                                align="center"
+                                                wrap="wrap"
+                                            >
+                                                <Box
+                                                    style={{
+                                                        flex: "1 1 200px",
+                                                        minWidth: 0,
+                                                    }}
+                                                >
+                                                    <Controller
+                                                        control={control}
+                                                        name={
+                                                            `items.${index}.foodName` as const
+                                                        }
+                                                        render={({ field }) => (
+                                                            <Autocomplete
+                                                                value={
+                                                                    field.value
+                                                                        ? ({
+                                                                              id:
+                                                                                  watchedItems?.[
+                                                                                      index
+                                                                                  ]
+                                                                                      ?.foodSourceId ??
+                                                                                  food.foodSourceId,
+                                                                              name: field.value,
+                                                                          } satisfies FoodSearchItem)
+                                                                        : null
+                                                                }
+                                                                error={Boolean(
+                                                                    errors
+                                                                        .items?.[
+                                                                        index
+                                                                    ]?.foodName
+                                                                )}
+                                                                onChange={(
+                                                                    selectedFood
+                                                                ) => {
+                                                                    field.onChange(
+                                                                        selectedFood.name
+                                                                    );
+                                                                    setValue(
+                                                                        `items.${index}.foodSourceId`,
+                                                                        selectedFood.id,
+                                                                        {
+                                                                            shouldDirty: true,
+                                                                            shouldValidate: true,
+                                                                        }
+                                                                    );
+                                                                    setValue(
+                                                                        `items.${index}.foodSource`,
+                                                                        "catalog",
+                                                                        {
+                                                                            shouldDirty: true,
+                                                                            shouldValidate: true,
+                                                                        }
+                                                                    );
+                                                                }}
+                                                            />
+                                                        )}
+                                                    />
+                                                </Box>
+
+                                                <Group
+                                                    gap={8}
+                                                    wrap="nowrap"
+                                                    ml="auto"
+                                                >
+                                                    {/* Quantity stepper */}
+                                                    <Group
+                                                        gap={2}
+                                                        p={3}
+                                                        wrap="nowrap"
+                                                        bg="var(--sf)"
+                                                        style={{
+                                                            borderRadius: 12,
+                                                            border: "1px solid var(--bd)",
+                                                        }}
+                                                    >
+                                                        <ActionIcon
+                                                            variant="subtle"
+                                                            size={30}
+                                                            radius={9}
+                                                            aria-label={`Decrease quantity for ${foodLabel}`}
+                                                            onClick={() =>
+                                                                stepQuantity(
+                                                                    index,
+                                                                    -1
+                                                                )
+                                                            }
+                                                        >
+                                                            <Minus size={14} />
+                                                        </ActionIcon>
+                                                        <Controller
+                                                            control={control}
+                                                            name={
+                                                                `items.${index}.quantity` as const
+                                                            }
+                                                            render={({
+                                                                field,
+                                                            }) => (
+                                                                <NumberInput
+                                                                    variant="unstyled"
+                                                                    hideControls
+                                                                    min={0}
+                                                                    step={0.01}
+                                                                    decimalScale={
+                                                                        2
+                                                                    }
+                                                                    w={64}
+                                                                    aria-label={`Quantity for ${foodLabel}`}
+                                                                    value={
+                                                                        field.value as
+                                                                            | number
+                                                                            | string
+                                                                    }
+                                                                    onChange={
+                                                                        field.onChange
+                                                                    }
+                                                                    onBlur={
+                                                                        field.onBlur
+                                                                    }
+                                                                    error={Boolean(
+                                                                        quantityError
+                                                                    )}
+                                                                    styles={{
+                                                                        input: {
+                                                                            height: 30,
+                                                                            minHeight: 30,
+                                                                            paddingInline: 4,
+                                                                            textAlign:
+                                                                                "center",
+                                                                            fontWeight: 600,
+                                                                            fontVariantNumeric:
+                                                                                "tabular-nums",
+                                                                        },
+                                                                    }}
+                                                                />
+                                                            )}
+                                                        />
+                                                        <ActionIcon
+                                                            variant="subtle"
+                                                            size={30}
+                                                            radius={9}
+                                                            aria-label={`Increase quantity for ${foodLabel}`}
+                                                            onClick={() =>
+                                                                stepQuantity(
+                                                                    index,
+                                                                    1
+                                                                )
+                                                            }
+                                                        >
+                                                            <Plus size={14} />
+                                                        </ActionIcon>
+                                                    </Group>
+
+                                                    <Controller
+                                                        control={control}
+                                                        name={
+                                                            `items.${index}.unit` as const
+                                                        }
+                                                        render={({ field }) => (
+                                                            <Select
+                                                                size="sm"
+                                                                radius={10}
+                                                                w={96}
+                                                                aria-label={`Unit for ${foodLabel}`}
+                                                                value={
+                                                                    field.value
+                                                                }
+                                                                onChange={(
+                                                                    selected
+                                                                ) =>
+                                                                    selected &&
+                                                                    field.onChange(
+                                                                        selected
+                                                                    )
+                                                                }
+                                                                data={UNITS.map(
+                                                                    (u) => ({
+                                                                        value: u,
+                                                                        label: u,
+                                                                    })
+                                                                )}
+                                                                styles={{
+                                                                    input: {
+                                                                        backgroundColor:
+                                                                            "var(--sf)",
+                                                                    },
+                                                                }}
+                                                            />
+                                                        )}
+                                                    />
+
+                                                    <ActionIcon
+                                                        variant="subtle"
+                                                        size={34}
+                                                        radius={10}
+                                                        c="var(--tx3)"
+                                                        aria-label="Remove"
+                                                        onClick={() =>
+                                                            removeItem(index)
+                                                        }
+                                                        disabled={
+                                                            items.length === 1
+                                                        }
+                                                    >
+                                                        <Trash2 size={15} />
+                                                    </ActionIcon>
+                                                </Group>
+                                            </Flex>
+                                            {quantityError && (
+                                                <Text
+                                                    fz={12}
+                                                    fw={500}
+                                                    c="var(--ro)"
+                                                    mt={6}
+                                                >
+                                                    {quantityError}
+                                                </Text>
+                                            )}
+                                        </Paper>
+                                    );
+                                })}
+
+                                {/* Add row */}
+                                <Paper
+                                    radius={16}
+                                    p={12}
+                                    bg="transparent"
+                                    shadow="none"
+                                    withBorder={false}
+                                    style={{
+                                        border: "1.5px dashed var(--bd2)",
+                                    }}
+                                >
+                                    <Group gap={8} wrap="wrap">
+                                        <Box
+                                            mx={4}
+                                            c="var(--tx3)"
+                                            style={{ display: "flex" }}
+                                        >
+                                            <Plus size={15} />
+                                        </Box>
+                                        <Text fz={13} c="var(--tx2)" mr={4}>
+                                            Something else on the plate?
+                                        </Text>
+                                        <Button
+                                            type="button"
+                                            variant="default"
+                                            size="xs"
+                                            onClick={() =>
+                                                addItem({ ...emptyFood() })
+                                            }
+                                        >
+                                            Add food
                                         </Button>
-                                    </div>
-                                    {errors.items?.[index]?.foodName && (
-                                        <p className="text-[10px] text-destructive px-1">
-                                            {
-                                                errors.items[index].foodName
-                                                    .message
-                                            }
-                                        </p>
-                                    )}
-                                    {errors.items?.[index]?.quantity && (
-                                        <p className="text-[10px] text-destructive px-1">
-                                            {
-                                                errors.items[index].quantity
-                                                    .message
-                                            }
-                                        </p>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                                    </Group>
+                                </Paper>
+                            </Stack>
+                        </Paper>
+                    </Stack>
 
-                    <Separator className="my-4" />
-
-                    {/* Macros */}
-                    {/*<div className="space-y-5">*/}
-                    {/*    <Label className="text-muted-foreground text-xs uppercase tracking-wide">Optional macros</Label>*/}
-                    {/*    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">*/}
-                    {/*        {[*/}
-                    {/*            {label: "Calories (kcal)", name: "nutrition.calories"},*/}
-                    {/*            {label: "Protein (g)", name: "nutrition.protein"},*/}
-                    {/*            {label: "Carbs (g)", name: "nutrition.carbs"},*/}
-                    {/*            {label: "Fat (g)", name: "nutrition.fat"},*/}
-                    {/*        ].map(({label, name}) => (*/}
-                    {/*            <div key={label} className="space-y-1.5">*/}
-                    {/*                <Label className="text-xs">{label}</Label>*/}
-                    {/*                <Input*/}
-                    {/*                    type="number"*/}
-                    {/*                    min={0}*/}
-                    {/*                    placeholder="—"*/}
-                    {/*                    className={errors.nutrition?.[name] ? "border-destructive" : ""}*/}
-                    {/*                    {...register(`nutrition.${name}`)}*/}
-                    {/*                />*/}
-                    {/*                {errors.nutrition?.[name] && (*/}
-                    {/*                    <p className="text-[10px] text-destructive">*/}
-                    {/*                        {errors.nutrition?.[name]?.message}*/}
-                    {/*                    </p>*/}
-                    {/*                )}*/}
-                    {/*            </div>*/}
-                    {/*        ))}*/}
-                    {/*    </div>*/}
-                    {/*</div>*/}
-
-                    <Separator className="my-4" />
-
-                    {/* Journal */}
-                    {/*<div className="space-y-4">*/}
-                    {/*    <Label className="text-muted-foreground text-xs uppercase tracking-wide">How did you*/}
-                    {/*        feel?</Label>*/}
-                    {/*    {([*/}
-                    {/*        {label: "Mood", name: "mood"},*/}
-                    {/*        {label: "Energy", name: "energy"},*/}
-                    {/*        {label: "Digestion", name: "digestion"},*/}
-                    {/*        {label: "Likeness", name: "likeness"},*/}
-                    {/*    ] as const).map(({label, name}) => (*/}
-                    {/*        <div key={label} className="space-y-2">*/}
-                    {/*            <Controller*/}
-                    {/*                control={control}*/}
-                    {/*                name={name}*/}
-                    {/*                render={({field}) => (*/}
-                    {/*                    <>*/}
-
-                    {/*                        <div className="flex items-center justify-between">*/}
-                    {/*                            <Label className="text-sm">{label}</Label>*/}
-                    {/*                            <span*/}
-                    {/*                                className="text-xs text-muted-foreground">{sliderLabel(field.value)}</span>*/}
-                    {/*                        </div>*/}
-                    {/*                        <Slider*/}
-                    {/*                            min={1} max={5} step={1}*/}
-                    {/*                            value={[field.value]}*/}
-                    {/*                            onValueChange={([v]) => field.onChange(v)}*/}
-                    {/*                            className="w-full"*/}
-                    {/*                        />*/}
-                    {/*                    </>*/}
-                    {/*                )}*/}
-                    {/*            />*/}
-                    {/*            <div className="flex justify-between text-[10px] text-muted-foreground px-0.5">*/}
-                    {/*                {[1, 2, 3, 4, 5].map((n) => <span key={n}>{n}</span>)}*/}
-                    {/*            </div>*/}
-                    {/*        </div>*/}
-                    {/*    ))}*/}
-                    {/*    <div className="space-y-1.5 mb-6">*/}
-                    {/*        <Label className="text-sm">Notes</Label>*/}
-                    {/*        <Textarea*/}
-                    {/*            placeholder="How did this meal make you feel? Any observations…"*/}
-                    {/*            rows={3}*/}
-                    {/*            {...register("notes")}*/}
-                    {/*        />*/}
-                    {/*    </div>*/}
-                    {/*</div>*/}
-                    <Button
-                        type="submit"
-                        className="w-full sm:w-auto"
-                        disabled={isSubmitting || isPending}
+                    {/* ── Right column (sticky summary) ───────────── */}
+                    <Stack
+                        gap={12}
+                        pos={{ base: "static", md: "sticky" }}
+                        top={12}
+                        style={{ flex: "4 1 300px", minWidth: 0 }}
                     >
-                        {isSubmitting || isPending ? (
-                            <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Saving...
-                            </>
-                        ) : (
-                            "Save Meal"
-                        )}
-                    </Button>
-                </div>
-            </form>
+                        <Paper p={22}>
+                            <Stack gap={18}>
+                                <Group justify="space-between" align="center">
+                                    <Text fw={700} fz={16}>
+                                        This meal
+                                    </Text>
+                                    <Badge
+                                        color={selectedType.color}
+                                        leftSection={
+                                            <selectedType.Icon size={12} />
+                                        }
+                                    >
+                                        {selectedType.label}
+                                    </Badge>
+                                </Group>
+
+                                <Group gap={18} wrap="nowrap">
+                                    <ThemeIcon
+                                        size={64}
+                                        radius={20}
+                                        color={selectedType.color}
+                                    >
+                                        <selectedType.Icon size={28} />
+                                    </ThemeIcon>
+                                    <Box>
+                                        <Text
+                                            fz={38}
+                                            fw={700}
+                                            lh={1}
+                                            style={{
+                                                letterSpacing: "-0.04em",
+                                                fontVariantNumeric:
+                                                    "tabular-nums",
+                                            }}
+                                        >
+                                            {namedFoods.length}
+                                        </Text>
+                                        <Text fz={13} c="var(--tx3)" mt={4}>
+                                            {namedFoods.length === 1
+                                                ? "food"
+                                                : "foods"}{" "}
+                                            in this meal
+                                        </Text>
+                                    </Box>
+                                </Group>
+
+                                <Stack gap={10}>
+                                    <Group
+                                        justify="space-between"
+                                        gap={12}
+                                        wrap="nowrap"
+                                    >
+                                        <Text fz={13} c="var(--tx2)">
+                                            Name
+                                        </Text>
+                                        <Text
+                                            fz={13}
+                                            fw={600}
+                                            ta="right"
+                                            truncate
+                                            c={
+                                                watchedTitle?.trim()
+                                                    ? "var(--tx)"
+                                                    : "var(--tx3)"
+                                            }
+                                        >
+                                            {watchedTitle?.trim() ||
+                                                "Untitled meal"}
+                                        </Text>
+                                    </Group>
+                                    <Group
+                                        justify="space-between"
+                                        gap={12}
+                                        wrap="nowrap"
+                                    >
+                                        <Text fz={13} c="var(--tx2)">
+                                            When
+                                        </Text>
+                                        <Text
+                                            fz={13}
+                                            fw={600}
+                                            ta="right"
+                                            style={{
+                                                fontVariantNumeric:
+                                                    "tabular-nums",
+                                            }}
+                                        >
+                                            {formatWhen(watchedMealTime)}
+                                        </Text>
+                                    </Group>
+                                    <Group
+                                        justify="space-between"
+                                        gap={12}
+                                        wrap="nowrap"
+                                        align="flex-start"
+                                    >
+                                        <Text fz={13} c="var(--tx2)">
+                                            Foods
+                                        </Text>
+                                        <Text
+                                            fz={13}
+                                            fw={600}
+                                            ta="right"
+                                            lineClamp={3}
+                                            c={
+                                                namedFoods.length
+                                                    ? "var(--tx)"
+                                                    : "var(--tx3)"
+                                            }
+                                        >
+                                            {namedFoods.length
+                                                ? namedFoods
+                                                      .map((item) =>
+                                                          `${item.quantity ?? ""} ${item.unit ?? ""} ${item.foodName}`.trim()
+                                                      )
+                                                      .join(" · ")
+                                                : "Nothing added yet"}
+                                        </Text>
+                                    </Group>
+                                </Stack>
+
+                                <Button
+                                    type="submit"
+                                    size="lg"
+                                    radius={16}
+                                    fullWidth
+                                    fw={700}
+                                    fz={15}
+                                    variant={
+                                        saveFailed
+                                            ? "filled"
+                                            : isSaved
+                                              ? "gradient"
+                                              : "filled"
+                                    }
+                                    color={saveFailed ? "rose" : undefined}
+                                    loading={saving}
+                                    leftSection={<Check size={17} />}
+                                    aria-live="polite"
+                                    style={{
+                                        animation: saveFailed
+                                            ? "alm-shake 400ms ease"
+                                            : undefined,
+                                    }}
+                                >
+                                    {saveFailed && !saving
+                                        ? "Try again"
+                                        : saveLabel}
+                                </Button>
+                                {saveFailed && (
+                                    <Group
+                                        gap={6}
+                                        align="flex-start"
+                                        wrap="nowrap"
+                                        mt={-8}
+                                        c="var(--ro)"
+                                    >
+                                        <Box mt={2} style={{ display: "flex" }}>
+                                            <WifiOff size={13} />
+                                        </Box>
+                                        <Text fz={12} lh={1.45} c="var(--ro)">
+                                            Couldn&apos;t reach the server. Your
+                                            meal is still here, so just try
+                                            again.
+                                        </Text>
+                                    </Group>
+                                )}
+                            </Stack>
+                        </Paper>
+                    </Stack>
+                </Flex>
+            </Box>
             {mounted && process.env.NODE_ENV === "development" && (
                 <DevTool control={devToolControl} />
             )}

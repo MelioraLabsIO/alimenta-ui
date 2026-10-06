@@ -1,7 +1,14 @@
 "use client";
 
-import { Users, type LucideIcon } from "lucide-react";
-import { Card, CardContent } from "@/components/mantine/ui";
+import {
+    Group,
+    Paper,
+    SimpleGrid,
+    Stack,
+    Text,
+    ThemeIcon,
+} from "@mantine/core";
+import type { LucideIcon } from "lucide-react";
 
 export type WheelInstructionStep = {
     icon: LucideIcon;
@@ -20,34 +27,27 @@ export function WheelInstructions({
     steps: WheelInstructionStep[];
 }) {
     return (
-        <Card className="border-border/50 bg-card/60">
-            <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-3">
-                    <Users
-                        className="h-4 w-4 text-primary"
-                        aria-hidden="true"
-                    />
-                    <span className="text-sm font-semibold">How it works</span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {steps.map(({ icon: Icon, title, description }) => (
-                        <div key={title} className="space-y-1">
-                            <div className="flex items-center gap-1.5">
-                                <Icon
-                                    className="h-3.5 w-3.5 text-primary shrink-0"
-                                    aria-hidden="true"
-                                />
-                                <p className="text-xs font-semibold text-foreground">
-                                    {title}
-                                </p>
-                            </div>
-                            <p className="text-xs text-muted-foreground leading-snug">
-                                {description}
-                            </p>
-                        </div>
-                    ))}
-                </div>
-            </CardContent>
-        </Card>
+        <Paper p={18} style={{ border: "1px solid var(--bd)" }}>
+            <Text fw={700} fz={15} mb={12}>
+                How it works
+            </Text>
+            <SimpleGrid cols={{ base: 1, sm: 3 }} spacing={12}>
+                {steps.map(({ icon: Icon, title, description }) => (
+                    <Stack key={title} gap={6}>
+                        <Group gap={8} wrap="nowrap">
+                            <ThemeIcon size={28} radius={9}>
+                                <Icon size={14} aria-hidden="true" />
+                            </ThemeIcon>
+                            <Text fz={13} fw={600}>
+                                {title}
+                            </Text>
+                        </Group>
+                        <Text fz={12} c="var(--tx2)" lh={1.45}>
+                            {description}
+                        </Text>
+                    </Stack>
+                ))}
+            </SimpleGrid>
+        </Paper>
     );
 }

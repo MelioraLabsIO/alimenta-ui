@@ -1,33 +1,70 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Box, Burger, Button, Group, Text, Title } from "@mantine/core";
+import { Plus } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { MobileNavSheet } from "./MobileNavSheet";
-import { HeaderBrand } from "./HeaderBrand";
+import { useProfileStore } from "@/stores/profile.store";
+import { getPageHeading } from "@/lib/page-headings";
 import { HeaderSearch } from "./HeaderSearch";
 import { HeaderNotifications } from "./HeaderNotifications";
 import { HeaderUserMenu } from "./HeaderUserMenu";
 
+type AppHeaderProps = {
+    navOpened: boolean;
+    onToggleNav: () => void;
+};
+
 /**
- * The application's sticky top bar. Pure composition — every piece owns its
- * own state and data, so this file only decides what sits where: navigation
- * and identity on the left, search in the middle, account actions on the
- * right.
+ * Page header at the top of the main column: the route's kicker and title on
+ * the left, controls on the right. Pages don't render their own `<h1>`.
+ * Below `md` the sidebar is collapsed, so the burger and account menu appear
+ * here instead.
  */
-export function AppHeader() {
+export function AppHeader({ navOpened, onToggleNav }: AppHeaderProps) {
+    const pathname = usePathname();
+    const profile = useProfileStore((state) => state.profile);
+    const { kicker, title } = getPageHeading(pathname, {
+        firstName: profile?.firstName,
+    });
+    const onLogPage = pathname.startsWith("/log");
+
     return (
-        <header className="app-header sticky top-0 z-50 border-b border-border/50">
-            <div className="flex h-16 items-center gap-3 px-4">
-                <MobileNavSheet />
-                <HeaderBrand />
+        <Group component="header" gap={12} wrap="wrap" px={4} pb={4}>
+            <Burger
+                opened={navOpened}
+                onClick={onToggleNav}
+                hiddenFrom="md"
+                size="sm"
+                aria-label="Toggle navigation"
+            />
 
+            <Box miw={0}>
+                <Text fz={13} c="var(--tx2)">
+                    {kicker}
+                </Text>
+                <Title order={1} mt={2}>
+                    {title}
+                </Title>
+            </Box>
+
+            <Group gap={8} ml="auto" wrap="nowrap">
                 <HeaderSearch />
-
-                <div className="ml-auto flex items-center gap-1">
-                    <ThemeToggle />
-                    <HeaderNotifications />
-                    <HeaderUserMenu />
-                </div>
-            </div>
-        </header>
+                <ThemeToggle />
+                <HeaderNotifications />
+                <HeaderUserMenu />
+                {!onLogPage && (
+                    <Button
+                        component={Link}
+                        href="/log"
+                        leftSection={<Plus size={16} />}
+                        visibleFrom="sm"
+                    >
+                        Log meal
+                    </Button>
+                )}
+            </Group>
+        </Group>
     );
 }

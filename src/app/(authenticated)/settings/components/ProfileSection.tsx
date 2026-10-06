@@ -2,24 +2,49 @@
 
 import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { User } from "lucide-react";
-import {
-    Avatar,
-    Button,
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-    Input,
-    Text,
-    Separator,
-} from "@/components/mantine/ui";
+import { Avatar, Box, Button, Stack, Text, TextInput } from "@mantine/core";
+import { Save } from "lucide-react";
 import { toast } from "@/lib/notifications";
 import { updateProfile } from "@/apis/profile/mutations";
-// import { type UserProfileResponse } from "@/apis/profile/queries";
 import { useProfileStore } from "@/stores/profile.store";
 import { getProfileInitials } from "@/lib/profile";
 import { UserProfile } from "@/core/types/models/profile";
+import { SettingsGroup, SettingsRow } from "./SettingsGroup";
+
+function NameRow({
+    label,
+    value,
+    onChange,
+    last,
+}: {
+    label: string;
+    value: string;
+    onChange: (value: string) => void;
+    last?: boolean;
+}) {
+    return (
+        <SettingsRow last={last}>
+            <Text component="label" w={110} fw={500}>
+                {label}
+            </Text>
+            <TextInput
+                variant="unstyled"
+                aria-label={label}
+                value={value}
+                onChange={(event) => onChange(event.currentTarget.value)}
+                style={{ flex: 1, minWidth: 0 }}
+                styles={{
+                    input: {
+                        height: 40,
+                        textAlign: "right",
+                        paddingInline: 0,
+                        fontSize: 14,
+                    },
+                }}
+            />
+        </SettingsRow>
+    );
+}
 
 export function ProfileSection() {
     const [name, setName] = useState({ firstName: "", lastName: "" });
@@ -28,7 +53,7 @@ export function ProfileSection() {
     const setProfile = useProfileStore((state) => state.setProfile);
     const isLoading = !data;
 
-    const { mutate: mutateUserProfile } = useMutation({
+    const { mutate: mutateUserProfile, isPending } = useMutation({
         mutationKey: ["update-user-profile"],
         mutationFn: async (profile: Partial<UserProfile>) =>
             updateProfile(profile),
@@ -53,8 +78,6 @@ export function ProfileSection() {
         }
     }, [data]);
 
-    const email = data?.email ?? "";
-    const fullName = `${name.firstName} ${name.lastName}`.trim();
     const avatarInitials = getProfileInitials(data);
     const hasModifiedProfile = Boolean(
         data &&
@@ -69,83 +92,58 @@ export function ProfileSection() {
     }
 
     return (
-        <Card className="border-border/50 bg-card/60">
-            <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                    <User className="h-4 w-4 text-muted-foreground" /> Profile
-                </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-5">
-                <div className="flex items-center gap-4">
-                    <Avatar className="h-16 w-16 text-xl">
+        <Stack gap={16}>
+            <SettingsGroup label="Profile">
+                <SettingsRow minHeight={72}>
+                    <Avatar size={44}>
                         {isLoading ? ".." : avatarInitials}
                     </Avatar>
-                    <div>
-                        <p className="text-sm font-medium">
-                            {isLoading ? "Loading..." : fullName}
-                        </p>
-                        <p className="text-xs text-muted-foreground">{email}</p>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="mt-2 h-7 text-xs"
-                        >
-                            Change avatar
-                        </Button>
-                    </div>
-                </div>
+                    <Box style={{ flex: 1 }}>
+                        <Text fw={500}>Photo</Text>
+                        <Text fz={12} c="var(--tx3)">
+                            Shown to friends in shared spins
+                        </Text>
+                    </Box>
+                    <Button
+                        type="button"
+                        variant="default"
+                        size="xs"
+                        h={32}
+                        px={14}
+                        bg="var(--sf)"
+                    >
+                        Change
+                    </Button>
+                </SettingsRow>
+                <NameRow
+                    label="First name"
+                    value={name.firstName}
+                    onChange={(firstName) =>
+                        setName((prev) => ({ ...prev, firstName }))
+                    }
+                />
+                <NameRow
+                    label="Last name"
+                    value={name.lastName}
+                    onChange={(lastName) =>
+                        setName((prev) => ({ ...prev, lastName }))
+                    }
+                    last
+                />
+            </SettingsGroup>
 
-                <Separator />
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                        <Text>First name</Text>
-                        <Input
-                            id="firstName"
-                            type="text"
-                            value={name.firstName}
-                            onChange={(event) =>
-                                setName((prev) => ({
-                                    ...prev,
-                                    firstName: event.target.value,
-                                }))
-                            }
-                        />
-                    </div>
-                    <div className="space-y-1.5">
-                        <Text>Last name</Text>
-                        <Input
-                            id="lastName"
-                            type="text"
-                            value={name.lastName}
-                            onChange={(event) =>
-                                setName((prev) => ({
-                                    ...prev,
-                                    lastName: event.target.value,
-                                }))
-                            }
-                        />
-                    </div>
-                </div>
-
-                <div className="space-y-1.5">
-                    <Text>Email</Text>
-                    <Input
-                        id="email"
-                        value={email}
-                        readOnly
-                        className="opacity-60 cursor-not-allowed"
-                    />
-                </div>
-
-                <Button
-                    size="sm"
-                    disabled={!hasModifiedProfile}
-                    onClick={handleSaveProfile}
-                >
-                    Save profile
-                </Button>
-            </CardContent>
-        </Card>
+            <Button
+                type="button"
+                h={40}
+                px={18}
+                style={{ alignSelf: "flex-start" }}
+                disabled={!hasModifiedProfile}
+                loading={isPending}
+                leftSection={<Save size={15} />}
+                onClick={handleSaveProfile}
+            >
+                Save profile
+            </Button>
+        </Stack>
     );
 }

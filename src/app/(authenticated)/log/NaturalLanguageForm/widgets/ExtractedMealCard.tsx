@@ -1,13 +1,20 @@
-import { CheckCircle2, Loader2, Pencil } from "lucide-react";
+import { Check, Pencil } from "lucide-react";
 import {
     Badge,
+    Box,
     Button,
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from "@/components/mantine/ui";
+    Group,
+    Paper,
+    SimpleGrid,
+    Stack,
+    Text,
+} from "@mantine/core";
 import type { MealDraft } from "@/apis/meal/mutations";
+import { EMealType } from "@/core/types/models/meal";
+import {
+    MEAL_TYPE_META,
+    getMealTypeMeta,
+} from "@/app/(authenticated)/log/ManualForm/ManualForm";
 import { ExtractedMealIngredients } from "./ExtractedMealIngredients";
 import { ExtractedMealTextList } from "./ExtractedMealTextList";
 
@@ -24,60 +31,81 @@ export function ExtractedMealCard({
     onConfirm,
     onEdit,
 }: ExtractedMealCardProps) {
+    const meta = getMealTypeMeta(draft.mealType);
+    const isKnownType =
+        draft.mealType.trim().toUpperCase() in MEAL_TYPE_META &&
+        draft.mealType.trim().toUpperCase() !== EMealType.OTHER;
+    const typeLabel = isKnownType ? meta.label : draft.mealType || "Other";
+    const hasNotes =
+        draft.assumptions.length > 0 || draft.clarificationQuestions.length > 0;
+
     return (
-        <Card className="border-emerald-500/20 bg-card/60">
-            <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                    <CardTitle className="text-sm font-semibold">
-                        Extracted Meal
-                    </CardTitle>
+        <Paper
+            p={22}
+            style={{ animation: "alm-in 500ms cubic-bezier(.2,.8,.2,1) both" }}
+        >
+            <Stack gap={16}>
+                <Group
+                    justify="space-between"
+                    align="center"
+                    gap={12}
+                    wrap="nowrap"
+                >
+                    <Box miw={0}>
+                        <Text fz={12} c="var(--tx3)">
+                            We found
+                        </Text>
+                        <Text fz={22} fw={700} lh={1.2} lts="-0.025em">
+                            {draft.mealName}
+                        </Text>
+                    </Box>
                     <Badge
-                        variant="outline"
-                        className="border-emerald-500/30 text-xs text-emerald-400"
+                        color={meta.color}
+                        h={30}
+                        px={12}
+                        leftSection={<meta.Icon size={13} />}
+                        style={{ flexShrink: 0 }}
                     >
-                        {draft.mealType || "Other"}
+                        {typeLabel}
                     </Badge>
-                </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <div>
-                    <p className="text-xs text-muted-foreground mb-1">Title</p>
-                    <p className="text-sm font-medium">{draft.mealName}</p>
-                </div>
+                </Group>
 
                 <ExtractedMealIngredients ingredients={draft.ingredients} />
-                <ExtractedMealTextList
-                    title="Assumptions"
-                    items={draft.assumptions}
-                />
-                <ExtractedMealTextList
-                    title="Clarification questions"
-                    items={draft.clarificationQuestions}
-                />
 
-                <div className="flex gap-4 pt-1">
+                {hasNotes && (
+                    <SimpleGrid cols={{ base: 1, sm: 2 }} spacing={10}>
+                        <ExtractedMealTextList
+                            title="Assumed"
+                            items={draft.assumptions}
+                        />
+                        <ExtractedMealTextList
+                            title="Quick question"
+                            items={draft.clarificationQuestions}
+                            tone="amber"
+                        />
+                    </SimpleGrid>
+                )}
+
+                <Group gap={8}>
                     <Button
+                        type="button"
                         onClick={onConfirm}
-                        disabled={isSaving}
-                        className="gap-2 flex-1 sm:flex-none"
+                        loading={isSaving}
+                        leftSection={<Check size={16} />}
                     >
-                        {isSaving ? (
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        ) : (
-                            <CheckCircle2 className="h-4 w-4 mr-2" />
-                        )}
-                        {isSaving ? "Saving…" : "Confirm & Save"}
+                        Looks right, save
                     </Button>
                     <Button
-                        variant="outline"
+                        type="button"
+                        variant="default"
                         onClick={onEdit}
                         disabled={isSaving}
-                        className="gap-4 flex-1 sm:flex-none"
+                        leftSection={<Pencil size={15} />}
                     >
-                        <Pencil className="mr-2 h-4 w-4" /> Edit before saving
+                        Edit first
                     </Button>
-                </div>
-            </CardContent>
-        </Card>
+                </Group>
+            </Stack>
+        </Paper>
     );
 }

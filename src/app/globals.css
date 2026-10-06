@@ -1,257 +1,249 @@
+/*
+ * Cascade layers, declared before anything is imported so this order wins:
+ *
+ *   theme < base < mantine < components < utilities
+ *
+ * Mantine ships `styles.layer.css`, which wraps its CSS in `@layer mantine`.
+ * Putting that layer *above* Tailwind's preflight (`base`) but *below*
+ * `utilities` keeps Mantine's resets intact while letting a Tailwind utility
+ * on a Mantine element apply when one is used.
+ *
+ * Styling lives in the Mantine theme (`src/lib/mantine/theme.ts`) and in
+ * component props. This file only holds what CSS has to hold: the design
+ * tokens, the bridge from Mantine's variables onto them, and keyframes.
+ */
+@layer theme, base, mantine, components, utilities;
+
 @import "tailwindcss";
+@import "@mantine/core/styles.layer.css";
+@import "@mantine/dates/styles.layer.css";
+@import "@mantine/notifications/styles.layer.css";
 
 @custom-variant dark (&:is([data-mantine-color-scheme="dark"] *));
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
-}
+/* ------------------------------------------------------------------------ */
+/* Design tokens (Alimenta v2)                                              */
+/*                                                                          */
+/*   --bg   page wash base       --sf  card surface     --sf2 inset surface */
+/*   --tx   primary text         --tx2 secondary text   --tx3 captions      */
+/*   --bd   hairline border      --bd2 stronger border (inputs, chips)      */
+/*   --ac   accent (green)       --act ink on accent    --acs accent tint   */
+/*   --bl   blue   --am amber    --ro  rose                                 */
+/*   --glass translucent panel   --sh  card shadow      --wash page bg      */
+/*                                                                          */
+/* Use them from components as `bg="var(--sf)"`, `c="var(--tx2)"`, etc.    */
+/* ------------------------------------------------------------------------ */
 
 :root,
 [data-mantine-color-scheme="light"] {
-  --radius: 0.625rem;
-  --background: #f8fbf7;
-  --foreground: #17211c;
-  --card: #ffffff;
-  --card-foreground: #17211c;
-  --popover: #ffffff;
-  --popover-foreground: #17211c;
-  --primary: #18865f;
-  --primary-foreground: #f5fff9;
-  --secondary: #eef6f0;
-  --secondary-foreground: #213629;
-  --muted: #edf3ee;
-  --muted-foreground: #68776f;
-  --accent: #e1f6ed;
-  --accent-foreground: #15533e;
-  --destructive: #d92d52;
-  --border: #dbe6de;
-  --input: #dbe6de;
-  --ring: #31bd86;
-  --chart-1: #22a876;
-  --chart-2: #3b82f6;
-  --chart-3: #f59e0b;
-  --chart-4: #d946ef;
-  --chart-5: #dc3f7c;
-  --sidebar: #f1f7f2;
-  --sidebar-foreground: #17211c;
-  --sidebar-primary: #18865f;
-  --sidebar-primary-foreground: #f5fff9;
-  --sidebar-accent: #e1f6ed;
-  --sidebar-accent-foreground: #15533e;
-  --sidebar-border: #dbe6de;
-  --sidebar-ring: #31bd86;
+    --bg: #f7f8f7;
+    --sf: #ffffff;
+    --sf2: #eff3f0;
+    --bd: rgb(16 30 22 / 8%);
+    --bd2: rgb(16 30 22 / 15%);
+    --tx: #0f1712;
+    --tx2: #4f5c54;
+    --tx3: #86928b;
+    --ac: #12936a;
+    --act: #ffffff;
+    --acs: rgb(18 147 106 / 12%);
+    --bl: #2f6fe4;
+    --am: #c26a00;
+    --ro: #d0266f;
+    --glass: rgb(255 255 255 / 72%);
+    --sh: 0 1px 2px rgb(16 30 22 / 4%), 0 14px 36px rgb(16 30 22 / 8%);
+    --wash:
+        radial-gradient(
+            1100px 600px at 10% -10%,
+            rgb(59 214 146 / 26%),
+            transparent 60%
+        ),
+        radial-gradient(
+            900px 700px at 100% 110%,
+            rgb(96 165 250 / 24%),
+            transparent 60%
+        ),
+        #f1f5f2;
+    /* Ink on the green→blue gradient, which stays bright in both schemes. */
+    --ink-on-gradient: #04110a;
+    --gradient-accent: linear-gradient(135deg, #3bd692, #60a5fa);
 }
 
 [data-mantine-color-scheme="dark"] {
-  --background: #040706;
-  --foreground: #eef8f1;
-  --card: #090f0b;
-  --card-foreground: #eef8f1;
-  --popover: #0c130f;
-  --popover-foreground: #eef8f1;
-  --primary: #3bd692;
-  --primary-foreground: #020403;
-  --secondary: #101811;
-  --secondary-foreground: #e7f4ea;
-  --muted: #101811;
-  --muted-foreground: #8b9a91;
-  --accent: #10291f;
-  --accent-foreground: #bdf1d8;
-  --destructive: #ff5c7f;
-  --border: rgb(238 248 241 / 10%);
-  --input: rgb(238 248 241 / 14%);
-  --ring: #58d1a0;
-  --chart-1: #58d1a0;
-  --chart-2: #60a5fa;
-  --chart-3: #fbbf24;
-  --chart-4: #e879f9;
-  --chart-5: #ff91b5;
-  --sidebar: #060a08;
-  --sidebar-foreground: #eef8f1;
-  --sidebar-primary: #3bd692;
-  --sidebar-primary-foreground: #020403;
-  --sidebar-accent: #101811;
-  --sidebar-accent-foreground: #eef8f1;
-  --sidebar-border: rgb(238 248 241 / 10%);
-  --sidebar-ring: #58d1a0;
-  --mantine-color-body: #040706;
-  --mantine-color-text: #eef8f1;
-  --mantine-color-default: #090f0b;
-  --mantine-color-default-hover: #101811;
-  --mantine-color-default-color: #eef8f1;
-  --mantine-color-default-border: rgb(238 248 241 / 11%);
-  --mantine-color-dimmed: #8b9a91;
-  --mantine-color-error: #ff5c7f;
+    --bg: #070908;
+    --sf: #0d110f;
+    --sf2: #161c19;
+    --bd: rgb(235 245 238 / 7%);
+    --bd2: rgb(235 245 238 / 14%);
+    --tx: #eef4f0;
+    --tx2: #a3b0a8;
+    --tx3: #6f7c75;
+    --ac: #3bd692;
+    --act: #04110a;
+    --acs: rgb(59 214 146 / 14%);
+    --bl: #60a5fa;
+    --am: #fbbf24;
+    --ro: #f472b6;
+    --glass: rgb(18 24 21 / 62%);
+    --sh: 0 1px 0 rgb(255 255 255 / 4%) inset, 0 14px 36px rgb(0 0 0 / 30%);
+    --wash:
+        radial-gradient(
+            1100px 600px at 10% -10%,
+            rgb(59 214 146 / 18%),
+            transparent 60%
+        ),
+        radial-gradient(
+            900px 700px at 100% 110%,
+            rgb(96 165 250 / 14%),
+            transparent 60%
+        ),
+        #070a09;
+}
+
+/*
+ * Bridge Mantine's global variables onto the tokens. Mantine injects its own
+ * values from a `<style>` inside the provider with `:root[data-mantine-color-
+ * scheme]` selectors, so these carry one extra type selector to outrank them
+ * regardless of source order.
+ */
+html:root,
+html[data-mantine-color-scheme]:root {
+    --mantine-color-body: var(--bg);
+    --mantine-color-text: var(--tx);
+    --mantine-color-bright: var(--tx);
+    --mantine-color-dimmed: var(--tx3);
+    --mantine-color-placeholder: var(--tx3);
+    --mantine-color-anchor: var(--ac);
+    --mantine-color-error: var(--ro);
+    --mantine-color-default: var(--sf);
+    --mantine-color-default-hover: var(--sf2);
+    --mantine-color-default-color: var(--tx);
+    --mantine-color-default-border: var(--bd2);
+    --mantine-primary-color-filled: var(--ac);
+    --mantine-primary-color-filled-hover: color-mix(
+        in srgb,
+        var(--ac) 88%,
+        var(--tx)
+    );
+    --mantine-primary-color-light: var(--acs);
+    --mantine-primary-color-light-hover: color-mix(
+        in srgb,
+        var(--acs) 70%,
+        var(--ac)
+    );
+    --mantine-primary-color-light-color: var(--ac);
+    --mantine-primary-color-contrast: var(--act);
+}
+
+/* Tokens exposed to Tailwind for the few utilities still in use. */
+@theme inline {
+    --font-sans: var(--font-geist-sans);
+    --font-mono: var(--font-geist-mono);
+
+    --color-bg: var(--bg);
+    --color-sf: var(--sf);
+    --color-sf2: var(--sf2);
+    --color-bd: var(--bd);
+    --color-bd2: var(--bd2);
+    --color-tx: var(--tx);
+    --color-tx2: var(--tx2);
+    --color-tx3: var(--tx3);
+    --color-ac: var(--ac);
+    --color-act: var(--act);
+    --color-acs: var(--acs);
+    --color-bl: var(--bl);
+    --color-am: var(--am);
+    --color-ro: var(--ro);
+
+    --color-background: var(--bg);
+    --color-foreground: var(--tx);
+    --color-card: var(--sf);
+    --color-card-foreground: var(--tx);
+    --color-popover: var(--sf);
+    --color-popover-foreground: var(--tx);
+    --color-primary: var(--ac);
+    --color-primary-foreground: var(--act);
+    --color-secondary: var(--sf2);
+    --color-secondary-foreground: var(--tx);
+    --color-muted: var(--sf2);
+    --color-muted-foreground: var(--tx2);
+    --color-accent: var(--acs);
+    --color-accent-foreground: var(--ac);
+    --color-destructive: var(--ro);
+    --color-border: var(--bd);
+    --color-input: var(--bd2);
+    --color-ring: var(--ac);
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+    body {
+        background: var(--bg);
+        color: var(--tx);
+        font-size: 14px;
+    }
 }
 
-.app-shell {
-  background:
-    linear-gradient(180deg, rgb(4 7 6) 0%, rgb(5 10 8) 46%, rgb(3 5 4) 100%);
+@keyframes alm-spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
-[data-mantine-color-scheme="light"] .app-shell {
-  background:
-    linear-gradient(180deg, #fbfdfb 0%, #f2f8f4 52%, #f8fbf7 100%);
+@keyframes alm-pulse {
+    0%,
+    100% {
+        opacity: 0.45;
+    }
+    50% {
+        opacity: 1;
+    }
 }
 
-.app-header {
-  background: color-mix(in srgb, var(--background) 84%, transparent);
-  box-shadow: 0 1px 0 rgb(255 255 255 / 4%), 0 18px 50px rgb(0 0 0 / 22%);
-  backdrop-filter: blur(18px) saturate(1.35);
+@keyframes alm-pop {
+    0% {
+        transform: scale(0.3);
+    }
+    60% {
+        transform: scale(1.3);
+    }
+    100% {
+        transform: scale(1);
+    }
 }
 
-.app-sidebar {
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--sidebar) 88%, transparent), color-mix(in srgb, var(--background) 94%, transparent));
-  box-shadow: inset -1px 0 0 rgb(255 255 255 / 3%);
+@keyframes alm-in {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
 }
 
-.app-main {
-  background:
-    linear-gradient(90deg, rgb(255 255 255 / 2.5%) 1px, transparent 1px),
-    linear-gradient(180deg, rgb(255 255 255 / 2%) 1px, transparent 1px);
-  background-size: 44px 44px;
-  background-position: center top;
+@keyframes alm-bounce {
+    0%,
+    80%,
+    100% {
+        transform: translateY(0);
+        opacity: 0.35;
+    }
+    40% {
+        transform: translateY(-6px);
+        opacity: 1;
+    }
 }
 
-[data-mantine-color-scheme="light"] .app-main {
-  background:
-    linear-gradient(90deg, rgb(21 83 62 / 4%) 1px, transparent 1px),
-    linear-gradient(180deg, rgb(21 83 62 / 3%) 1px, transparent 1px);
-  background-size: 44px 44px;
-}
-
-.brand-mark {
-  align-items: center;
-  background: linear-gradient(135deg, var(--primary), #60a5fa);
-  border-radius: 10px;
-  box-shadow: 0 0 0 1px rgb(255 255 255 / 10%), 0 12px 28px rgb(59 214 146 / 18%);
-  color: var(--primary-foreground);
-  display: inline-flex;
-  height: 32px;
-  justify-content: center;
-  width: 32px;
-}
-
-.app-search .mantine-Input-input {
-  background: color-mix(in srgb, var(--muted) 62%, transparent);
-  border-color: color-mix(in srgb, var(--border) 82%, transparent);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 4%);
-  height: 38px;
-}
-
-.app-avatar-button {
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 6%);
-}
-
-.nav-link {
-  isolation: isolate;
-}
-
-.nav-link::before {
-  background: var(--primary);
-  border-radius: 999px;
-  content: "";
-  height: 18px;
-  left: -8px;
-  opacity: 0;
-  position: absolute;
-  transition: opacity 160ms ease, transform 160ms ease;
-  width: 3px;
-}
-
-.nav-link.is-active::before {
-  opacity: 1;
-  transform: translateX(4px);
-}
-
-.app-card.mantine-Paper-root {
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--card) 92%, white 4%), color-mix(in srgb, var(--card) 95%, black 8%));
-  border-color: color-mix(in srgb, var(--border) 86%, transparent);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 5%),
-    0 18px 46px rgb(0 0 0 / 18%);
-  position: relative;
-}
-
-[data-mantine-color-scheme="light"] .app-card.mantine-Paper-root {
-  background: rgb(255 255 255 / 82%);
-  box-shadow: 0 18px 46px rgb(22 80 58 / 8%);
-}
-
-.kpi-card {
-  transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
-}
-
-.kpi-card:hover {
-  border-color: color-mix(in srgb, var(--primary) 32%, var(--border));
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 7%),
-      0 22px 56px rgb(0 0 0 / 28%);
-  transform: translateY(-1px);
-}
-
-.dashboard-hero {
-  background:
-    linear-gradient(135deg, rgb(59 214 146 / 12%), transparent 38%),
-    linear-gradient(120deg, color-mix(in srgb, var(--card) 94%, transparent), color-mix(in srgb, var(--muted) 34%, transparent));
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 6%),
-    0 22px 56px rgb(0 0 0 / 20%);
-}
-
-[data-mantine-color-scheme="light"] .dashboard-hero {
-  background:
-    linear-gradient(135deg, rgb(34 168 118 / 12%), transparent 40%),
-    rgb(255 255 255 / 80%);
-  box-shadow: 0 22px 56px rgb(22 80 58 / 9%);
+@keyframes alm-shake {
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-5px);
+    }
+    75% {
+        transform: translateX(5px);
+    }
 }

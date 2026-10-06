@@ -1,38 +1,93 @@
 "use client";
 
-type Props = { data: { meal: string; mood: number; energy: number; calories: number }[] };
+import { Center, Group, SimpleGrid, Text, Tooltip } from "@mantine/core";
 
-export function MoodScatterChart({data}: Props) {
-    const width = 320;
-    const height = 200;
-    const padding = 28;
-    const scale = (value: number) => padding + ((value - 1) / 4) * (width - padding * 2);
-    const scaleY = (value: number) => height - padding - ((value - 1) / 4) * (height - padding * 2);
+type Props = {
+    data: { meal: string; mood: number; energy: number; calories: number }[];
+};
+
+/** Two rows of seven tiles — the most recent rated meals. */
+const MAX_TILES = 14;
+
+function round1(value: number) {
+    return (Math.round(value * 10) / 10).toFixed(1);
+}
+
+function average(values: number[]) {
+    if (!values.length) return null;
+    return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+/**
+ * Mood heat tiles: one tile per rated meal, stronger green for a better
+ * mood, with the average mood / energy underneath. The points carry no date,
+ * so this is "by meal" rather than the design's "by day".
+ */
+export function MoodScatterChart({ data }: Props) {
+    const points = data.slice(0, MAX_TILES);
+    const avgMood = average(data.map((point) => point.mood));
+    const avgEnergy = average(data.map((point) => point.energy));
 
     return (
-        <div className="h-[200px] w-full">
-            <svg viewBox={`0 0 ${width} ${height}`} className="h-full w-full">
-                {[1, 2, 3, 4, 5].map((tick) => (
-                    <g key={tick}>
-                        <line x1={scale(tick)} x2={scale(tick)} y1={padding} y2={height - padding} stroke="var(--border)" opacity="0.45"/>
-                        <line x1={padding} x2={width - padding} y1={scaleY(tick)} y2={scaleY(tick)} stroke="var(--border)" opacity="0.45"/>
-                        <text x={scale(tick)} y={height - 7} textAnchor="middle" className="fill-muted-foreground text-[10px]">{tick}</text>
-                        <text x={9} y={scaleY(tick) + 4} className="fill-muted-foreground text-[10px]">{tick}</text>
-                    </g>
-                ))}
-                {data.map((item, index) => (
-                    <circle
-                        key={`${item.meal}-${index}`}
-                        cx={scale(item.mood)}
-                        cy={scaleY(item.energy)}
-                        r={Math.max(4, Math.min(10, item.calories / 140))}
-                        fill={index % 2 === 0 ? "#58d1a0" : "#60a5fa"}
-                        opacity="0.85"
-                    />
-                ))}
-                <text x={width / 2} y={height - 1} textAnchor="middle" className="fill-muted-foreground text-[10px]">Mood</text>
-                <text x={12} y={height / 2} textAnchor="middle" className="fill-muted-foreground text-[10px]" transform={`rotate(-90 12 ${height / 2})`}>Energy</text>
-            </svg>
-        </div>
+        <>
+            {points.length === 0 ? (
+                <Center flex={1} mt={14} mb={12} mih={88}>
+                    <Text fz={13} c="var(--tx3)" ta="center">
+                        Rate how meals made you feel and they show up here.
+                    </Text>
+                </Center>
+            ) : (
+                <SimpleGrid cols={7} spacing={6} mt={14} mb={12}>
+                    {points.map((point, index) => {
+                        const opacity = Math.min(
+                            1,
+                            Math.max(0.15, 0.15 + ((point.mood - 1) / 4) * 0.85)
+                        );
+                        return (
+                            <Tooltip
+                                key={`${point.meal}-${index}`}
+                                label={`${point.meal}: mood ${round1(point.mood)}, energy ${round1(point.energy)}`}
+                                withArrow
+                            >
+                                <Center
+                                    h={44}
+                                    bg="var(--ac)"
+                                    style={{
+                                        borderRadius: 11,
+                                        opacity,
+                                        alignItems: "flex-end",
+                                        paddingBottom: 6,
+                                        cursor: "default",
+                                    }}
+                                >
+                                    <Text
+                                        fz={10}
+                                        fw={700}
+                                        c="var(--act)"
+                                        lh={1}
+                                    >
+                                        {point.mood}
+                                    </Text>
+                                </Center>
+                            </Tooltip>
+                        );
+                    })}
+                </SimpleGrid>
+            )}
+            <Group justify="space-between" mt="auto">
+                <Text fz={12} c="var(--tx2)">
+                    Avg mood{" "}
+                    <Text component="span" fz={12} fw={700} c="var(--tx)">
+                        {avgMood === null ? "—" : round1(avgMood)}
+                    </Text>
+                </Text>
+                <Text fz={12} c="var(--tx2)">
+                    Avg energy{" "}
+                    <Text component="span" fz={12} fw={700} c="var(--tx)">
+                        {avgEnergy === null ? "—" : round1(avgEnergy)}
+                    </Text>
+                </Text>
+            </Group>
+        </>
     );
 }

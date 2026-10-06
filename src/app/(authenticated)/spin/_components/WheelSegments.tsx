@@ -1,15 +1,17 @@
 "use client";
 
-import { Trash2, X } from "lucide-react";
 import {
-    Badge,
-    Button,
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from "@/components/mantine/ui";
+    ActionIcon,
+    Box,
+    Group,
+    Paper,
+    Stack,
+    Text,
+    UnstyledButton,
+} from "@mantine/core";
+import { X } from "lucide-react";
 import { MAX_WHEEL_SEGMENTS } from "./MealEntryForm";
+import { WHEEL_COLORS } from "./MealSpinWheel";
 
 export interface SegmentRow {
     /** Stable unique ID for this entry. */
@@ -37,9 +39,10 @@ interface WheelSegmentsProps {
 }
 
 /**
- * Wheel-segments card for both modes: a labelled list with per-row remove
- * buttons and a "Clear all" action. Personal passes plain labels; Shared
- * passes `sublabel` too, rendering the participant's name beside their meal.
+ * "On the wheel" card for both modes: a list with a colour swatch matching
+ * each slice, per-row remove buttons and a "Clear" action. Personal passes
+ * plain labels; Shared passes `sublabel` too, rendering the participant's
+ * name beside their meal.
  */
 export function WheelSegments({
     segments,
@@ -48,92 +51,97 @@ export function WheelSegments({
     canClearAll,
     emptyMessage,
 }: WheelSegmentsProps) {
-    if (segments.length === 0) {
-        if (!emptyMessage) return null;
-
-        return (
-            <Card className="border-border/50 bg-card/60">
-                <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-semibold">
-                        Wheel segments
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                    <p className="text-sm text-muted-foreground py-1">
-                        {emptyMessage}
-                    </p>
-                </CardContent>
-            </Card>
-        );
-    }
+    if (segments.length === 0 && !emptyMessage) return null;
 
     return (
-        <Card className="border-border/50 bg-card/60">
-            <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                    <CardTitle className="text-sm font-semibold">
-                        Wheel segments
-                    </CardTitle>
-                    <Badge variant="secondary" className="text-xs">
+        <Paper p={18} style={{ border: "1px solid var(--bd)" }}>
+            <Group justify="space-between" align="center" mb={10}>
+                <Text fw={700} fz={15}>
+                    On the wheel
+                </Text>
+                <Group gap={10} align="center">
+                    <Text fz={12} c="var(--tx3)">
                         {segments.length} / {MAX_WHEEL_SEGMENTS}
-                    </Badge>
-                </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-                <ul className="space-y-1" aria-label="Wheel segments">
-                    {segments.map((seg) => (
-                        <li
-                            key={seg.id}
-                            className="flex items-center gap-2 rounded-md px-2 py-1.5 bg-muted/30"
+                    </Text>
+                    {canClearAll && segments.length > 0 && (
+                        <UnstyledButton
+                            onClick={onClearAll}
+                            fz={12}
+                            fw={600}
+                            c="var(--tx3)"
+                            aria-label="Clear all wheel segments"
+                            styles={{
+                                root: { transition: "color 150ms" },
+                            }}
                         >
+                            Clear
+                        </UnstyledButton>
+                    )}
+                </Group>
+            </Group>
+
+            {segments.length === 0 ? (
+                <Text fz={13} c="var(--tx3)" py={4}>
+                    {emptyMessage}
+                </Text>
+            ) : (
+                <Stack gap={4} role="list" aria-label="Wheel segments">
+                    {segments.map((seg, i) => (
+                        <Group
+                            key={seg.id}
+                            role="listitem"
+                            gap={10}
+                            wrap="nowrap"
+                            py={8}
+                            pr={8}
+                            pl={10}
+                            style={{ borderRadius: 12 }}
+                        >
+                            <Box
+                                w={10}
+                                h={10}
+                                style={{
+                                    borderRadius: 4,
+                                    flexShrink: 0,
+                                    background:
+                                        WHEEL_COLORS[i % WHEEL_COLORS.length],
+                                }}
+                                aria-hidden="true"
+                            />
                             {seg.sublabel ? (
-                                <>
-                                    <span className="w-16 sm:w-20 shrink-0 text-sm font-medium truncate">
+                                <Group gap={6} flex={1} miw={0} wrap="nowrap">
+                                    <Text fw={600} fz={14} truncate>
                                         {seg.label}
-                                    </span>
-                                    <span className="flex-1 text-sm text-muted-foreground truncate">
+                                    </Text>
+                                    <Text fz={13} c="var(--tx2)" truncate>
                                         {seg.sublabel}
-                                    </span>
-                                </>
+                                    </Text>
+                                </Group>
                             ) : (
-                                <span className="flex-1 text-sm truncate">
+                                <Text fw={500} fz={14} flex={1} truncate>
                                     {seg.label}
-                                </span>
+                                </Text>
                             )}
 
                             {seg.canRemove ? (
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-6 w-6 text-muted-foreground hover:text-destructive shrink-0"
+                                <ActionIcon
+                                    variant="subtle"
+                                    size={28}
+                                    radius={8}
+                                    c="var(--tx3)"
                                     onClick={() => onRemove(seg.id)}
                                     aria-label={`Remove ${seg.label}${seg.sublabel ? ` — ${seg.sublabel}` : ""} from wheel`}
                                 >
-                                    <X className="h-3.5 w-3.5" />
-                                </Button>
+                                    <X size={14} />
+                                </ActionIcon>
                             ) : (
                                 /* Keep visual space consistent */
-                                <span
-                                    className="h-6 w-6 shrink-0"
-                                    aria-hidden="true"
-                                />
+                                <Box w={28} h={28} aria-hidden="true" />
                             )}
-                        </li>
+                        </Group>
                     ))}
-                </ul>
-                {canClearAll && (
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-3 gap-1.5 text-xs text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
-                        onClick={onClearAll}
-                        aria-label="Clear all wheel segments"
-                    >
-                        <Trash2 className="h-3 w-3" />
-                        Clear all
-                    </Button>
-                )}
-            </CardContent>
-        </Card>
+                </Stack>
+            )}
+        </Paper>
     );
 }

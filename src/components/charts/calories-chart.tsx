@@ -1,51 +1,107 @@
 "use client";
 
+import { useState } from "react";
+import { Box, Center, Flex, Paper, SimpleGrid, Text } from "@mantine/core";
+
 type Props = { data: { date: string; calories: number }[] };
 
-export function CaloriesChart({data}: Props) {
-    const values = data.length ? data : [{date: "Today", calories: 0}];
+const AREA_HEIGHT = 220;
+const BAR_MAX = 160;
+/** Dashed placeholder heights (px) for a week with nothing logged. */
+const GHOST_HEIGHTS = [64, 112, 88, 144, 96, 128, 72];
+
+/**
+ * Seven vertical bars, one per day. The hovered bar (today by default) is
+ * painted with the green→blue gradient and shows its value above.
+ */
+export function CaloriesChart({ data }: Props) {
+    const values = data.length ? data : [{ date: "Today", calories: 0 }];
+    const [hovered, setHovered] = useState<number | null>(null);
     const max = Math.max(...values.map((item) => item.calories), 1);
-    const width = 640;
-    const height = 200;
-    const padding = {top: 18, right: 18, bottom: 32, left: 34};
-    const chartWidth = width - padding.left - padding.right;
-    const chartHeight = height - padding.top - padding.bottom;
-    const points = values.map((item, index) => {
-        const x = padding.left + (values.length === 1 ? chartWidth / 2 : (index / (values.length - 1)) * chartWidth);
-        const y = padding.top + chartHeight - (item.calories / max) * chartHeight;
-        return {x, y, ...item};
-    });
-    const path = points.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ");
+    const isEmpty = values.every((item) => item.calories <= 0);
+    const active = hovered ?? values.length - 1;
 
     return (
-        <div className="h-[200px] w-full">
-            <svg viewBox={`0 0 ${width} ${height}`} className="h-full w-full overflow-visible">
-                {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
-                    const y = padding.top + chartHeight - ratio * chartHeight;
+        <Box pos="relative">
+            <SimpleGrid cols={values.length} spacing={12}>
+                {values.map((item, index) => {
+                    const on = !isEmpty && index === active;
+                    const height = isEmpty
+                        ? GHOST_HEIGHTS[index % GHOST_HEIGHTS.length]
+                        : Math.max(6, (item.calories / max) * BAR_MAX);
                     return (
-                        <g key={ratio}>
-                            <line x1={padding.left} x2={width - padding.right} y1={y} y2={y} stroke="var(--border)" strokeDasharray="4 8" opacity="0.55"/>
-                            <text x={8} y={y + 4} className="fill-muted-foreground text-[10px]">{Math.round(max * ratio)}</text>
-                        </g>
+                        <Flex
+                            key={`${item.date}-${index}`}
+                            direction="column"
+                            align="center"
+                            justify="flex-end"
+                            gap={8}
+                            h={AREA_HEIGHT}
+                            onMouseEnter={() => setHovered(index)}
+                            onMouseLeave={() => setHovered(null)}
+                        >
+                            <Text
+                                fz={12}
+                                fw={700}
+                                style={{
+                                    fontVariantNumeric: "tabular-nums",
+                                    opacity: on ? 1 : 0,
+                                    transform: on
+                                        ? "translateY(0)"
+                                        : "translateY(4px)",
+                                    transition:
+                                        "opacity 150ms, transform 150ms",
+                                }}
+                            >
+                                {Math.round(item.calories).toLocaleString()}
+                            </Text>
+                            <Box
+                                w="100%"
+                                maw={48}
+                                h={height}
+                                style={{
+                                    borderRadius: 14,
+                                    background: isEmpty
+                                        ? "transparent"
+                                        : on
+                                          ? "linear-gradient(180deg, var(--ac), color-mix(in srgb, var(--ac) 50%, var(--bl)))"
+                                          : "var(--sf2)",
+                                    border: isEmpty
+                                        ? "1.5px dashed var(--bd2)"
+                                        : undefined,
+                                    transition:
+                                        "height 800ms cubic-bezier(.2,.8,.2,1), background 160ms",
+                                    transitionDelay: `${index * 40}ms`,
+                                }}
+                            />
+                            <Text
+                                fz={12}
+                                fw={500}
+                                c={on ? "var(--tx)" : "var(--tx3)"}
+                            >
+                                {item.date}
+                            </Text>
+                        </Flex>
                     );
                 })}
-                <path d={path} fill="none" stroke="url(#calories-line)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
-                {points.map((point) => (
-                    <circle key={`${point.date}-${point.x}`} cx={point.x} cy={point.y} r="4" fill="#58d1a0" stroke="var(--card)" strokeWidth="3"/>
-                ))}
-                {points.map((point, index) => (
-                    <text key={point.date} x={point.x} y={height - 8} textAnchor={index === 0 ? "start" : index === points.length - 1 ? "end" : "middle"} className="fill-muted-foreground text-[11px]">
-                        {point.date}
-                    </text>
-                ))}
-                <defs>
-                    <linearGradient id="calories-line" x1="0" x2="1">
-                        <stop offset="0%" stopColor="#58d1a0"/>
-                        <stop offset="55%" stopColor="#60a5fa"/>
-                        <stop offset="100%" stopColor="#fbbf24"/>
-                    </linearGradient>
-                </defs>
-            </svg>
-        </div>
+            </SimpleGrid>
+            {isEmpty && (
+                <Center pos="absolute" style={{ inset: "0 0 28px" }}>
+                    <Paper
+                        radius={999}
+                        px={14}
+                        py={8}
+                        bg="var(--glass)"
+                        shadow="none"
+                        withBorder
+                        style={{ backdropFilter: "blur(10px)" }}
+                    >
+                        <Text fz={13} c="var(--tx2)">
+                            Your week shows up here after your first meal
+                        </Text>
+                    </Paper>
+                </Center>
+            )}
+        </Box>
     );
 }

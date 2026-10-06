@@ -1,3 +1,4 @@
+import { Paper, SimpleGrid, Text } from "@mantine/core";
 import type { MealDraft } from "@/apis/meal/mutations";
 
 type ExtractedMealIngredientsProps = {
@@ -8,30 +9,29 @@ export function ExtractedMealIngredients({
     ingredients,
 }: ExtractedMealIngredientsProps) {
     return (
-        <div>
-            <p className="text-xs text-muted-foreground mb-2">
-                Ingredients detected
-            </p>
-            <div className="space-y-1">
-                {ingredients.map((ingredient) => (
-                    <div
-                        key={`${ingredient.name}-${ingredient.quantity}-${ingredient.unit}`}
-                        className="flex items-center gap-2 text-sm"
-                    >
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-                        <span>{ingredient.name}</span>
-                        <span className="text-muted-foreground">
-                            {ingredient.quantity ?? "unspecified"}{" "}
-                            {ingredient.unit ?? ""}
-                        </span>
-                        {ingredient.preparation && (
-                            <span className="text-muted-foreground">
-                                ({ingredient.preparation})
-                            </span>
-                        )}
-                    </div>
-                ))}
-            </div>
-        </div>
+        <SimpleGrid cols={{ base: 2, sm: 4 }} spacing={8}>
+            {ingredients.map((ingredient) => (
+                <Paper
+                    key={`${ingredient.name}-${ingredient.quantity}-${ingredient.unit}`}
+                    radius={16}
+                    px={14}
+                    py={12}
+                    bg="var(--sf2)"
+                    shadow="none"
+                    withBorder={false}
+                >
+                    <Text fw={600} truncate>
+                        {ingredient.name}
+                    </Text>
+                    <Text fz={12} c="var(--tx3)" mt={3}>
+                        {ingredient.quantity ?? "unspecified"}{" "}
+                        {ingredient.unit ?? ""}
+                        {ingredient.preparation
+                            ? ` (${ingredient.preparation})`
+                            : ""}
+                    </Text>
+                </Paper>
+            ))}
+        </SimpleGrid>
     );
 }

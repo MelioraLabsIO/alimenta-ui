@@ -2,11 +2,20 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Container, Tabs } from "@mantine/core";
-import { Dices } from "lucide-react";
+import { Group, Stack, Tabs, Text } from "@mantine/core";
+import { User, Users } from "lucide-react";
 
 type SpinTab = "personal" | "shared";
 
+const INTRO: Record<SpinTab, string> = {
+    personal: "Build your wheel, then spin to decide what to eat.",
+    shared: "Create a session, invite friends, add meals, and spin to decide.",
+};
+
+/**
+ * Mode switch for the spin screens. The page title lives in the app shell
+ * header; this only adds the "Just me / With friends" pills and the intro.
+ */
 export default function SpinLayout({
     children,
 }: {
@@ -18,51 +27,34 @@ export default function SpinLayout({
         : "personal";
 
     return (
-        <Container
-            size="lg"
-            className="py-8 px-4"
-            style={{
-                alignContent: "center",
-                justifyContent: "center",
-                display: "flex",
-                flexDirection: "column",
-                width: "100%",
-            }}
-        >
-            <header className="mb-8">
-                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                    <Dices className="h-3.5 w-3.5" />
-                    Meal Picker
-                </div>
-                <h1 className="text-3xl font-bold tracking-tight">
-                    Spin Wheel
-                </h1>
-            </header>
-
-            <Tabs value={activeTab} variant="pills" color="teal">
-                <Tabs.List
-                    justify="center"
-                    className="mb-4"
-                    aria-label="Spin wheel modes"
-                >
-                    <Tabs.Tab
-                        value="personal"
-                        component={Link}
-                        {...{ href: "/spin/personal" }}
-                    >
-                        Personal
-                    </Tabs.Tab>
-                    <Tabs.Tab
-                        value="shared"
-                        component={Link}
-                        {...{ href: "/spin/shared" }}
-                    >
-                        Shared
-                    </Tabs.Tab>
-                </Tabs.List>
-            </Tabs>
+        <Stack gap={12}>
+            <Group gap={12} align="center" wrap="wrap">
+                <Tabs value={activeTab}>
+                    <Tabs.List aria-label="Spin wheel modes">
+                        <Tabs.Tab
+                            value="personal"
+                            component={Link}
+                            {...{ href: "/spin/personal" }}
+                            leftSection={<User size={15} />}
+                        >
+                            Just me
+                        </Tabs.Tab>
+                        <Tabs.Tab
+                            value="shared"
+                            component={Link}
+                            {...{ href: "/spin/shared" }}
+                            leftSection={<Users size={15} />}
+                        >
+                            With friends
+                        </Tabs.Tab>
+                    </Tabs.List>
+                </Tabs>
+                <Text fz={13} c="var(--tx2)">
+                    {INTRO[activeTab]}
+                </Text>
+            </Group>
 
             {children}
-        </Container>
+        </Stack>
     );
 }

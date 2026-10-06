@@ -3,15 +3,17 @@
 import { useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
-import { Dices, LogIn } from "lucide-react";
 import {
     Avatar,
+    Box,
     Button,
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from "@/components/mantine/ui";
+    Group,
+    Paper,
+    Stack,
+    Text,
+    ThemeIcon,
+} from "@mantine/core";
+import { Dices, LogIn } from "lucide-react";
 import {
     JoinSpinSessionResponse,
     SpinSession,
@@ -71,17 +73,26 @@ export function JoinSpinSessionForm({
     const participantCount = session.spinParticipants?.length ?? 0;
 
     return (
-        <Card className="border-border/50 bg-card/60">
-            <CardHeader className="pb-3">
-                <div className="flex items-center gap-3">
-                    <span className="brand-mark shrink-0">
-                        <Dices className="h-4 w-4" />
-                    </span>
-                    <div className="min-w-0">
-                        <CardTitle className="text-base font-semibold">
+        <Paper
+            radius={28}
+            pt={32}
+            px={28}
+            pb={28}
+            style={{
+                border: "1px solid var(--bd)",
+                animation: "alm-in 500ms cubic-bezier(.2,.8,.2,1)",
+            }}
+        >
+            <Stack gap={20}>
+                <Group gap={12} wrap="nowrap">
+                    <ThemeIcon variant="gradient" size={40} radius={13}>
+                        <Dices size={19} />
+                    </ThemeIcon>
+                    <Box miw={0}>
+                        <Text fz={20} fw={700} lts="-0.025em">
                             Join this session
-                        </CardTitle>
-                        <p className="text-xs text-muted-foreground">
+                        </Text>
+                        <Text fz={13} c="var(--tx2)">
                             {participantCount === 0
                                 ? "Be the first one in."
                                 : `${participantCount} ${
@@ -89,45 +100,47 @@ export function JoinSpinSessionForm({
                                           ? "person is"
                                           : "people are"
                                   } already in.`}
-                        </p>
-                    </div>
-                </div>
-            </CardHeader>
+                        </Text>
+                    </Box>
+                </Group>
 
-            <CardContent className="pt-0">
                 {currentUser ? (
-                    <div className="space-y-3">
-                        <div className="flex items-center gap-3 rounded-lg border border-border/50 bg-muted/30 px-3 py-2.5">
-                            <Avatar className="h-9 w-9 text-xs">
-                                {getProfileInitials(currentUser)}
-                            </Avatar>
-                            <div className="min-w-0">
-                                <p className="text-xs text-muted-foreground">
-                                    Joining as
-                                </p>
-                                <p className="truncate text-sm font-medium">
-                                    {currentUser.displayName}
-                                </p>
-                            </div>
-                        </div>
+                    <Stack gap={12}>
+                        <Paper radius={16} p={12} bg="var(--sf2)" shadow="none">
+                            <Group gap={12} wrap="nowrap">
+                                <Avatar size={36} fz={12}>
+                                    {getProfileInitials(currentUser)}
+                                </Avatar>
+                                <Box miw={0}>
+                                    <Text fz={12} c="var(--tx3)">
+                                        Joining as
+                                    </Text>
+                                    <Text fz={14} fw={600} truncate>
+                                        {currentUser.displayName}
+                                    </Text>
+                                </Box>
+                            </Group>
+                        </Paper>
 
                         <Button
                             size="lg"
+                            radius={16}
                             fullWidth
+                            fw={700}
                             loading={isPending}
                             onClick={() => joinAsMember()}
-                            leftSection={<LogIn className="h-4 w-4" />}
+                            leftSection={<LogIn size={16} />}
                         >
                             {isPending ? "Joining…" : "Join session"}
                         </Button>
-                    </div>
+                    </Stack>
                 ) : (
                     <AnonymousJoinForm
                         session={session}
                         onJoinedParticipantAction={onJoinedAction}
                     />
                 )}
-            </CardContent>
-        </Card>
+            </Stack>
+        </Paper>
     );
 }

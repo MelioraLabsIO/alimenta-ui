@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Anchor, Stack, Text } from "@mantine/core";
 import { EMealType, EMealUnit } from "@/core/types/models/meal";
 import type { Meal } from "@/core/types/models/meal";
 import { extractMeal, saveMeal } from "@/apis/meal/mutations";
@@ -152,17 +153,21 @@ export function NaturalLanguageForm({ onSuccess }: { onSuccess?: () => void }) {
             } else {
                 toast.success("Meal saved!", {
                     description: (
-                        <span>
+                        <Text component="span" fz="inherit" c="inherit">
                             {currentDraft.mealName}. You can view your newly
                             created meal{" "}
-                            <Link
+                            <Anchor
+                                component={Link}
                                 href="/history"
-                                className="font-medium underline underline-offset-2"
+                                fw={500}
+                                fz="inherit"
+                                c="inherit"
+                                underline="always"
                             >
                                 here
-                            </Link>
+                            </Anchor>
                             .
-                        </span>
+                        </Text>
                     ),
                 });
             }
@@ -200,18 +205,18 @@ export function NaturalLanguageForm({ onSuccess }: { onSuccess?: () => void }) {
 
     if (editMode && draft) {
         return (
-            <div className="space-y-4">
+            <Stack gap={12}>
                 <BackToPreviewButton onBack={() => setEditMode(false)} />
                 <ManualForm
                     onSuccess={onSuccess}
                     prefill={draftPrefill(draft)}
                 />
-            </div>
+            </Stack>
         );
     }
 
     return (
-        <div className="space-y-5">
+        <Stack gap={12}>
             <NaturalLanguageInputSection
                 text={text}
                 error={error}
@@ -233,6 +238,6 @@ export function NaturalLanguageForm({ onSuccess }: { onSuccess?: () => void }) {
                     onEdit={() => setEditMode(true)}
                 />
             )}
-        </div>
+        </Stack>
     );
 }
