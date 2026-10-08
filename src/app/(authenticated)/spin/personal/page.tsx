@@ -75,9 +75,9 @@ export default function Personal() {
     }));
 
     return (
-        <Flex wrap="wrap" gap={12} align="flex-start">
+        <Flex wrap="wrap" gap="md" align="flex-start">
             {/* Wheel */}
-            <Stack gap={12} style={{ flex: "7 1 440px", minWidth: 0 }}>
+            <Stack gap="md" style={{ flex: "7 1 440px", minWidth: 0 }}>
                 <WheelCard>
                     {segments.length === 0 ? (
                         <WheelEmptyState
@@ -93,7 +93,7 @@ export default function Personal() {
             </Stack>
 
             {/* Controls */}
-            <Stack gap={12} style={{ flex: "5 1 360px", minWidth: 0 }}>
+            <Stack gap="md" style={{ flex: "5 1 360px", minWidth: 0 }}>
                 <MealEntryForm canAddMore={canAddMore} onAdd={addSegment}>
                     <PastMealsSearch
                         addedLabels={addedLabels}

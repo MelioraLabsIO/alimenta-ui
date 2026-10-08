@@ -10,7 +10,7 @@ import { NaturalLanguageForm } from "@/app/(authenticated)/log/NaturalLanguageFo
 export default function LogMealPage() {
     return (
         <Tabs defaultValue="manual">
-            <Tabs.List mb={12}>
+            <Tabs.List mb="md">
                 <Tabs.Tab value="manual" leftSection={<ListPlus size={15} />}>
                     Build it
                 </Tabs.Tab>

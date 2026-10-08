@@ -20,7 +20,7 @@ import { TopFoodsChart } from "@/components/charts/top-foods-chart";
 import { MoodTrendChart } from "@/components/charts/mood-trend-chart";
 import { CalendarDays, ChartLine, Plus } from "lucide-react";
 
-const CARD_TITLE = { fw: 700, fz: 16 } as const;
+const CARD_TITLE = { fw: 700, fz: "lg" } as const;
 
 /** Rated meals needed before the insight cards replace the empty state. */
 const MIN_RATED_MEALS = 3;
@@ -34,26 +34,26 @@ function scoreTone(score: number) {
 function HeroStat({ value, label }: { value: string; label: string }) {
     return (
         <Paper
-            radius={18}
-            p={14}
+            radius="lg"
+            p="md"
             shadow="none"
             withBorder={false}
-            c="#fff"
+            c="white"
             bg="rgba(255,255,255,0.16)"
             style={{ backdropFilter: "blur(10px)" }}
         >
             <Text
-                fz={26}
+                fz="xxl"
                 fw={700}
-                lh={1.1}
+                lh="xs"
                 style={{
-                    letterSpacing: "-0.03em",
+                    letterSpacing: "var(--ls-snug)",
                     fontVariantNumeric: "tabular-nums",
                 }}
             >
                 {value}
             </Text>
-            <Text fz={12} mt={2} opacity={0.85}>
+            <Text fz="xs" mt="xxs" opacity={0.85}>
                 {label}
             </Text>
         </Paper>
@@ -62,9 +62,14 @@ function HeroStat({ value, label }: { value: string; label: string }) {
 
 function LegendDot({ color, label }: { color: string; label: string }) {
     return (
-        <Group gap={5} align="center" wrap="nowrap">
-            <Box w={8} h={8} bg={color} style={{ borderRadius: 999 }} />
-            <Text fz={12} c="var(--tx3)">
+        <Group gap="xs" align="center" wrap="nowrap">
+            <Box
+                w={8}
+                h={8}
+                bg={color}
+                style={{ borderRadius: "var(--mantine-radius-pill)" }}
+            />
+            <Text fz="xs" c="var(--tx3)">
                 {label}
             </Text>
         </Group>
@@ -134,37 +139,43 @@ export default function InsightsPage() {
     if (hero.ratedCount < MIN_RATED_MEALS) {
         const filled = Math.min(hero.ratedCount, MIN_RATED_MEALS);
         return (
-            <Paper px={32} py={48} withBorder>
-                <Stack align="center" gap={14} ta="center">
-                    <ThemeIcon size={72} radius={22} variant="gradient">
+            <Paper px="xxl" py={48} withBorder>
+                <Stack align="center" gap="md" ta="center">
+                    <ThemeIcon size={72} radius="xl" variant="gradient">
                         <ChartLine size={32} />
                     </ThemeIcon>
-                    <Text fz={24} fw={700} style={{ letterSpacing: "-0.03em" }}>
+                    <Text
+                        fz="xxl"
+                        fw={700}
+                        style={{ letterSpacing: "var(--ls-snug)" }}
+                    >
                         Insights need a few meals
                     </Text>
-                    <Text fz={14} c="var(--tx2)" maw={440} lh={1.5}>
+                    <Text fz="md" c="var(--tx2)" maw={440} lh="lg">
                         Log {MIN_RATED_MEALS} meals with how they made you feel
                         and we&apos;ll start spotting what lifts your mood and
                         energy.
                     </Text>
-                    <Group gap={6} my={4}>
+                    <Group gap="xs" my="xxs">
                         {Array.from({ length: MIN_RATED_MEALS }, (_, i) => (
                             <Box
                                 key={i}
                                 w={56}
                                 h={8}
                                 bg={i < filled ? "var(--ac)" : "var(--sf2)"}
-                                style={{ borderRadius: 999 }}
+                                style={{
+                                    borderRadius: "var(--mantine-radius-pill)",
+                                }}
                             />
                         ))}
                     </Group>
-                    <Text fz={12} c="var(--tx3)">
+                    <Text fz="xs" c="var(--tx3)">
                         {filled} of {MIN_RATED_MEALS} meals
                     </Text>
                     <Button
                         component={Link}
                         href="/log"
-                        mt={6}
+                        mt="xs"
                         size="md"
                         leftSection={<Plus size={16} />}
                     >
@@ -176,15 +187,15 @@ export default function InsightsPage() {
     }
 
     return (
-        <Flex wrap="wrap" gap={12}>
+        <Flex wrap="wrap" gap="md">
             {/* Hero banner */}
             <Paper
-                radius={28}
+                radius="xxl"
                 px={34}
-                py={32}
+                py="xxl"
                 shadow="none"
                 withBorder={false}
-                c="#fff"
+                c="white"
                 pos="relative"
                 style={{
                     flex: "12 1 900px",
@@ -199,20 +210,24 @@ export default function InsightsPage() {
                     w={380}
                     h={380}
                     bg="rgba(255,255,255,0.12)"
-                    style={{ right: -80, top: -120, borderRadius: 999 }}
+                    style={{
+                        right: -80,
+                        top: -120,
+                        borderRadius: "var(--mantine-radius-pill)",
+                    }}
                 />
-                <Grid gap={32} align="flex-end" pos="relative">
+                <Grid gap="xxl" align="flex-end" pos="relative">
                     <Grid.Col span={{ base: 12, md: 7 }}>
-                        <Text fz={13} fw={600} opacity={0.85}>
+                        <Text fz="sm" fw={600} opacity={0.85}>
                             Your biggest pattern this week
                         </Text>
                         <Text
-                            fz={{ base: 30, sm: 38 }}
+                            fz={{ base: "display", sm: 38 }}
                             fw={700}
-                            lh={1.08}
-                            mt={8}
+                            lh="xs"
+                            mt="sm"
                             style={{
-                                letterSpacing: "-0.04em",
+                                letterSpacing: "var(--ls-snug)",
                                 textWrap: "balance",
                             }}
                         >
@@ -220,7 +235,7 @@ export default function InsightsPage() {
                         </Text>
                     </Grid.Col>
                     <Grid.Col span={{ base: 12, md: 5 }}>
-                        <SimpleGrid cols={3} spacing={10}>
+                        <SimpleGrid cols={3} spacing="sm">
                             {hero.stats.map((s) => (
                                 <HeroStat
                                     key={s.label}
@@ -237,7 +252,7 @@ export default function InsightsPage() {
             <Card style={{ flex: "7 1 440px", minWidth: 0 }}>
                 <Group justify="space-between" align="baseline" wrap="nowrap">
                     <Text {...CARD_TITLE}>Mood &amp; energy</Text>
-                    <Group gap={12} wrap="nowrap">
+                    <Group gap="md" wrap="nowrap">
                         <LegendDot color="var(--ac)" label="Mood" />
                         <LegendDot color="var(--bl)" label="Energy" />
                     </Group>
@@ -254,47 +269,50 @@ export default function InsightsPage() {
             {/* Digestion */}
             <Card style={{ flex: "5 1 360px", minWidth: 0 }}>
                 <Text {...CARD_TITLE}>Easiest on digestion</Text>
-                <Text fz={12} c="var(--tx3)" mt={2}>
+                <Text fz="xs" c="var(--tx3)" mt="xxs">
                     Average digestion score after eating
                 </Text>
                 {digestCorr.length === 0 ? (
-                    <Text fz={13} c="var(--tx3)" ta="center" py={24}>
+                    <Text fz="sm" c="var(--tx3)" ta="center" py="xl">
                         Rate digestion on a few meals to see this.
                     </Text>
                 ) : (
-                    <SimpleGrid cols={2} spacing={8} mt={16}>
+                    <SimpleGrid cols={2} spacing="sm" mt="lg">
                         {digestCorr.map((d) => {
                             const tone = scoreTone(d.avgDigestion);
                             return (
                                 <Paper
                                     key={d.food}
-                                    radius={16}
-                                    px={14}
-                                    py={12}
+                                    radius="lg"
+                                    px="md"
+                                    py="md"
                                     bg="var(--sf2)"
                                     shadow="none"
                                     withBorder={false}
-                                    style={{ transition: "transform 150ms" }}
+                                    style={{
+                                        transition: `transform var(--motion-fast)`,
+                                    }}
                                 >
                                     <Group
                                         justify="space-between"
-                                        gap={8}
+                                        gap="sm"
                                         wrap="nowrap"
                                     >
-                                        <Text fw={500} fz={14} truncate="end">
+                                        <Text fw={500} fz="md" truncate="end">
                                             {d.food}
                                         </Text>
                                         <Text
                                             component="span"
                                             h={24}
-                                            px={9}
-                                            fz={12}
+                                            px="sm"
+                                            fz="xs"
                                             fw={700}
                                             lh="24px"
                                             c={tone}
                                             bg={`color-mix(in srgb, ${tone} 16%, transparent)`}
                                             style={{
-                                                borderRadius: 999,
+                                                borderRadius:
+                                                    "var(--mantine-radius-pill)",
                                                 flexShrink: 0,
                                                 fontVariantNumeric:
                                                     "tabular-nums",
@@ -314,29 +332,30 @@ export default function InsightsPage() {
             <Card style={{ flex: "4 1 300px", minWidth: 0 }}>
                 <Text {...CARD_TITLE}>Top rated meals</Text>
                 {favorites.length === 0 ? (
-                    <Text fz={13} c="var(--tx3)" ta="center" py={24}>
+                    <Text fz="sm" c="var(--tx3)" ta="center" py="xl">
                         Log meals with mood/energy to see rankings.
                     </Text>
                 ) : (
-                    <Stack gap={6} mt={14}>
+                    <Stack gap="xs" mt="md">
                         {favorites.map((f, i) => {
                             const first = i === 0;
                             return (
                                 <Group
                                     key={f.title + i}
-                                    gap={12}
-                                    p={6}
+                                    gap="md"
+                                    p="xs"
                                     wrap="nowrap"
                                     style={{
-                                        borderRadius: 14,
-                                        transition: "background 150ms",
+                                        borderRadius:
+                                            "var(--mantine-radius-md)",
+                                        transition: `background var(--motion-fast)`,
                                     }}
                                 >
                                     <Box
                                         w={34}
                                         h={34}
                                         display="flex"
-                                        fz={13}
+                                        fz="sm"
                                         fw={700}
                                         c={
                                             first
@@ -349,7 +368,8 @@ export default function InsightsPage() {
                                                 : "var(--sf2)"
                                         }
                                         style={{
-                                            borderRadius: 11,
+                                            borderRadius:
+                                                "var(--mantine-radius-sm)",
                                             alignItems: "center",
                                             justifyContent: "center",
                                             flexShrink: 0,
@@ -358,11 +378,11 @@ export default function InsightsPage() {
                                         {i + 1}
                                     </Box>
                                     <Box flex={1} miw={0}>
-                                        <Text fw={600} fz={14} truncate="end">
+                                        <Text fw={600} fz="md" truncate="end">
                                             {f.title}
                                         </Text>
                                         <Text
-                                            fz={12}
+                                            fz="xs"
                                             c="var(--tx3)"
                                             tt="capitalize"
                                         >
@@ -371,7 +391,7 @@ export default function InsightsPage() {
                                     </Box>
                                     <Text
                                         fw={700}
-                                        fz={14}
+                                        fz="md"
                                         c="var(--ac)"
                                         style={{
                                             fontVariantNumeric: "tabular-nums",
@@ -381,7 +401,7 @@ export default function InsightsPage() {
                                         {f.score.toFixed(1)}
                                         <Text
                                             component="span"
-                                            fz={12}
+                                            fz="xs"
                                             fw={500}
                                             c="var(--tx3)"
                                         >
@@ -402,24 +422,26 @@ export default function InsightsPage() {
                 style={{
                     flex: "3 1 240px",
                     minWidth: 0,
-                    borderRadius: 24,
+                    borderRadius: "var(--mantine-radius-xl)",
                     background: "linear-gradient(135deg, var(--am), var(--ro))",
                     boxShadow: "var(--sh)",
                 }}
             >
                 <Paper
-                    radius={22.5}
-                    p={22}
+                    style={{
+                        borderRadius: "calc(var(--mantine-radius-xl) - 1.5px)",
+                    }}
+                    p="xl"
                     h="100%"
                     shadow="none"
                     withBorder={false}
                 >
-                    <Stack gap={12} h="100%">
-                        <ThemeIcon size={38} radius={12} color="amber">
+                    <Stack gap="md" h="100%">
+                        <ThemeIcon size={38} radius="sm" color="amber">
                             <CalendarDays size={18} />
                         </ThemeIcon>
                         <Text {...CARD_TITLE}>Weekly plans</Text>
-                        <Text fz={13} c="var(--tx2)" lh={1.5}>
+                        <Text fz="sm" c="var(--tx2)" lh="lg">
                             A week of meals built from what makes you feel best.
                         </Text>
                         <Badge

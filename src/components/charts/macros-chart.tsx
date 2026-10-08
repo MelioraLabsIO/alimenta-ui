@@ -24,7 +24,7 @@ export function MacrosChart({ data, label, children }: Props) {
     const max = Math.max(...data.map((item) => item.value), 1);
 
     return (
-        <Group gap={22} align="center" wrap="nowrap">
+        <Group gap="xl" align="center" wrap="nowrap">
             <Box pos="relative" w={SIZE} h={SIZE} style={{ flexShrink: 0 }}>
                 {data.map((item, index) => {
                     const size = SIZE - index * 2 * (THICKNESS + RING_GAP);
@@ -51,32 +51,35 @@ export function MacrosChart({ data, label, children }: Props) {
                     );
                 })}
             </Box>
-            <Stack gap={12} miw={0}>
+            <Stack gap="md" miw={0}>
                 {children}
                 <Box>
                     {label && (
-                        <Text fz={11} c="var(--tx3)" mb={6}>
+                        <Text fz="xxs" c="var(--tx3)" mb="xs">
                             {label}
                         </Text>
                     )}
-                    <Group gap={16}>
+                    <Group gap="lg">
                         {data.map((item, index) => (
-                            <Box key={item.name} fz={12}>
-                                <Group gap={5} wrap="nowrap">
+                            <Box key={item.name} fz="xs">
+                                <Group gap="xs" wrap="nowrap">
                                     <Box
                                         w={7}
                                         h={7}
                                         bg={COLORS[index % COLORS.length]}
-                                        style={{ borderRadius: 999 }}
+                                        style={{
+                                            borderRadius:
+                                                "var(--mantine-radius-pill)",
+                                        }}
                                     />
-                                    <Text fz={12} c="var(--tx3)">
+                                    <Text fz="xs" c="var(--tx3)">
                                         {item.name}
                                     </Text>
                                 </Group>
                                 <Text
                                     fw={700}
-                                    fz={14}
-                                    mt={3}
+                                    fz="md"
+                                    mt="xxs"
                                     style={{
                                         fontVariantNumeric: "tabular-nums",
                                     }}

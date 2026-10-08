@@ -31,13 +31,13 @@ export function MoodScatterChart({ data }: Props) {
     return (
         <>
             {points.length === 0 ? (
-                <Center flex={1} mt={14} mb={12} mih={88}>
-                    <Text fz={13} c="var(--tx3)" ta="center">
+                <Center flex={1} mt="md" mb="md" mih={88}>
+                    <Text fz="sm" c="var(--tx3)" ta="center">
                         Rate how meals made you feel and they show up here.
                     </Text>
                 </Center>
             ) : (
-                <SimpleGrid cols={7} spacing={6} mt={14} mb={12}>
+                <SimpleGrid cols={7} spacing="xs" mt="md" mb="md">
                     {points.map((point, index) => {
                         const opacity = Math.min(
                             1,
@@ -53,15 +53,17 @@ export function MoodScatterChart({ data }: Props) {
                                     h={44}
                                     bg="var(--ac)"
                                     style={{
-                                        borderRadius: 11,
+                                        borderRadius:
+                                            "var(--mantine-radius-sm)",
                                         opacity,
                                         alignItems: "flex-end",
-                                        paddingBottom: 6,
+                                        paddingBottom:
+                                            "var(--mantine-spacing-xs)",
                                         cursor: "default",
                                     }}
                                 >
                                     <Text
-                                        fz={10}
+                                        fz="xxs"
                                         fw={700}
                                         c="var(--act)"
                                         lh={1}
@@ -75,15 +77,15 @@ export function MoodScatterChart({ data }: Props) {
                 </SimpleGrid>
             )}
             <Group justify="space-between" mt="auto">
-                <Text fz={12} c="var(--tx2)">
+                <Text fz="xs" c="var(--tx2)">
                     Avg mood{" "}
-                    <Text component="span" fz={12} fw={700} c="var(--tx)">
+                    <Text component="span" fz="xs" fw={700} c="var(--tx)">
                         {avgMood === null ? "—" : round1(avgMood)}
                     </Text>
                 </Text>
-                <Text fz={12} c="var(--tx2)">
+                <Text fz="xs" c="var(--tx2)">
                     Avg energy{" "}
-                    <Text component="span" fz={12} fw={700} c="var(--tx)">
+                    <Text component="span" fz="xs" fw={700} c="var(--tx)">
                         {avgEnergy === null ? "—" : round1(avgEnergy)}
                     </Text>
                 </Text>

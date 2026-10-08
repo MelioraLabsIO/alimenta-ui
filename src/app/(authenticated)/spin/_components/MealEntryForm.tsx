@@ -52,12 +52,12 @@ export function MealEntryForm({
     }
 
     return (
-        <Paper p={18} style={{ border: "1px solid var(--bd)" }}>
-            <Stack gap={12}>
-                <Text fw={700} fz={15}>
+        <Paper p="lg" style={{ border: "1px solid var(--bd)" }}>
+            <Stack gap="md">
+                <Text fw={700} fz="md">
                     {title}
                 </Text>
-                <Group gap={8} align="flex-start" wrap="nowrap">
+                <Group gap="sm" align="flex-start" wrap="nowrap">
                     <Box flex={1} miw={0}>
                         <Autocomplete
                             key={autocompleteKey}
@@ -71,8 +71,8 @@ export function MealEntryForm({
                         onClick={handleAddTyped}
                         disabled={!typedInput.trim() || !canAddMore}
                         h={44}
-                        px={16}
-                        radius={14}
+                        px="lg"
+                        radius="md"
                         leftSection={<Plus size={15} />}
                         aria-label="Add typed meal to wheel"
                         style={{ flexShrink: 0 }}
@@ -81,7 +81,7 @@ export function MealEntryForm({
                     </Button>
                 </Group>
                 {!canAddMore && (
-                    <Text fz={12} c="var(--tx3)">
+                    <Text fz="xs" c="var(--tx3)">
                         Maximum {MAX_WHEEL_SEGMENTS} segments reached.
                     </Text>
                 )}

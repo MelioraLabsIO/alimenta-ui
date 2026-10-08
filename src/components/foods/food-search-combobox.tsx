@@ -110,7 +110,7 @@ export function FoodSearchCombobox({
             </Popover.Target>
 
             <Popover.Dropdown p={0}>
-                <Box p={8} style={{ borderBottom: "1px solid var(--bd)" }}>
+                <Box p="sm" style={{ borderBottom: "1px solid var(--bd)" }}>
                     <TextInput
                         value={query}
                         onChange={(event) =>
@@ -122,9 +122,9 @@ export function FoodSearchCombobox({
                     />
                 </Box>
 
-                <Box mah={288} p={4} style={{ overflowY: "auto" }}>
+                <Box mah={288} p="xxs" style={{ overflowY: "auto" }}>
                     {isLoading && (
-                        <Stack gap={8} p={8}>
+                        <Stack gap="sm" p="sm">
                             <Skeleton height={40} />
                             <Skeleton height={40} />
                             <Skeleton height={40} />
@@ -135,8 +135,8 @@ export function FoodSearchCombobox({
                         debouncedQuery &&
                         (isError || items.length === 0) && (
                             <Text
-                                px={12}
-                                py={24}
+                                px="md"
+                                py="xl"
                                 ta="center"
                                 fz="sm"
                                 c="var(--tx3)"
@@ -149,7 +149,13 @@ export function FoodSearchCombobox({
 
                     {!isLoading && items.length > 0 && (
                         <Box>
-                            <Text px={8} py={4} fz={12} fw={500} c="var(--tx3)">
+                            <Text
+                                px="sm"
+                                py="xxs"
+                                fz="xs"
+                                fw={500}
+                                c="var(--tx3)"
+                            >
                                 Foods
                             </Text>
                             {items.map((food) => (
@@ -157,16 +163,19 @@ export function FoodSearchCombobox({
                                     key={food.id}
                                     type="button"
                                     w="100%"
-                                    px={8}
-                                    py={8}
+                                    px="sm"
+                                    py="sm"
                                     onClick={() => {
                                         onSelect(food);
                                         setOpen(false);
                                         setQuery("");
                                     }}
-                                    style={{ borderRadius: 10 }}
+                                    style={{
+                                        borderRadius:
+                                            "var(--mantine-radius-sm)",
+                                    }}
                                 >
-                                    <Group gap={8} wrap="nowrap">
+                                    <Group gap="sm" wrap="nowrap">
                                         <Box
                                             style={{
                                                 display: "flex",
@@ -182,7 +191,7 @@ export function FoodSearchCombobox({
 
                                         <Group
                                             justify="space-between"
-                                            gap={12}
+                                            gap="md"
                                             wrap="nowrap"
                                             miw={0}
                                             style={{ flex: 1 }}
@@ -193,7 +202,7 @@ export function FoodSearchCombobox({
                                                 </Text>
 
                                                 <Text
-                                                    fz={12}
+                                                    fz="xs"
                                                     c="var(--tx3)"
                                                     truncate
                                                 >

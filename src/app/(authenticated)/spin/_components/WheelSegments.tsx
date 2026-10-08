@@ -54,24 +54,26 @@ export function WheelSegments({
     if (segments.length === 0 && !emptyMessage) return null;
 
     return (
-        <Paper p={18} style={{ border: "1px solid var(--bd)" }}>
-            <Group justify="space-between" align="center" mb={10}>
-                <Text fw={700} fz={15}>
+        <Paper p="lg" style={{ border: "1px solid var(--bd)" }}>
+            <Group justify="space-between" align="center" mb="sm">
+                <Text fw={700} fz="md">
                     On the wheel
                 </Text>
-                <Group gap={10} align="center">
-                    <Text fz={12} c="var(--tx3)">
+                <Group gap="sm" align="center">
+                    <Text fz="xs" c="var(--tx3)">
                         {segments.length} / {MAX_WHEEL_SEGMENTS}
                     </Text>
                     {canClearAll && segments.length > 0 && (
                         <UnstyledButton
                             onClick={onClearAll}
-                            fz={12}
+                            fz="xs"
                             fw={600}
                             c="var(--tx3)"
                             aria-label="Clear all wheel segments"
                             styles={{
-                                root: { transition: "color 150ms" },
+                                root: {
+                                    transition: "color var(--motion-fast)",
+                                },
                             }}
                         >
                             Clear
@@ -81,21 +83,21 @@ export function WheelSegments({
             </Group>
 
             {segments.length === 0 ? (
-                <Text fz={13} c="var(--tx3)" py={4}>
+                <Text fz="sm" c="var(--tx3)" py="xxs">
                     {emptyMessage}
                 </Text>
             ) : (
-                <Stack gap={4} role="list" aria-label="Wheel segments">
+                <Stack gap="xxs" role="list" aria-label="Wheel segments">
                     {segments.map((seg, i) => (
                         <Group
                             key={seg.id}
                             role="listitem"
-                            gap={10}
+                            gap="sm"
                             wrap="nowrap"
-                            py={8}
-                            pr={8}
-                            pl={10}
-                            style={{ borderRadius: 12 }}
+                            py="sm"
+                            pr="sm"
+                            pl="sm"
+                            style={{ borderRadius: "var(--mantine-radius-sm)" }}
                         >
                             <Box
                                 w={10}
@@ -109,16 +111,16 @@ export function WheelSegments({
                                 aria-hidden="true"
                             />
                             {seg.sublabel ? (
-                                <Group gap={6} flex={1} miw={0} wrap="nowrap">
-                                    <Text fw={600} fz={14} truncate>
+                                <Group gap="xs" flex={1} miw={0} wrap="nowrap">
+                                    <Text fw={600} fz="md" truncate>
                                         {seg.label}
                                     </Text>
-                                    <Text fz={13} c="var(--tx2)" truncate>
+                                    <Text fz="sm" c="var(--tx2)" truncate>
                                         {seg.sublabel}
                                     </Text>
                                 </Group>
                             ) : (
-                                <Text fw={500} fz={14} flex={1} truncate>
+                                <Text fw={500} fz="md" flex={1} truncate>
                                     {seg.label}
                                 </Text>
                             )}
@@ -127,7 +129,7 @@ export function WheelSegments({
                                 <ActionIcon
                                     variant="subtle"
                                     size={28}
-                                    radius={8}
+                                    radius="xs"
                                     c="var(--tx3)"
                                     onClick={() => onRemove(seg.id)}
                                     aria-label={`Remove ${seg.label}${seg.sublabel ? ` — ${seg.sublabel}` : ""} from wheel`}

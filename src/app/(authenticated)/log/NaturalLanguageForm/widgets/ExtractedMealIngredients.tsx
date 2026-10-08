@@ -9,13 +9,13 @@ export function ExtractedMealIngredients({
     ingredients,
 }: ExtractedMealIngredientsProps) {
     return (
-        <SimpleGrid cols={{ base: 2, sm: 4 }} spacing={8}>
+        <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm">
             {ingredients.map((ingredient) => (
                 <Paper
                     key={`${ingredient.name}-${ingredient.quantity}-${ingredient.unit}`}
-                    radius={16}
-                    px={14}
-                    py={12}
+                    radius="lg"
+                    px="md"
+                    py="md"
                     bg="var(--sf2)"
                     shadow="none"
                     withBorder={false}
@@ -23,7 +23,7 @@ export function ExtractedMealIngredients({
                     <Text fw={600} truncate>
                         {ingredient.name}
                     </Text>
-                    <Text fz={12} c="var(--tx3)" mt={3}>
+                    <Text fz="xs" c="var(--tx3)" mt="xxs">
                         {ingredient.quantity ?? "unspecified"}{" "}
                         {ingredient.unit ?? ""}
                         {ingredient.preparation

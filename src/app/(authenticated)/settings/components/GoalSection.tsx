@@ -37,7 +37,7 @@ export function GoalSection({
     onUnitsChange: (units: Units) => void;
 }) {
     return (
-        <Stack gap={24}>
+        <Stack gap="xl">
             <SettingsGroup label="Goal">
                 {GOALS.map((option, index) => {
                     const active = goal === option.value;
@@ -51,7 +51,7 @@ export function GoalSection({
                         >
                             <ThemeIcon
                                 size={32}
-                                radius={10}
+                                radius="sm"
                                 variant="transparent"
                                 bg={tint(option.token)}
                                 c={option.token}
@@ -65,8 +65,8 @@ export function GoalSection({
                                 <Text
                                     component="span"
                                     c="var(--tx3)"
-                                    fz={13}
-                                    ml={8}
+                                    fz="sm"
+                                    ml="sm"
                                 >
                                     {option.description}
                                 </Text>
@@ -77,8 +77,8 @@ export function GoalSection({
                                 c="var(--act)"
                                 bg={active ? "var(--ac)" : "var(--bd2)"}
                                 style={{
-                                    borderRadius: 999,
-                                    transition: "background 150ms",
+                                    borderRadius: "var(--mantine-radius-pill)",
+                                    transition: `background var(--motion-fast)`,
                                 }}
                                 aria-hidden="true"
                             >
@@ -96,7 +96,7 @@ export function GoalSection({
                 <SettingsRow last>
                     <Box style={{ flex: 1 }}>
                         <Text fw={500}>Units</Text>
-                        <Text fz={12} c="var(--tx3)">
+                        <Text fz="xs" c="var(--tx3)">
                             {UNIT_DESCRIPTIONS[units]}
                         </Text>
                     </Box>
@@ -115,8 +115,8 @@ export function GoalSection({
                             label: {
                                 height: 30,
                                 lineHeight: "30px",
-                                paddingInline: 14,
-                                fontSize: 12,
+                                paddingInline: "var(--mantine-spacing-md)",
+                                fontSize: "var(--mantine-font-size-xs)",
                             },
                         }}
                     />

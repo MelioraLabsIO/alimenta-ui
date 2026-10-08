@@ -10,13 +10,15 @@ import ReactQueryProvider from "@/providers/QueryProvider";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import AuthUserProvider from "@/providers/AuthUserProvider";
 
-const geistSans = Geist({
-    variable: "--font-geist-sans",
+// The app's typefaces. `tokens.ts` reads them as `--font-sans` / `--font-mono`,
+// so swapping the font means changing these two loaders only.
+const fontSans = Geist({
+    variable: "--font-sans",
     subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-    variable: "--font-geist-mono",
+const fontMono = Geist_Mono({
+    variable: "--font-mono",
     subsets: ["latin"],
 });
 
@@ -33,9 +35,7 @@ export default function RootLayout({
             <head>
                 <ColorSchemeScript defaultColorScheme="dark" />
             </head>
-            <body
-                className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-            >
+            <body className={`${fontSans.variable} ${fontMono.variable}`}>
                 <MantineThemeProvider>
                     <ReactQueryProvider>
                         <AuthUserProvider>

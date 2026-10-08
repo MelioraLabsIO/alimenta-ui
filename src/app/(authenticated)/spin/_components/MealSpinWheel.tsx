@@ -11,21 +11,11 @@ import {
     Tooltip,
 } from "@mantine/core";
 import { Dices } from "lucide-react";
+import { shared } from "@/lib/mantine/tokens";
 
 /** Segment palette, in slice order. Exported so the segment list can show
  *  a matching swatch beside each entry. */
-export const WHEEL_COLORS = [
-    "#3bd692",
-    "#60a5fa",
-    "#fbbf24",
-    "#f472b6",
-    "#a78bfa",
-    "#2dd4bf",
-    "#fb923c",
-    "#38bdf8",
-    "#e879f9",
-    "#4ade80",
-];
+export const WHEEL_COLORS = shared.wheel;
 
 /** Length of the wheel's landing animation. Exported so callers can time
  *  follow-up UI (e.g. a winner dialog) to when the wheel comes to rest. */
@@ -115,8 +105,8 @@ function truncateLabel(label: string): string {
 export function WheelCard({ children }: { children: ReactNode }) {
     return (
         <Paper
-            radius={28}
-            p={28}
+            radius="xxl"
+            p="xxl"
             pos="relative"
             style={{ overflow: "hidden", border: "1px solid var(--bd)" }}
         >
@@ -128,13 +118,13 @@ export function WheelCard({ children }: { children: ReactNode }) {
                     top: 30,
                     left: "50%",
                     marginLeft: -220,
-                    borderRadius: 999,
+                    borderRadius: "var(--mantine-radius-pill)",
                     background:
                         "radial-gradient(circle, var(--acs), transparent 65%)",
                     pointerEvents: "none",
                 }}
             />
-            <Stack align="center" gap={22} pos="relative">
+            <Stack align="center" gap="xl" pos="relative">
                 {children}
             </Stack>
         </Paper>
@@ -151,13 +141,13 @@ export function WheelEmptyState({
     description: string;
 }) {
     return (
-        <Stack align="center" justify="center" gap={12} h={340}>
+        <Stack align="center" justify="center" gap="md" h={340}>
             <Box
                 w={220}
                 h={220}
                 display="flex"
                 style={{
-                    borderRadius: 999,
+                    borderRadius: "var(--mantine-radius-pill)",
                     border: "2px dashed var(--bd2)",
                     alignItems: "center",
                     justifyContent: "center",
@@ -165,7 +155,7 @@ export function WheelEmptyState({
             >
                 <ThemeIcon
                     size={64}
-                    radius={20}
+                    radius="xl"
                     variant="surface"
                     style={{
                         backgroundColor: "var(--sf2)",
@@ -175,10 +165,10 @@ export function WheelEmptyState({
                     <Dices size={30} />
                 </ThemeIcon>
             </Box>
-            <Text fw={700} fz={17} mt={6}>
+            <Text fw={700} fz="xl" mt="xs">
                 {title}
             </Text>
-            <Text fz={13} c="var(--tx3)" ta="center">
+            <Text fz="sm" c="var(--tx3)" ta="center">
                 {description}
             </Text>
         </Stack>
@@ -287,7 +277,7 @@ export function MealSpinWheel({
 
     if (n === 0) {
         return (
-            <Text fz={13} c="var(--tx3)" py={32} ta="center">
+            <Text fz="sm" c="var(--tx3)" py="xxl" ta="center">
                 No meals available to spin.
             </Text>
         );
@@ -298,7 +288,7 @@ export function MealSpinWheel({
     return (
         <>
             {/* Pointer + ring + wheel */}
-            <Box pos="relative" pt={8} w="100%" maw={340}>
+            <Box pos="relative" pt="sm" w="100%" maw={340}>
                 <Box
                     pos="absolute"
                     top={0}
@@ -316,13 +306,13 @@ export function MealSpinWheel({
                     }}
                 />
                 <Box
-                    p={10}
+                    p="sm"
                     bg="var(--sf2)"
                     opacity={muted ? 0.85 : 1}
                     style={{
-                        borderRadius: 999,
+                        borderRadius: "var(--mantine-radius-pill)",
                         boxShadow:
-                            "0 20px 50px rgba(0,0,0,0.25), inset 0 0 0 1px var(--bd)",
+                            "var(--mantine-shadow-lg), inset 0 0 0 1px var(--bd)",
                     }}
                 >
                     <svg
@@ -393,11 +383,14 @@ export function MealSpinWheel({
                                     dominantBaseline="middle"
                                     transform={`rotate(${labelAngle}, ${tx}, ${ty})`}
                                     style={{
-                                        fontSize: n > 6 ? 11 : 13,
+                                        fontSize:
+                                            n > 6
+                                                ? "var(--mantine-font-size-xxs)"
+                                                : "var(--mantine-font-size-sm)",
                                         fontWeight: 700,
-                                        fill: "#04110a",
+                                        fill: "var(--ink-on-gradient)",
                                         fontFamily:
-                                            "var(--font-geist-sans), Geist, sans-serif",
+                                            "var(--font-sans), Geist, sans-serif",
                                         pointerEvents: "none",
                                     }}
                                 >
@@ -425,20 +418,19 @@ export function MealSpinWheel({
                 {winner && (
                     <Box
                         style={{
-                            animation:
-                                "alm-in 500ms cubic-bezier(.2,.8,.2,1) both",
+                            animation: "alm-in 500ms var(--motion-spring) both",
                         }}
                     >
                         <Text
-                            fz={12}
+                            fz="xs"
                             fw={600}
                             c="var(--ac)"
                             tt="uppercase"
-                            lts="0.04em"
+                            lts="var(--ls-wide)"
                         >
                             Tonight you&apos;re having
                         </Text>
-                        <Text fz={28} fw={700} lts="-0.03em" mt={2}>
+                        <Text fz="xxl" fw={700} lts="var(--ls-snug)" mt="xxs">
                             {winner.label}
                         </Text>
                     </Box>

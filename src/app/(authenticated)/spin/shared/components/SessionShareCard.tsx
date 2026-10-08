@@ -70,25 +70,31 @@ export function SessionShareCard({
             <Box
                 p={1.5}
                 style={{
-                    borderRadius: 24,
+                    borderRadius: "var(--mantine-radius-xl)",
                     background: "var(--gradient-accent)",
                     boxShadow: "var(--sh)",
                 }}
             >
-                <Paper radius={22.5} p={18} shadow="none">
-                    <Group gap={16} align="center" wrap="nowrap">
+                <Paper
+                    p="lg"
+                    shadow="none"
+                    style={{
+                        borderRadius: "calc(var(--mantine-radius-xl) - 1.5px)",
+                    }}
+                >
+                    <Group gap="lg" align="center" wrap="nowrap">
                         <UnstyledButton
                             onClick={() => setShareDialogOpen(true)}
                             disabled={sessionComplete}
                             aria-label="Share session QR code"
                             w={92}
                             h={92}
-                            p={8}
-                            bg="#fff"
+                            p="sm"
+                            bg="white"
                             style={{
                                 flexShrink: 0,
-                                borderRadius: 14,
-                                transition: "transform 160ms",
+                                borderRadius: "var(--mantine-radius-md)",
+                                transition: "transform var(--motion-normal)",
                                 opacity: sessionComplete ? 0.5 : 1,
                             }}
                         >
@@ -102,9 +108,9 @@ export function SessionShareCard({
                         <Box flex={1} miw={0}>
                             {isHost ? (
                                 <Group
-                                    gap={6}
+                                    gap="xs"
                                     wrap="nowrap"
-                                    fz={12}
+                                    fz="xs"
                                     fw={700}
                                     c="var(--am)"
                                 >
@@ -113,9 +119,9 @@ export function SessionShareCard({
                                 </Group>
                             ) : (
                                 <Group
-                                    gap={6}
+                                    gap="xs"
                                     wrap="nowrap"
-                                    fz={12}
+                                    fz="xs"
                                     fw={700}
                                     c="var(--ac)"
                                 >
@@ -123,18 +129,18 @@ export function SessionShareCard({
                                     You&apos;re in
                                 </Group>
                             )}
-                            <Text fw={700} fz={16} mt={4}>
+                            <Text fw={700} fz="lg" mt="xxs">
                                 Shared session
                             </Text>
                             <Text
-                                fz={12}
+                                fz="xs"
                                 c="var(--tx3)"
-                                mt={2}
+                                mt="xxs"
                                 style={{ wordBreak: "break-all" }}
                             >
                                 {displayLink}
                             </Text>
-                            <Group gap={6} mt={10}>
+                            <Group gap="xs" mt="sm">
                                 <Button
                                     variant="surface"
                                     size="xs"
@@ -191,22 +197,22 @@ export function SessionShareCard({
                 opened={shareDialogOpen}
                 onClose={() => setShareDialogOpen(false)}
                 size={380}
-                padding={30}
+                padding="xxl"
                 aria-label="Share this session"
             >
-                <Stack align="center" gap={14} ta="center">
-                    <Text fz={22} fw={700} lts="-0.025em">
+                <Stack align="center" gap="md" ta="center">
+                    <Text fz="xxl" fw={700} lts="var(--ls-snug)">
                         Invite friends
                     </Text>
-                    <Text fz={14} c="var(--tx2)">
+                    <Text fz="md" c="var(--tx2)">
                         Scan to join, or send the link.
                     </Text>
                     <Box
                         w={220}
                         h={220}
-                        p={16}
-                        bg="#fff"
-                        style={{ borderRadius: 22 }}
+                        p="lg"
+                        bg="white"
+                        style={{ borderRadius: "var(--mantine-radius-xl)" }}
                         aria-label="QR code to join this session"
                     >
                         <QRCode
@@ -216,7 +222,7 @@ export function SessionShareCard({
                         />
                     </Box>
                     <Text
-                        fz={13}
+                        fz="sm"
                         c="var(--tx3)"
                         style={{ wordBreak: "break-all" }}
                     >
@@ -224,7 +230,7 @@ export function SessionShareCard({
                     </Text>
                     <Button
                         h={44}
-                        px={22}
+                        px="xl"
                         fw={700}
                         leftSection={
                             copiedLink ? (

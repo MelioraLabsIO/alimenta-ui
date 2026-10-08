@@ -41,9 +41,9 @@ export function SettingsNav({
     return (
         <Stack
             component="nav"
-            gap={2}
-            py={18}
-            px={10}
+            gap="xxs"
+            py="lg"
+            px="sm"
             w={{ base: "100%", sm: 210 }}
             style={{
                 flexShrink: 0,
@@ -51,15 +51,15 @@ export function SettingsNav({
                 background: "color-mix(in srgb, var(--sf2) 45%, transparent)",
             }}
         >
-            <Group gap={10} wrap="nowrap" px={10} pt={6} pb={16}>
-                <Avatar size={40} fz={14}>
+            <Group gap="sm" wrap="nowrap" px="sm" pt="xs" pb="lg">
+                <Avatar size={40} fz="md">
                     {initials || "·"}
                 </Avatar>
                 <Box miw={0}>
-                    <Text fw={600} fz={14} truncate>
+                    <Text fw={600} fz="md" truncate>
                         {profile?.displayName ?? "Your account"}
                     </Text>
-                    <Text fz={12} c="var(--tx3)" truncate>
+                    <Text fz="xs" c="var(--tx3)" truncate>
                         {profile?.email ?? ""}
                     </Text>
                 </Box>
@@ -74,14 +74,17 @@ export function SettingsNav({
                     active={active === id}
                     onClick={() => onChange(id)}
                     styles={{
-                        root: { borderRadius: 12, paddingInline: 10 },
-                        label: { fontSize: 13 },
+                        root: {
+                            borderRadius: "var(--mantine-radius-sm)",
+                            paddingInline: "var(--mantine-spacing-sm)",
+                        },
+                        label: { fontSize: "var(--mantine-font-size-sm)" },
                         section: { color: token },
                     }}
                     leftSection={
                         <ThemeIcon
                             size={26}
-                            radius={8}
+                            radius="xs"
                             variant="transparent"
                             bg={tint(token)}
                             c={token}

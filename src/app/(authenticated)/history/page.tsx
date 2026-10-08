@@ -204,14 +204,14 @@ function historyViewReducer(
 function MoodDots({ value }: { value?: number }) {
     if (!value) return null;
     return (
-        <Group gap={2} wrap="nowrap">
+        <Group gap="xxs" wrap="nowrap">
             {Array.from({ length: 5 }).map((_, i) => (
                 <Box
                     key={i}
                     w={5}
                     h={5}
                     style={{
-                        borderRadius: 999,
+                        borderRadius: "var(--mantine-radius-pill)",
                         background: i < value ? "var(--ac)" : "var(--bd2)",
                     }}
                 />
@@ -225,7 +225,11 @@ function TypeDot({ color, size = 8 }: { color: string; size?: number }) {
         <Box
             w={size}
             h={size}
-            style={{ borderRadius: 999, background: color, flexShrink: 0 }}
+            style={{
+                borderRadius: "var(--mantine-radius-pill)",
+                background: color,
+                flexShrink: 0,
+            }}
         />
     );
 }
@@ -289,27 +293,27 @@ function MealDetailDialog({
                     top: 0,
                     right: 0,
                     minHeight: 0,
-                    padding: 14,
+                    padding: "var(--mantine-spacing-md)",
                     zIndex: 2,
                 },
                 body: { padding: 0 },
             }}
         >
-            <Stack gap={18}>
-                <Group gap={14} wrap="nowrap" pr={40}>
-                    <ThemeIcon color={style.color} size={52} radius={16}>
+            <Stack gap="lg">
+                <Group gap="md" wrap="nowrap" pr={40}>
+                    <ThemeIcon color={style.color} size={52} radius="lg">
                         <Icon size={22} />
                     </ThemeIcon>
                     <Box style={{ minWidth: 0 }}>
                         <Text
-                            fz={22}
+                            fz="xxl"
                             fw={700}
-                            lh={1.2}
-                            style={{ letterSpacing: "-0.025em" }}
+                            lh="xs"
+                            style={{ letterSpacing: "var(--ls-snug)" }}
                         >
                             {mealData.title}
                         </Text>
-                        <Text fz={13} c="var(--tx3)" mt={2}>
+                        <Text fz="sm" c="var(--tx3)" mt="xxs">
                             {mealData.mealTime &&
                                 new Date(mealData.mealTime).toLocaleString(
                                     "en-US",
@@ -327,33 +331,33 @@ function MealDetailDialog({
                 </Group>
 
                 {nutrition.length > 0 && (
-                    <SimpleGrid cols={{ base: 2, xs: 4 }} spacing={8}>
+                    <SimpleGrid cols={{ base: 2, xs: 4 }} spacing="sm">
                         {nutrition.map(({ label, value, unit }) => (
                             <Paper
                                 key={label}
-                                radius={16}
-                                p={12}
+                                radius="lg"
+                                p="md"
                                 bg="var(--sf2)"
                                 shadow="none"
                                 withBorder={false}
                             >
-                                <Text fz={11} c="var(--tx3)">
+                                <Text fz="xxs" c="var(--tx3)">
                                     {label}
                                 </Text>
                                 <Text
-                                    fz={20}
+                                    fz="xxl"
                                     fw={700}
-                                    mt={2}
-                                    lh={1.2}
-                                    style={{ letterSpacing: "-0.02em" }}
+                                    mt="xxs"
+                                    lh="xs"
+                                    style={{ letterSpacing: "var(--ls-snug)" }}
                                 >
                                     {value ?? "—"}
                                     <Text
                                         component="span"
-                                        fz={12}
+                                        fz="xs"
                                         fw={500}
                                         c="var(--tx3)"
-                                        ml={2}
+                                        ml="xxs"
                                     >
                                         {unit}
                                     </Text>
@@ -363,22 +367,22 @@ function MealDetailDialog({
                     </SimpleGrid>
                 )}
 
-                <Stack gap={4}>
+                <Stack gap="xxs">
                     {(mealData?.items || [])?.map((f) => (
                         <Group
                             key={f.id}
                             justify="space-between"
                             wrap="nowrap"
-                            py={8}
+                            py="sm"
                             style={{ borderBottom: "1px solid var(--bd)" }}
                         >
-                            <Text fz={14} style={{ flex: 1, minWidth: 0 }}>
+                            <Text fz="md" style={{ flex: 1, minWidth: 0 }}>
                                 {f.foodName}
                             </Text>
                             <Text
-                                fz={14}
+                                fz="md"
                                 c="var(--tx3)"
-                                ml={12}
+                                ml="md"
                                 style={{ whiteSpace: "nowrap" }}
                             >
                                 {f.quantity} {f.unit}
@@ -387,27 +391,28 @@ function MealDetailDialog({
                     ))}
                 </Stack>
 
-                <SimpleGrid cols={{ base: 2, xs: 4 }} spacing={8}>
+                <SimpleGrid cols={{ base: 2, xs: 4 }} spacing="sm">
                     {wellness.map(({ label, value }) => (
                         <Paper
                             key={label}
-                            radius={16}
-                            p={12}
+                            radius="lg"
+                            p="md"
                             bg="transparent"
                             shadow="none"
                             withBorder
                         >
-                            <Text fz={12} c="var(--tx3)">
+                            <Text fz="xs" c="var(--tx3)">
                                 {label}
                             </Text>
-                            <Group gap={3} mt={8} wrap="nowrap">
+                            <Group gap="xxs" mt="sm" wrap="nowrap">
                                 {Array.from({ length: 5 }).map((_, i) => (
                                     <Box
                                         key={i}
                                         h={6}
                                         style={{
                                             flex: 1,
-                                            borderRadius: 999,
+                                            borderRadius:
+                                                "var(--mantine-radius-pill)",
                                             background:
                                                 value && i < value
                                                     ? WELLNESS_COLORS[label]
@@ -416,7 +421,7 @@ function MealDetailDialog({
                                     />
                                 ))}
                             </Group>
-                            <Text fz={12} fw={600} mt={6}>
+                            <Text fz="xs" fw={600} mt="xs">
                                 {value ? moodLabel(value) : "—"}
                             </Text>
                         </Paper>
@@ -425,18 +430,18 @@ function MealDetailDialog({
 
                 {mealData.notes && (
                     <Paper
-                        radius={16}
-                        px={14}
-                        py={12}
+                        radius="lg"
+                        px="md"
+                        py="md"
                         bg="var(--acs)"
                         shadow="none"
                         withBorder={false}
                     >
-                        <Text fz={14}>&#34;{mealData.notes}&#34;</Text>
+                        <Text fz="md">&#34;{mealData.notes}&#34;</Text>
                     </Paper>
                 )}
 
-                <Group gap={8}>
+                <Group gap="sm">
                     <Button
                         variant="default"
                         size="sm"
@@ -694,7 +699,7 @@ export default function HistoryPage() {
     ];
 
     return (
-        <Stack gap={12} maw={1100} mx="auto" w="100%">
+        <Stack gap="md" maw={1100} mx="auto" w="100%">
             <BulkDeleteConfirmDialog
                 open={bulkDeleteConfirmOpen}
                 onOpenChange={setBulkDeleteConfirmOpen}
@@ -704,14 +709,14 @@ export default function HistoryPage() {
 
             {/* Filters */}
             <Paper
-                radius={22}
-                p={8}
+                radius="xl"
+                p="sm"
                 bg="var(--glass)"
                 shadow="none"
                 withBorder
                 style={{ backdropFilter: "blur(20px)" }}
             >
-                <Group gap={8} wrap="wrap">
+                <Group gap="sm" wrap="wrap">
                     <TextInput
                         placeholder="Search meals or foods"
                         aria-label="Search meals or foods"
@@ -723,7 +728,7 @@ export default function HistoryPage() {
                             })
                         }
                         leftSection={<Search size={15} />}
-                        radius={14}
+                        radius="md"
                         size="sm"
                         style={{ flex: 1, minWidth: 220, maxWidth: 340 }}
                         styles={{
@@ -731,7 +736,7 @@ export default function HistoryPage() {
                                 height: 40,
                                 backgroundColor: "var(--sf)",
                                 borderColor: "transparent",
-                                fontSize: 14,
+                                fontSize: "var(--mantine-font-size-md)",
                             },
                         }}
                     />
@@ -741,8 +746,8 @@ export default function HistoryPage() {
                             <UnstyledButton
                                 key={pill.value}
                                 h={40}
-                                px={14}
-                                fz={13}
+                                px="md"
+                                fz="sm"
                                 fw={600}
                                 c={active ? "var(--tx)" : "var(--tx2)"}
                                 onClick={() =>
@@ -754,19 +759,19 @@ export default function HistoryPage() {
                                 style={{
                                     display: "flex",
                                     alignItems: "center",
-                                    gap: 7,
-                                    borderRadius: 14,
+                                    gap: "var(--mantine-spacing-xs)",
+                                    borderRadius: "var(--mantine-radius-md)",
                                     whiteSpace: "nowrap",
                                     background: active
                                         ? "var(--sf)"
                                         : "transparent",
                                     boxShadow: active ? "var(--sh)" : "none",
-                                    transition: "background 150ms",
+                                    transition: `background var(--motion-fast)`,
                                 }}
                             >
                                 <TypeDot color={pill.dot} />
                                 {pill.label}
-                                <Text component="span" fz={11} c="var(--tx3)">
+                                <Text component="span" fz="xxs" c="var(--tx3)">
                                     {typeCounts[pill.value] ?? 0}
                                 </Text>
                             </UnstyledButton>
@@ -787,7 +792,7 @@ export default function HistoryPage() {
                         }}
                         leftSection={<CalendarDays size={15} />}
                         aria-label="Date range"
-                        radius={14}
+                        radius="md"
                         size="sm"
                         w={{ base: "100%", sm: 240 }}
                         valueFormat="MMM D, YYYY"
@@ -812,7 +817,7 @@ export default function HistoryPage() {
                     )}
                     <SegmentedControl
                         ml="auto"
-                        radius={14}
+                        radius="md"
                         value={displayMode}
                         onChange={(value) =>
                             dispatch({
@@ -824,15 +829,23 @@ export default function HistoryPage() {
                             root: { backgroundColor: "var(--sf)" },
                             indicator: {
                                 backgroundColor: "var(--sf2)",
-                                borderRadius: 11,
+                                borderRadius: "var(--mantine-radius-sm)",
                             },
-                            label: { fontSize: 12, height: 34 },
+                            label: {
+                                fontSize: "var(--mantine-font-size-xs)",
+                                height: 34,
+                            },
                         }}
                         data={[
                             {
                                 value: "whole",
                                 label: (
-                                    <Center style={{ gap: 6, height: "100%" }}>
+                                    <Center
+                                        style={{
+                                            gap: "var(--mantine-spacing-xs)",
+                                            height: "100%",
+                                        }}
+                                    >
                                         <CalendarDays size={14} />
                                         <Box component="span">By day</Box>
                                     </Center>
@@ -841,7 +854,12 @@ export default function HistoryPage() {
                             {
                                 value: "itemized",
                                 label: (
-                                    <Center style={{ gap: 6, height: "100%" }}>
+                                    <Center
+                                        style={{
+                                            gap: "var(--mantine-spacing-xs)",
+                                            height: "100%",
+                                        }}
+                                    >
                                         <UtensilsCrossed size={14} />
                                         <Box component="span">By food</Box>
                                     </Center>
@@ -851,10 +869,10 @@ export default function HistoryPage() {
                     />
                     {displayMode === "whole" && (
                         <Group
-                            gap={2}
-                            p={3}
+                            gap="xxs"
+                            p="xxs"
                             bg="var(--sf)"
-                            style={{ borderRadius: 14 }}
+                            style={{ borderRadius: "var(--mantine-radius-md)" }}
                             role="radiogroup"
                             aria-label="Layout"
                         >
@@ -869,7 +887,7 @@ export default function HistoryPage() {
                                         <ActionIcon
                                             variant="transparent"
                                             size={34}
-                                            radius={11}
+                                            radius="sm"
                                             role="radio"
                                             aria-checked={active}
                                             aria-label={option.label}
@@ -904,18 +922,18 @@ export default function HistoryPage() {
                         display: "grid",
                         gridTemplateColumns:
                             "repeat(auto-fill, minmax(min(420px, 100%), 1fr))",
-                        gap: 12,
+                        gap: "var(--mantine-spacing-md)",
                     }}
                 >
                     {Array.from({ length: 2 }).map((_, i) => (
-                        <Paper key={i} p={16}>
-                            <Group justify="space-between" px={6} pb={10}>
-                                <Skeleton h={16} w={120} radius={999} />
-                                <Skeleton h={12} w={60} radius={999} />
+                        <Paper key={i} p="lg">
+                            <Group justify="space-between" px="xs" pb="sm">
+                                <Skeleton h={16} w={120} radius="pill" />
+                                <Skeleton h={12} w={60} radius="pill" />
                             </Group>
-                            <Stack gap={4}>
+                            <Stack gap="xxs">
                                 {Array.from({ length: 3 }).map((_, j) => (
-                                    <Skeleton key={j} h={62} radius={16} />
+                                    <Skeleton key={j} h={62} radius="lg" />
                                 ))}
                             </Stack>
                         </Paper>
@@ -925,26 +943,26 @@ export default function HistoryPage() {
 
             {/* Empty: no meals logged at all */}
             {hasNoData && (
-                <Paper px={32} py={56}>
-                    <Stack align="center" gap={12} ta="center">
-                        <ThemeIcon size={64} radius={20}>
+                <Paper px="xxl" py={56}>
+                    <Stack align="center" gap="md" ta="center">
+                        <ThemeIcon size={64} radius="xl">
                             <History size={28} />
                         </ThemeIcon>
                         <Text
-                            fz={22}
+                            fz="xxl"
                             fw={700}
-                            style={{ letterSpacing: "-0.025em" }}
+                            style={{ letterSpacing: "var(--ls-snug)" }}
                         >
                             Your history starts with one meal
                         </Text>
-                        <Text fz={14} c="var(--tx2)" maw={400}>
+                        <Text fz="md" c="var(--tx2)" maw={400}>
                             Everything you log shows up here, grouped by day, so
                             you can find it, repeat it or edit it.
                         </Text>
                         <Button
                             component={Link}
                             href="/log"
-                            mt={6}
+                            mt="xs"
                             size="md"
                             h={44}
                             leftSection={<Plus size={16} />}
@@ -957,11 +975,11 @@ export default function HistoryPage() {
 
             {/* Empty: filters hide everything */}
             {nothingMatches && (
-                <Paper px={32} py={56}>
-                    <Stack align="center" gap={12} ta="center">
+                <Paper px="xxl" py={56}>
+                    <Stack align="center" gap="md" ta="center">
                         <ThemeIcon
                             size={64}
-                            radius={20}
+                            radius="xl"
                             variant="filled"
                             color="gray"
                             styles={{
@@ -974,18 +992,18 @@ export default function HistoryPage() {
                             <SearchX size={28} />
                         </ThemeIcon>
                         <Text
-                            fz={22}
+                            fz="xxl"
                             fw={700}
-                            style={{ letterSpacing: "-0.025em" }}
+                            style={{ letterSpacing: "var(--ls-snug)" }}
                         >
                             {search
                                 ? `Nothing matches “${search}”`
                                 : "Nothing matches these filters"}
                         </Text>
-                        <Text fz={14} c="var(--tx2)">
+                        <Text fz="md" c="var(--tx2)">
                             Try another word, or look in every meal type.
                         </Text>
-                        <Group gap={8} mt={6}>
+                        <Group gap="sm" mt="xs">
                             <Button
                                 size="sm"
                                 h={40}
@@ -1011,8 +1029,8 @@ export default function HistoryPage() {
 
             {/* Count + select all */}
             {!isLoading && !hasNoData && !nothingMatches && (
-                <Group justify="space-between" px={6}>
-                    <Text fz={12} c="var(--tx3)">
+                <Group justify="space-between" px="xs">
+                    <Text fz="xs" c="var(--tx3)">
                         {selectedMealIds.size > 0
                             ? `${selectedMealIds.size} of ${filtered.length} meal${filtered.length !== 1 ? "s" : ""} selected`
                             : displayMode === "whole"
@@ -1034,7 +1052,7 @@ export default function HistoryPage() {
                             onChange={toggleSelectAll}
                             styles={{
                                 label: {
-                                    fontSize: 12,
+                                    fontSize: "var(--mantine-font-size-xs)",
                                     color: "var(--tx2)",
                                     fontWeight: 600,
                                 },
@@ -1057,7 +1075,7 @@ export default function HistoryPage() {
                                 gridTemplateColumns: isGrid
                                     ? "repeat(auto-fill, minmax(min(420px, 100%), 1fr))"
                                     : "1fr",
-                                gap: 12,
+                                gap: "var(--mantine-spacing-md)",
                                 alignItems: "start",
                             }}
                         >
@@ -1072,23 +1090,23 @@ export default function HistoryPage() {
                                         <Group
                                             justify="space-between"
                                             align="baseline"
-                                            pt={2}
-                                            px={6}
-                                            pb={10}
+                                            pt="xxs"
+                                            px="xs"
+                                            pb="sm"
                                         >
                                             <Box>
                                                 <Text
                                                     component="span"
                                                     fw={700}
-                                                    fz={16}
+                                                    fz="lg"
                                                 >
                                                     {dayTitle(group.date)}
                                                 </Text>
                                                 <Text
                                                     component="span"
-                                                    fz={12}
+                                                    fz="xs"
                                                     c="var(--tx3)"
-                                                    ml={8}
+                                                    ml="sm"
                                                 >
                                                     {formatShortDate(
                                                         group.date
@@ -1096,7 +1114,7 @@ export default function HistoryPage() {
                                                 </Text>
                                             </Box>
                                             <Text
-                                                fz={12}
+                                                fz="xs"
                                                 c="var(--tx2)"
                                                 style={{
                                                     fontVariantNumeric:
@@ -1113,7 +1131,7 @@ export default function HistoryPage() {
                                                 kcal
                                             </Text>
                                         </Group>
-                                        <Stack gap={4}>
+                                        <Stack gap="xxs">
                                             {group.meals.map(
                                                 (meal: MealResponse) => {
                                                     const style = mealStyle(
@@ -1139,17 +1157,17 @@ export default function HistoryPage() {
                                                     return (
                                                         <Group
                                                             key={meal.id}
-                                                            gap={12}
+                                                            gap="md"
                                                             wrap="nowrap"
-                                                            p={10}
+                                                            p="sm"
                                                             style={{
-                                                                borderRadius: 16,
+                                                                borderRadius:
+                                                                    "var(--mantine-radius-lg)",
                                                                 background:
                                                                     isSelected
                                                                         ? "var(--acs)"
                                                                         : "transparent",
-                                                                transition:
-                                                                    "background 150ms",
+                                                                transition: `background var(--motion-fast)`,
                                                             }}
                                                         >
                                                             <Checkbox
@@ -1185,7 +1203,7 @@ export default function HistoryPage() {
                                                                 }}
                                                             >
                                                                 <Group
-                                                                    gap={12}
+                                                                    gap="md"
                                                                     wrap="nowrap"
                                                                 >
                                                                     <ThemeIcon
@@ -1195,9 +1213,7 @@ export default function HistoryPage() {
                                                                         size={
                                                                             42
                                                                         }
-                                                                        radius={
-                                                                            13
-                                                                        }
+                                                                        radius="md"
                                                                     >
                                                                         <Icon
                                                                             size={
@@ -1215,9 +1231,7 @@ export default function HistoryPage() {
                                                                             fw={
                                                                                 600
                                                                             }
-                                                                            fz={
-                                                                                14
-                                                                            }
+                                                                            fz="md"
                                                                             truncate
                                                                         >
                                                                             {
@@ -1225,13 +1239,9 @@ export default function HistoryPage() {
                                                                             }
                                                                         </Text>
                                                                         <Text
-                                                                            fz={
-                                                                                12
-                                                                            }
+                                                                            fz="xs"
                                                                             c="var(--tx3)"
-                                                                            mt={
-                                                                                2
-                                                                            }
+                                                                            mt="xxs"
                                                                             truncate
                                                                         >
                                                                             {[
@@ -1247,16 +1257,14 @@ export default function HistoryPage() {
                                                                         </Text>
                                                                     </Box>
                                                                     <Stack
-                                                                        gap={5}
+                                                                        gap="xs"
                                                                         align="flex-end"
                                                                     >
                                                                         <Text
                                                                             fw={
                                                                                 600
                                                                             }
-                                                                            fz={
-                                                                                13
-                                                                            }
+                                                                            fz="sm"
                                                                             style={{
                                                                                 fontVariantNumeric:
                                                                                     "tabular-nums",
@@ -1287,12 +1295,12 @@ export default function HistoryPage() {
                                 );
                                 const key = group.date.toDateString();
                                 return isGrid ? (
-                                    <Paper key={key} p={16}>
+                                    <Paper key={key} p="lg">
                                         {body}
                                     </Paper>
                                 ) : (
                                     <Box key={key}>
-                                        {groupIndex > 0 && <Divider mb={12} />}
+                                        {groupIndex > 0 && <Divider mb="md" />}
                                         {body}
                                     </Box>
                                 );
@@ -1301,7 +1309,7 @@ export default function HistoryPage() {
                     );
                     // The list is one card holding every day; the grid gives
                     // each day its own.
-                    return isGrid ? days : <Paper p={16}>{days}</Paper>;
+                    return isGrid ? days : <Paper p="lg">{days}</Paper>;
                 })()}
 
             {/* By food */}
@@ -1309,7 +1317,7 @@ export default function HistoryPage() {
                 !hasNoData &&
                 !nothingMatches &&
                 displayMode === "itemized" && (
-                    <Paper p={10}>
+                    <Paper p="sm">
                         <Table.ScrollContainer
                             minWidth={640}
                             maxHeight={tableMaxHeight}
@@ -1317,10 +1325,14 @@ export default function HistoryPage() {
                             <Table
                                 layout="fixed"
                                 withRowBorders={false}
-                                horizontalSpacing={14}
-                                verticalSpacing={10}
+                                horizontalSpacing="md"
+                                verticalSpacing="sm"
                                 styles={{
-                                    th: { paddingTop: 10, paddingBottom: 10 },
+                                    th: {
+                                        paddingTop: "var(--mantine-spacing-sm)",
+                                        paddingBottom:
+                                            "var(--mantine-spacing-sm)",
+                                    },
                                 }}
                             >
                                 <Table.Thead>
@@ -1348,7 +1360,7 @@ export default function HistoryPage() {
                                                 <Table.Td>
                                                     <Text
                                                         fw={600}
-                                                        fz={14}
+                                                        fz="md"
                                                         truncate
                                                     >
                                                         {food.name}
@@ -1356,7 +1368,7 @@ export default function HistoryPage() {
                                                 </Table.Td>
                                                 <Table.Td>
                                                     <Text
-                                                        fz={14}
+                                                        fz="md"
                                                         c="var(--tx2)"
                                                         style={{
                                                             fontVariantNumeric:
@@ -1369,14 +1381,14 @@ export default function HistoryPage() {
                                                 </Table.Td>
                                                 <Table.Td>
                                                     <Group
-                                                        gap={8}
+                                                        gap="sm"
                                                         wrap="nowrap"
                                                     >
                                                         <TypeDot
                                                             color={style.token}
                                                         />
                                                         <Text
-                                                            fz={14}
+                                                            fz="md"
                                                             c="var(--tx2)"
                                                             truncate
                                                         >
@@ -1386,7 +1398,7 @@ export default function HistoryPage() {
                                                 </Table.Td>
                                                 <Table.Td>
                                                     <Text
-                                                        fz={14}
+                                                        fz="md"
                                                         c="var(--tx3)"
                                                     >
                                                         {meal.mealTime &&
@@ -1399,7 +1411,7 @@ export default function HistoryPage() {
                                                 </Table.Td>
                                                 <Table.Td ta="right">
                                                     <Text
-                                                        fz={14}
+                                                        fz="md"
                                                         style={{
                                                             fontVariantNumeric:
                                                                 "tabular-nums",
@@ -1427,18 +1439,18 @@ export default function HistoryPage() {
                     style={{ alignSelf: "center", zIndex: 5 }}
                 >
                     <Paper
-                        radius={999}
+                        radius="pill"
                         bg="var(--tx)"
                         c="var(--bg)"
                         withBorder={false}
-                        pl={18}
-                        pr={8}
-                        py={8}
-                        style={{ boxShadow: "0 20px 50px rgba(0,0,0,0.35)" }}
+                        pl="lg"
+                        pr="sm"
+                        py="sm"
+                        style={{ boxShadow: "var(--mantine-shadow-lg)" }}
                     >
-                        <Group gap={10} wrap="nowrap">
+                        <Group gap="sm" wrap="nowrap">
                             <Text
-                                fz={14}
+                                fz="md"
                                 fw={700}
                                 style={{ whiteSpace: "nowrap" }}
                             >
@@ -1456,15 +1468,12 @@ export default function HistoryPage() {
                             </Button>
                             <Button
                                 size="sm"
-                                px={16}
+                                color="rose"
+                                px="lg"
                                 leftSection={<Trash2 size={14} />}
                                 onClick={handleBulkDelete}
                                 styles={{
-                                    root: {
-                                        backgroundColor: "#ff5c7f",
-                                        color: "#fff",
-                                        boxShadow: "none",
-                                    },
+                                    root: { boxShadow: "none" },
                                 }}
                             >
                                 Delete

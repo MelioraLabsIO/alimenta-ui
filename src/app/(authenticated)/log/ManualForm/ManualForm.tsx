@@ -168,7 +168,8 @@ function formatWhen(value: unknown): string {
     });
 }
 
-const TILE_MOTION = "transform 160ms, border-color 160ms, background 160ms";
+const TILE_MOTION =
+    "transform var(--motion-normal), border-color var(--motion-normal), background var(--motion-normal)";
 
 function MealTypeTile({
     type,
@@ -186,14 +187,14 @@ function MealTypeTile({
             onClick={onSelect}
             aria-pressed={active}
             h={96}
-            p={14}
+            p="md"
             c="var(--tx)"
             style={{
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "flex-start",
                 justifyContent: "space-between",
-                borderRadius: 18,
+                borderRadius: "var(--mantine-radius-lg)",
                 border: `1.5px solid ${active ? meta.token : "var(--bd)"}`,
                 background: active
                     ? `color-mix(in srgb, ${meta.token} 10%, transparent)`
@@ -205,7 +206,7 @@ function MealTypeTile({
             <ThemeIcon variant={active ? "filled" : "light"} color={meta.color}>
                 <meta.Icon size={16} />
             </ThemeIcon>
-            <Text fw={600} fz={14} lh={1.2}>
+            <Text fw={600} fz="md" lh={1.2}>
                 {meta.label}
             </Text>
         </UnstyledButton>
@@ -378,13 +379,13 @@ export function ManualForm({
                 onSubmit={handleSubmit(handleSave)}
                 noValidate
             >
-                <Flex wrap="wrap" gap={12} align="flex-start">
+                <Flex wrap="wrap" gap="md" align="flex-start">
                     {/* ── Left column ─────────────────────────────── */}
-                    <Stack gap={12} style={{ flex: "8 1 520px", minWidth: 0 }}>
+                    <Stack gap="md" style={{ flex: "8 1 520px", minWidth: 0 }}>
                         {/* Basic info */}
-                        <Paper p={22}>
-                            <Stack gap={18}>
-                                <Text fw={700} fz={16}>
+                        <Paper p="xl">
+                            <Stack gap="lg">
+                                <Text fw={700} fz="lg">
                                     What kind of meal?
                                 </Text>
                                 <Controller
@@ -393,7 +394,7 @@ export function ManualForm({
                                     render={({ field }) => (
                                         <SimpleGrid
                                             cols={{ base: 2, sm: 5 }}
-                                            spacing={10}
+                                            spacing="sm"
                                         >
                                             {MEAL_TYPES.map((t) => (
                                                 <MealTypeTile
@@ -409,11 +410,11 @@ export function ManualForm({
                                     )}
                                 />
                                 {errors.type && (
-                                    <Text fz={12} fw={500} c="var(--ro)">
+                                    <Text fz="xs" fw={500} c="var(--ro)">
                                         {errors.type.message}
                                     </Text>
                                 )}
-                                <Flex wrap="wrap" gap={12}>
+                                <Flex wrap="wrap" gap="md">
                                     <TextInput
                                         id="title"
                                         size="lg"
@@ -437,7 +438,12 @@ export function ManualForm({
                                             flex: "1 1 200px",
                                             minWidth: 0,
                                         }}
-                                        styles={{ input: { fontSize: 15 } }}
+                                        styles={{
+                                            input: {
+                                                fontSize:
+                                                    "var(--mantine-font-size-md)",
+                                            },
+                                        }}
                                         {...register("mealTime")}
                                     />
                                 </Flex>
@@ -445,13 +451,13 @@ export function ManualForm({
                         </Paper>
 
                         {/* Foods */}
-                        <Paper p={22}>
-                            <Stack gap={12}>
+                        <Paper p="xl">
+                            <Stack gap="md">
                                 <Group justify="space-between" align="center">
-                                    <Text fw={700} fz={16}>
+                                    <Text fw={700} fz="lg">
                                         Foods
                                     </Text>
-                                    <Text fz={12} c="var(--tx3)">
+                                    <Text fz="xs" c="var(--tx3)">
                                         {items.length}{" "}
                                         {items.length === 1 ? "item" : "items"}
                                     </Text>
@@ -459,8 +465,8 @@ export function ManualForm({
 
                                 {itemsErrorMessage && (
                                     <Paper
-                                        radius={16}
-                                        p={16}
+                                        radius="lg"
+                                        p="lg"
                                         shadow="none"
                                         withBorder={false}
                                         bg="color-mix(in srgb, var(--ro) 7%, transparent)"
@@ -469,10 +475,10 @@ export function ManualForm({
                                             animation: "alm-shake 400ms ease",
                                         }}
                                     >
-                                        <Group gap={12} wrap="nowrap">
+                                        <Group gap="md" wrap="nowrap">
                                             <ThemeIcon
                                                 size={38}
-                                                radius={12}
+                                                radius="sm"
                                                 variant="light"
                                                 color="rose"
                                             >
@@ -483,9 +489,9 @@ export function ManualForm({
                                                     {itemsErrorMessage}
                                                 </Text>
                                                 <Text
-                                                    fz={12}
+                                                    fz="xs"
                                                     c="var(--tx3)"
-                                                    mt={2}
+                                                    mt="xxs"
                                                 >
                                                     Pick a food from the catalog
                                                     for every row.
@@ -506,15 +512,15 @@ export function ManualForm({
                                     return (
                                         <Paper
                                             key={food.id}
-                                            radius={16}
-                                            p={10}
-                                            pl={14}
+                                            radius="lg"
+                                            p="sm"
+                                            pl="md"
                                             bg="var(--sf2)"
                                             shadow="none"
                                             withBorder={false}
                                         >
                                             <Flex
-                                                gap={12}
+                                                gap="md"
                                                 align="center"
                                                 wrap="wrap"
                                             >
@@ -579,25 +585,26 @@ export function ManualForm({
                                                 </Box>
 
                                                 <Group
-                                                    gap={8}
+                                                    gap="sm"
                                                     wrap="nowrap"
                                                     ml="auto"
                                                 >
                                                     {/* Quantity stepper */}
                                                     <Group
-                                                        gap={2}
-                                                        p={3}
+                                                        gap="xxs"
+                                                        p="xxs"
                                                         wrap="nowrap"
                                                         bg="var(--sf)"
                                                         style={{
-                                                            borderRadius: 12,
+                                                            borderRadius:
+                                                                "var(--mantine-radius-sm)",
                                                             border: "1px solid var(--bd)",
                                                         }}
                                                     >
                                                         <ActionIcon
                                                             variant="subtle"
                                                             size={30}
-                                                            radius={9}
+                                                            radius="xs"
                                                             aria-label={`Decrease quantity for ${foodLabel}`}
                                                             onClick={() =>
                                                                 stepQuantity(
@@ -644,7 +651,8 @@ export function ManualForm({
                                                                         input: {
                                                                             height: 30,
                                                                             minHeight: 30,
-                                                                            paddingInline: 4,
+                                                                            paddingInline:
+                                                                                "var(--mantine-spacing-xxs)",
                                                                             textAlign:
                                                                                 "center",
                                                                             fontWeight: 600,
@@ -658,7 +666,7 @@ export function ManualForm({
                                                         <ActionIcon
                                                             variant="subtle"
                                                             size={30}
-                                                            radius={9}
+                                                            radius="xs"
                                                             aria-label={`Increase quantity for ${foodLabel}`}
                                                             onClick={() =>
                                                                 stepQuantity(
@@ -679,7 +687,7 @@ export function ManualForm({
                                                         render={({ field }) => (
                                                             <Select
                                                                 size="sm"
-                                                                radius={10}
+                                                                radius="sm"
                                                                 w={96}
                                                                 aria-label={`Unit for ${foodLabel}`}
                                                                 value={
@@ -712,7 +720,7 @@ export function ManualForm({
                                                     <ActionIcon
                                                         variant="subtle"
                                                         size={34}
-                                                        radius={10}
+                                                        radius="sm"
                                                         c="var(--tx3)"
                                                         aria-label="Remove"
                                                         onClick={() =>
@@ -728,10 +736,10 @@ export function ManualForm({
                                             </Flex>
                                             {quantityError && (
                                                 <Text
-                                                    fz={12}
+                                                    fz="xs"
                                                     fw={500}
                                                     c="var(--ro)"
-                                                    mt={6}
+                                                    mt="xs"
                                                 >
                                                     {quantityError}
                                                 </Text>
@@ -742,8 +750,8 @@ export function ManualForm({
 
                                 {/* Add row */}
                                 <Paper
-                                    radius={16}
-                                    p={12}
+                                    radius="lg"
+                                    p="md"
                                     bg="transparent"
                                     shadow="none"
                                     withBorder={false}
@@ -751,15 +759,15 @@ export function ManualForm({
                                         border: "1.5px dashed var(--bd2)",
                                     }}
                                 >
-                                    <Group gap={8} wrap="wrap">
+                                    <Group gap="sm" wrap="wrap">
                                         <Box
-                                            mx={4}
+                                            mx="xxs"
                                             c="var(--tx3)"
                                             style={{ display: "flex" }}
                                         >
                                             <Plus size={15} />
                                         </Box>
-                                        <Text fz={13} c="var(--tx2)" mr={4}>
+                                        <Text fz="sm" c="var(--tx2)" mr="xxs">
                                             Something else on the plate?
                                         </Text>
                                         <Button
@@ -780,15 +788,15 @@ export function ManualForm({
 
                     {/* ── Right column (sticky summary) ───────────── */}
                     <Stack
-                        gap={12}
+                        gap="md"
                         pos={{ base: "static", md: "sticky" }}
                         top={12}
                         style={{ flex: "4 1 300px", minWidth: 0 }}
                     >
-                        <Paper p={22}>
-                            <Stack gap={18}>
+                        <Paper p="xl">
+                            <Stack gap="lg">
                                 <Group justify="space-between" align="center">
-                                    <Text fw={700} fz={16}>
+                                    <Text fw={700} fz="lg">
                                         This meal
                                     </Text>
                                     <Badge
@@ -801,28 +809,28 @@ export function ManualForm({
                                     </Badge>
                                 </Group>
 
-                                <Group gap={18} wrap="nowrap">
+                                <Group gap="lg" wrap="nowrap">
                                     <ThemeIcon
                                         size={64}
-                                        radius={20}
+                                        radius="xl"
                                         color={selectedType.color}
                                     >
                                         <selectedType.Icon size={28} />
                                     </ThemeIcon>
                                     <Box>
                                         <Text
-                                            fz={38}
+                                            fz="display"
                                             fw={700}
                                             lh={1}
                                             style={{
-                                                letterSpacing: "-0.04em",
+                                                letterSpacing: "var(--ls-snug)",
                                                 fontVariantNumeric:
                                                     "tabular-nums",
                                             }}
                                         >
                                             {namedFoods.length}
                                         </Text>
-                                        <Text fz={13} c="var(--tx3)" mt={4}>
+                                        <Text fz="sm" c="var(--tx3)" mt="xxs">
                                             {namedFoods.length === 1
                                                 ? "food"
                                                 : "foods"}{" "}
@@ -831,17 +839,17 @@ export function ManualForm({
                                     </Box>
                                 </Group>
 
-                                <Stack gap={10}>
+                                <Stack gap="sm">
                                     <Group
                                         justify="space-between"
-                                        gap={12}
+                                        gap="md"
                                         wrap="nowrap"
                                     >
-                                        <Text fz={13} c="var(--tx2)">
+                                        <Text fz="sm" c="var(--tx2)">
                                             Name
                                         </Text>
                                         <Text
-                                            fz={13}
+                                            fz="sm"
                                             fw={600}
                                             ta="right"
                                             truncate
@@ -857,14 +865,14 @@ export function ManualForm({
                                     </Group>
                                     <Group
                                         justify="space-between"
-                                        gap={12}
+                                        gap="md"
                                         wrap="nowrap"
                                     >
-                                        <Text fz={13} c="var(--tx2)">
+                                        <Text fz="sm" c="var(--tx2)">
                                             When
                                         </Text>
                                         <Text
-                                            fz={13}
+                                            fz="sm"
                                             fw={600}
                                             ta="right"
                                             style={{
@@ -877,15 +885,15 @@ export function ManualForm({
                                     </Group>
                                     <Group
                                         justify="space-between"
-                                        gap={12}
+                                        gap="md"
                                         wrap="nowrap"
                                         align="flex-start"
                                     >
-                                        <Text fz={13} c="var(--tx2)">
+                                        <Text fz="sm" c="var(--tx2)">
                                             Foods
                                         </Text>
                                         <Text
-                                            fz={13}
+                                            fz="sm"
                                             fw={600}
                                             ta="right"
                                             lineClamp={3}
@@ -909,10 +917,10 @@ export function ManualForm({
                                 <Button
                                     type="submit"
                                     size="lg"
-                                    radius={16}
+                                    radius="lg"
                                     fullWidth
                                     fw={700}
-                                    fz={15}
+                                    fz="md"
                                     variant={
                                         saveFailed
                                             ? "filled"
@@ -936,16 +944,19 @@ export function ManualForm({
                                 </Button>
                                 {saveFailed && (
                                     <Group
-                                        gap={6}
+                                        gap="xs"
                                         align="flex-start"
                                         wrap="nowrap"
                                         mt={-8}
                                         c="var(--ro)"
                                     >
-                                        <Box mt={2} style={{ display: "flex" }}>
+                                        <Box
+                                            mt="xxs"
+                                            style={{ display: "flex" }}
+                                        >
                                             <WifiOff size={13} />
                                         </Box>
-                                        <Text fz={12} lh={1.45} c="var(--ro)">
+                                        <Text fz="xs" lh="md" c="var(--ro)">
                                             Couldn&apos;t reach the server. Your
                                             meal is still here, so just try
                                             again.

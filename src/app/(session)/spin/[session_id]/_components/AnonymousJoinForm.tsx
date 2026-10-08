@@ -69,13 +69,13 @@ export function AnonymousJoinForm({
     );
 
     return (
-        <Stack gap={16}>
+        <Stack gap="lg">
             <Box
                 component="form"
                 onSubmit={handleSubmit(handleJoinAsGuest)}
                 noValidate
             >
-                <Stack gap={12}>
+                <Stack gap="md">
                     <TextInput
                         id="displayName"
                         label="Your name"
@@ -87,7 +87,7 @@ export function AnonymousJoinForm({
                     <Button
                         type="submit"
                         size="lg"
-                        radius={16}
+                        radius="lg"
                         fullWidth
                         fw={700}
                         loading={isPending}
@@ -103,15 +103,15 @@ export function AnonymousJoinForm({
                 labelPosition="center"
                 styles={{
                     label: {
-                        fontSize: 11,
+                        fontSize: "var(--mantine-font-size-xxs)",
                         textTransform: "uppercase",
-                        letterSpacing: "0.06em",
+                        letterSpacing: "var(--ls-wide)",
                         color: "var(--tx3)",
                     },
                 }}
             />
 
-            <Stack gap={6} ta="center">
+            <Stack gap="xs" ta="center">
                 <Button
                     component="a"
                     href={routes.login({
@@ -121,12 +121,12 @@ export function AnonymousJoinForm({
                     })}
                     variant="default"
                     size="lg"
-                    radius={16}
+                    radius="lg"
                     fullWidth
                 >
                     Sign in to Alimenta
                 </Button>
-                <Text fz={12} c="var(--tx3)">
+                <Text fz="xs" c="var(--tx3)">
                     Signing in joins you under your account name.
                 </Text>
             </Stack>

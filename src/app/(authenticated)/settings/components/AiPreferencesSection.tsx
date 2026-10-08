@@ -52,18 +52,18 @@ export function AiPreferencesSection() {
     }
 
     return (
-        <Stack gap={10}>
+        <Stack gap="sm">
             <Text
-                fz={11}
+                fz="xxs"
                 fw={600}
                 c="var(--tx3)"
-                pl={16}
+                pl="lg"
                 tt="uppercase"
-                lts="0.07em"
+                lts="var(--ls-wide)"
             >
                 AI helps with
             </Text>
-            <Group gap={8} pl={4}>
+            <Group gap="sm" pl="xxs">
                 {AI_PREFERENCE_ITEMS.map((item) => {
                     const on = preferences[item.key];
                     const Icon = on ? Check : item.icon;
@@ -85,7 +85,7 @@ export function AiPreferencesSection() {
                                     : undefined,
                                 borderWidth: 1,
                                 borderStyle: "solid",
-                                transition: "all 160ms",
+                                transition: `all var(--motion-normal)`,
                             }}
                         >
                             {item.label}
@@ -105,12 +105,12 @@ export function AiPreferencesSection() {
                             last={index === AI_PREFERENCE_ITEMS.length - 1}
                             onClick={() => toggle(item.key)}
                         >
-                            <ThemeIcon size={32} radius={10}>
+                            <ThemeIcon size={32} radius="sm">
                                 <Icon size={15} />
                             </ThemeIcon>
-                            <Box py={12} style={{ flex: 1, minWidth: 0 }}>
+                            <Box py="md" style={{ flex: 1, minWidth: 0 }}>
                                 <Text fw={500}>{item.label}</Text>
-                                <Text fz={12} c="var(--tx3)" mt={2}>
+                                <Text fz="xs" c="var(--tx3)" mt="xxs">
                                     {item.description}
                                 </Text>
                             </Box>

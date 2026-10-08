@@ -48,8 +48,8 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
     const initials = getProfileInitials(profile);
 
     return (
-        <Stack h="100%" gap={4}>
-            <Box px={8} pb={14} pt={2}>
+        <Stack h="100%" gap="xxs">
+            <Box px="sm" pb="md" pt="xxs">
                 <Brand />
             </Box>
 
@@ -73,8 +73,8 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
                                     variant="surface"
                                     size="xs"
                                     h={20}
-                                    px={8}
-                                    fz={10}
+                                    px="sm"
+                                    fz="xxs"
                                     c="var(--tx3)"
                                 >
                                     Soon
@@ -85,29 +85,29 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
                 );
             })}
 
-            <Stack mt="auto" gap={10}>
+            <Stack mt="auto" gap="sm">
                 <Paper
-                    radius={16}
-                    p={14}
+                    radius="lg"
+                    p="md"
                     bg="var(--acs)"
                     shadow="none"
                     style={{ borderColor: "transparent" }}
                 >
-                    <Stack gap={8}>
-                        <Group gap={8} wrap="nowrap">
+                    <Stack gap="sm">
+                        <Group gap="sm" wrap="nowrap">
                             <Dices size={15} color="var(--ac)" />
-                            <Text fw={600} fz={13}>
+                            <Text fw={600} fz="sm">
                                 Can&apos;t decide dinner?
                             </Text>
                         </Group>
-                        <Text fz={12} c="var(--tx2)" lh={1.45}>
+                        <Text fz="xs" c="var(--tx2)" lh="md">
                             Spin your saved options and let the wheel pick.
                         </Text>
                         <Button
                             component={Link}
                             href="/spin"
                             size="xs"
-                            radius={11}
+                            radius="sm"
                             fullWidth
                             onClick={onNavigate}
                         >
@@ -120,19 +120,19 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
                     component={Link}
                     href="/settings"
                     onClick={onNavigate}
-                    px={8}
-                    py={6}
-                    style={{ borderRadius: 12 }}
+                    px="sm"
+                    py="xs"
+                    style={{ borderRadius: "var(--mantine-radius-sm)" }}
                 >
-                    <Group gap={10} wrap="nowrap">
-                        <Avatar size={30} fz={11}>
+                    <Group gap="sm" wrap="nowrap">
+                        <Avatar size={30} fz="xxs">
                             {initials || "·"}
                         </Avatar>
                         <Box miw={0} style={{ flex: 1 }}>
-                            <Text fw={600} fz={13} truncate c="var(--tx)">
-                                {profile?.displayName ?? "Your account"}
+                            <Text fw={600} fz="sm" truncate c="var(--tx)">
+                                9{profile?.displayName ?? "Your account"}
                             </Text>
-                            <Text fz={11} truncate c="var(--tx3)">
+                            <Text fz="xxs" truncate c="var(--tx3)">
                                 {profile?.email ?? "Open settings"}
                             </Text>
                         </Box>

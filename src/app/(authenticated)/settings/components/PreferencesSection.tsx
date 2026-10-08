@@ -51,7 +51,7 @@ export function PreferencesSection({
     }
 
     return (
-        <Stack gap={24}>
+        <Stack gap="xl">
             <PreferenceTagInput
                 label="Dislikes"
                 placeholder="Add a food you avoid"

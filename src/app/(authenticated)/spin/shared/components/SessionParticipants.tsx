@@ -63,18 +63,18 @@ function ParticipantRow({
     return (
         <Group
             role="listitem"
-            gap={12}
+            gap="md"
             wrap="nowrap"
-            p={8}
-            style={{ borderRadius: 14 }}
+            p="sm"
+            style={{ borderRadius: "var(--mantine-radius-md)" }}
         >
-            <Avatar size={36} fz={12} gradient={avatarGradient(index)}>
+            <Avatar size={36} fz="xs" gradient={avatarGradient(index)}>
                 {getInitialsFromName(participant.displayName)}
             </Avatar>
 
             <Box flex={1} miw={0}>
-                <Group gap={6} wrap="nowrap">
-                    <Text fw={600} fz={14} truncate>
+                <Group gap="xs" wrap="nowrap">
+                    <Text fw={600} fz="md" truncate>
                         {participant.displayName}
                     </Text>
                     {isParticipantHost && (
@@ -86,7 +86,7 @@ function ParticipantRow({
                         />
                     )}
                 </Group>
-                <Text fz={12} c={pick ? "var(--tx2)" : "var(--tx3)"} truncate>
+                <Text fz="xs" c={pick ? "var(--tx2)" : "var(--tx3)"} truncate>
                     {pick ?? "Still choosing…"}
                 </Text>
             </Box>
@@ -96,7 +96,7 @@ function ParticipantRow({
                     w={8}
                     h={8}
                     style={{
-                        borderRadius: 999,
+                        borderRadius: "var(--mantine-radius-pill)",
                         flexShrink: 0,
                         background: pick ? "var(--ac)" : "var(--bd2)",
                     }}
@@ -109,7 +109,7 @@ function ParticipantRow({
                 <ActionIcon
                     variant="subtle"
                     size={30}
-                    radius={9}
+                    radius="xs"
                     c="var(--tx3)"
                     onClick={() => onRemove?.(participant.id)}
                     aria-label={`Remove ${participant.displayName}`}
@@ -134,37 +134,37 @@ export function SessionParticipants({
     error,
 }: SessionParticipantsProps) {
     return (
-        <Paper p={18} style={{ border: "1px solid var(--bd)" }}>
-            <Group justify="space-between" align="center" mb={12}>
-                <Text fw={700} fz={15}>
+        <Paper p="lg" style={{ border: "1px solid var(--bd)" }}>
+            <Group justify="space-between" align="center" mb="md">
+                <Text fw={700} fz="md">
                     Who&apos;s in
                 </Text>
                 {!isLoading && !error && (
-                    <Text fz={12} c="var(--tx3)">
+                    <Text fz="xs" c="var(--tx3)">
                         {participants.length} of {MAX_PARTICIPANTS}
                     </Text>
                 )}
             </Group>
 
             {isLoading ? (
-                <Stack gap={6} aria-label="Loading participants">
+                <Stack gap="xs" aria-label="Loading participants">
                     {[1, 2, 3].map((i) => (
-                        <Group key={i} gap={12} p={8} wrap="nowrap">
-                            <Skeleton h={36} w={36} radius={999} />
-                            <Skeleton h={14} w={120} radius={999} />
+                        <Group key={i} gap="md" p="sm" wrap="nowrap">
+                            <Skeleton h={36} w={36} radius="pill" />
+                            <Skeleton h={14} w={120} radius="pill" />
                         </Group>
                     ))}
                 </Stack>
             ) : error ? (
-                <Text fz={13} c="var(--ro)" py={8}>
+                <Text fz="sm" c="var(--ro)" py="sm">
                     {error}
                 </Text>
             ) : participants.length === 0 ? (
-                <Text fz={13} c="var(--tx3)" py={8}>
+                <Text fz="sm" c="var(--tx3)" py="sm">
                     No participants yet. Share the link to invite others.
                 </Text>
             ) : (
-                <Stack gap={6} role="list" aria-label="Session participants">
+                <Stack gap="xs" role="list" aria-label="Session participants">
                     {participants.map((p, i) => (
                         <ParticipantRow
                             key={p.id}

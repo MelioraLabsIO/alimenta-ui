@@ -18,22 +18,23 @@ export function SettingsGroup({
     padded?: boolean;
 }) {
     return (
-        <Stack gap={8}>
+        <Stack gap="sm">
             <Text
-                fz={11}
+                fz="xxs"
                 fw={600}
                 c="var(--tx3)"
-                pl={16}
+                pl="lg"
                 tt="uppercase"
-                lts="0.07em"
+                lts="var(--ls-wide)"
             >
                 {label}
             </Text>
             <Box
                 bg="var(--sf2)"
-                p={padded ? "14px 16px" : 0}
+                py={padded ? "md" : 0}
+                px={padded ? "lg" : 0}
                 style={{
-                    borderRadius: 18,
+                    borderRadius: "var(--mantine-radius-lg)",
                     border: "1px solid var(--bd)",
                     overflow: "hidden",
                 }}
@@ -60,16 +61,16 @@ export function SettingsRow({
 }) {
     return (
         <Group
-            gap={12}
+            gap="md"
             wrap="nowrap"
-            px={16}
+            px="lg"
             mih={minHeight}
             c={color}
             onClick={onClick}
             style={{
                 borderBottom: last ? "none" : "1px solid var(--bd)",
                 cursor: onClick ? "pointer" : undefined,
-                transition: "background 150ms",
+                transition: `background var(--motion-fast)`,
             }}
         >
             {children}

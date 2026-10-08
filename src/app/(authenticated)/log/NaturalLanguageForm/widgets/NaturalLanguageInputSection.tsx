@@ -41,22 +41,29 @@ export function NaturalLanguageInputSection({
         <Box
             p={1.5}
             style={{
-                borderRadius: 24,
+                borderRadius: "var(--mantine-radius-xl)",
                 background: "var(--gradient-accent)",
                 boxShadow: "var(--sh)",
             }}
         >
-            <Paper radius={22.5} p={22} shadow="none" withBorder={false}>
-                <Stack gap={14}>
-                    <Group gap={10} wrap="nowrap">
+            <Paper
+                style={{
+                    borderRadius: "calc(var(--mantine-radius-xl) - 1.5px)",
+                }}
+                p="xl"
+                shadow="none"
+                withBorder={false}
+            >
+                <Stack gap="md">
+                    <Group gap="sm" wrap="nowrap">
                         <ThemeIcon>
                             <Sparkles size={16} />
                         </ThemeIcon>
                         <Box miw={0}>
-                            <Text fw={700} fz={16}>
+                            <Text fw={700} fz="lg">
                                 Just tell us what you ate
                             </Text>
-                            <Text fz={12} c="var(--tx3)">
+                            <Text fz="xs" c="var(--tx3)">
                                 We&apos;ll pull out the foods and amounts.
                             </Text>
                         </Box>
@@ -73,15 +80,15 @@ export function NaturalLanguageInputSection({
                         error={error || undefined}
                         styles={{
                             input: {
-                                fontSize: 17,
-                                lineHeight: 1.5,
-                                borderRadius: 16,
-                                padding: 16,
+                                fontSize: "var(--mantine-font-size-xl)",
+                                lineHeight: "var(--mantine-line-height-lg)",
+                                borderRadius: "var(--mantine-radius-lg)",
+                                padding: "var(--mantine-spacing-lg)",
                             },
                         }}
                     />
 
-                    <Group gap={8} wrap="wrap">
+                    <Group gap="sm" wrap="wrap">
                         <Button
                             type="button"
                             onClick={onAnalyze}

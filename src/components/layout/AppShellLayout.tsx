@@ -5,9 +5,10 @@ import { AppShell, Box } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { AppHeader } from "@/components/layout/app-header";
 import { SidebarNav } from "@/components/layout/sidebar-nav";
+import { spacing } from "@/lib/mantine/tokens";
 
 const NAV_WIDTH = 220;
-const GUTTER = 12;
+const GUTTER = spacing.md;
 
 /**
  * The signed-in shell: a floating glass sidebar on the left and a main column
@@ -37,7 +38,8 @@ export function AppShellLayout({ children }: { children: ReactNode }) {
                     background: "var(--glass)",
                     border: "1px solid var(--bd)",
                     backdropFilter: "blur(24px)",
-                    padding: "16px 10px",
+                    padding:
+                        "var(--mantine-spacing-lg) var(--mantine-spacing-sm)",
                     zIndex: 200,
                 },
             }}
@@ -47,20 +49,20 @@ export function AppShellLayout({ children }: { children: ReactNode }) {
                 top={{ base: 0, md: GUTTER }}
                 left={{ base: 0, md: GUTTER }}
                 h={{ base: "100dvh", md: `calc(100dvh - ${GUTTER * 2}px)` }}
-                bdrs={{ base: 0, md: 22 }}
+                bdrs={{ base: 0, md: "xl" }}
             >
                 <SidebarNav onNavigate={close} />
             </AppShell.Navbar>
 
             <AppShell.Main>
                 <Box
-                    pt={22}
+                    pt="xl"
                     pb={36}
-                    pl={{ base: GUTTER + 4, md: 16 }}
-                    pr={{ base: GUTTER + 4, md: 18 }}
+                    pl={{ base: GUTTER + 4, md: "lg" }}
+                    pr={{ base: GUTTER + 4, md: "lg" }}
                 >
                     <AppHeader navOpened={navOpened} onToggleNav={toggle} />
-                    <Box mt={14}>{children}</Box>
+                    <Box mt="md">{children}</Box>
                 </Box>
             </AppShell.Main>
         </AppShell>

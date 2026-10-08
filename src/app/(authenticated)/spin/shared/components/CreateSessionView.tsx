@@ -8,6 +8,7 @@ import {
     Stack,
     Text,
     ThemeIcon,
+    Title,
 } from "@mantine/core";
 import { Dices, Sparkles, User, Users, Utensils } from "lucide-react";
 
@@ -30,9 +31,9 @@ export function CreateSessionView({
 }: CreateSessionViewProps) {
     return (
         <Paper
-            radius={28}
+            radius="xxl"
             py={48}
-            px={32}
+            px="xxl"
             pos="relative"
             style={{ overflow: "hidden", border: "1px solid var(--bd)" }}
         >
@@ -44,26 +45,26 @@ export function CreateSessionView({
                     top: -200,
                     left: "50%",
                     marginLeft: -260,
-                    borderRadius: 999,
+                    borderRadius: "var(--mantine-radius-pill)",
                     background:
                         "radial-gradient(circle, var(--acs), transparent 65%)",
                     pointerEvents: "none",
                 }}
             />
-            <Stack align="center" gap={14} ta="center" pos="relative">
-                <Group gap={0} pl={10} wrap="nowrap">
+            <Stack align="center" gap="md" ta="center" pos="relative">
+                <Group gap={0} pl="sm" wrap="nowrap">
                     {GHOSTS.map(({ icon: Icon, gradient }, i) => (
                         <ThemeIcon
                             key={i}
                             variant="gradient"
                             gradient={gradient}
                             size={52}
-                            radius={999}
+                            radius="pill"
                             ml={-10}
                             style={{
                                 border: "3px solid var(--sf)",
                                 animation:
-                                    "alm-in 500ms cubic-bezier(.2,.8,.2,1) both",
+                                    "alm-in 500ms var(--motion-spring) both",
                                 animationDelay: `${i * 70}ms`,
                             }}
                         >
@@ -71,20 +72,20 @@ export function CreateSessionView({
                         </ThemeIcon>
                     ))}
                 </Group>
-                <Text fz={26} fw={700} lts="-0.03em">
+                <Title order={2} fw={700} lts="var(--ls-snug)">
                     No active session
-                </Text>
-                <Text fz={14} c="var(--tx2)" maw={440} lh={1.55}>
+                </Title>
+                <Text fz="md" c="var(--tx2)" maw={440} lh="lg">
                     Start a session and share the link. Everyone adds one meal,
                     you spin, and the whole group sees the result live.
                 </Text>
                 <Button
-                    mt={6}
+                    mt="xs"
                     variant="gradient"
                     size="xl"
                     h={52}
-                    px={26}
-                    fz={16}
+                    px="xxl"
+                    fz="lg"
                     fw={700}
                     onClick={onCreateSession}
                     loading={isCreatingSession}
@@ -93,7 +94,7 @@ export function CreateSessionView({
                 >
                     Create a session
                 </Button>
-                <Text fz={12} c="var(--tx3)">
+                <Text fz="xs" c="var(--tx3)">
                     Up to 10 people · one link for everyone
                 </Text>
             </Stack>
