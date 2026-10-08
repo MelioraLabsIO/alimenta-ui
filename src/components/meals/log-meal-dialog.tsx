@@ -86,7 +86,7 @@ export function LogMealDialog({
                         )}
                     </Tabs.List>
 
-                    <Tabs.Panel value="manual" pt={18}>
+                    <Tabs.Panel value="manual" pt="lg">
                         <ManualForm
                             prefill={mealToEdit || undefined}
                             onSuccess={() => {
@@ -98,13 +98,13 @@ export function LogMealDialog({
                         />
                     </Tabs.Panel>
 
-                    <Tabs.Panel value="natural" pt={18}>
-                        <Stack gap={16}>
-                            <Group gap={8} wrap="nowrap">
-                                <ThemeIcon size={28} radius={9}>
+                    <Tabs.Panel value="natural" pt="lg">
+                        <Stack gap="lg">
+                            <Group gap="sm" wrap="nowrap">
+                                <ThemeIcon size={28} radius="xs">
                                     <Sparkles size={14} />
                                 </ThemeIcon>
-                                <Text fz={14} fw={600}>
+                                <Text fz="md" fw={600}>
                                     AI-powered parsing
                                 </Text>
                             </Group>

@@ -38,7 +38,7 @@ function NameRow({
                         height: 40,
                         textAlign: "right",
                         paddingInline: 0,
-                        fontSize: 14,
+                        fontSize: "var(--mantine-font-size-md)",
                     },
                 }}
             />
@@ -92,7 +92,7 @@ export function ProfileSection() {
     }
 
     return (
-        <Stack gap={16}>
+        <Stack gap="lg">
             <SettingsGroup label="Profile">
                 <SettingsRow minHeight={72}>
                     <Avatar size={44}>
@@ -100,7 +100,7 @@ export function ProfileSection() {
                     </Avatar>
                     <Box style={{ flex: 1 }}>
                         <Text fw={500}>Photo</Text>
-                        <Text fz={12} c="var(--tx3)">
+                        <Text fz="xs" c="var(--tx3)">
                             Shown to friends in shared spins
                         </Text>
                     </Box>
@@ -109,7 +109,7 @@ export function ProfileSection() {
                         variant="default"
                         size="xs"
                         h={32}
-                        px={14}
+                        px="md"
                         bg="var(--sf)"
                     >
                         Change
@@ -135,7 +135,7 @@ export function ProfileSection() {
             <Button
                 type="button"
                 h={40}
-                px={18}
+                px="lg"
                 style={{ alignSelf: "flex-start" }}
                 disabled={!hasModifiedProfile}
                 loading={isPending}

@@ -116,28 +116,41 @@ Mantine v9 is the component library and the **only** way UI is built or styled:
   style props (`p`, `bg`, `c`, `fz`, `fw`, `w`, `radius`, `pos`, `hiddenFrom`, responsive
   objects like `w={{ base: "100%", md: 220 }}`), the `style` prop, or `styles={{ root: {…} }}`
   for inner parts. Mantine v9 has no `sx`; these are its equivalents.
-- Tokens are CSS custom properties from `src/app/globals.css`, used as `bg="var(--sf)"`,
-  `c="var(--tx2)"`: `--bg --sf --sf2` (page / card / inset), `--tx --tx2 --tx3` (text
-  tiers), `--bd --bd2` (borders), `--ac --act --acs` (accent, ink on accent, tint),
-  `--bl --am --ro` (blue, amber, rose), `--glass`, `--sh`, `--wash`, `--gradient-accent`,
-  `--ink-on-gradient`. Tint any token with `color-mix(in srgb, var(--am) 16%, transparent)`.
-  Mantine color names: `alimenta` (primary green), `sky`, `amber`, `rose`, `gray`.
+- Reference the theme scales **by key, never by raw number**: `p="md"`, `gap="sm"`,
+  `radius="lg"`, `fz="xs"`, `lh="md"`. Keys: spacing `xxs xs sm md lg xl xxl`
+  (4/6/8/12/16/22/28), radius `xs sm md lg xl xxl pill` (8/11/14/16/24/28/999), fontSizes
+  `xxs xs sm md lg xl xxl display` (11…22/36). Inside `style={{}}` use the variables:
+  `"var(--mantine-spacing-md)"`, `"var(--mantine-radius-lg)"`, `"var(--mantine-font-size-xs)"`.
+  Component _sizes_ (`size={34}`, `h={40}`) stay numeric. A string `radius`/`size` prop
+  that is not a key becomes `var(--mantine-radius-<string>)` — put `calc()` values in
+  `style.borderRadius` instead.
+- Colors are CSS variables, used as `bg="var(--sf)"`, `c="var(--tx2)"`: `--bg --sf --sf2`
+  (page / card / inset), `--tx --tx2 --tx3` (text tiers), `--bd --bd2` (borders),
+  `--ac --act --acs` (accent, ink on accent, tint), `--bl --am --ro` (blue, amber, rose),
+  `--glass`, `--sh`, `--wash`, `--gradient-accent`, `--ink-on-gradient`. Tint any token with
+  `color-mix(in srgb, var(--am) 16%, transparent)`. Mantine color names: `alimenta`
+  (primary green), `sky`, `amber`, `rose`, `gray`. Letter-spacing/motion: `var(--ls-tight|
+snug|wide)`, `var(--motion-fast|normal|slow|spring)`.
 
 ### Where styling lives
 
-- `src/lib/mantine/theme.ts` — the global theme: palettes, radius/shadow scales, Geist type,
-  and per-component `defaultProps` / `vars` / `styles`. Button variants: `filled` (green
-  CTA with glow, default), `default` (bordered secondary), `subtle` (ghost), `surface`
-  (`--sf2` chip), `glass` (translucent round control), `gradient`, `light`; `ActionIcon`
-  defaults to a 42px glass circle; `ThemeIcon` is the 34px accent icon tile; `Card`/`Paper`
-  are the 24px-radius `--sf` cards; `Tabs` are pill tabs in a glass track. The theme
-  contains functions, so it is only imported by `src/providers/MantineThemeProvider.tsx`
-  (`"use client"`) — never from a server component.
-- `src/app/globals.css` — only tokens, the bridge from Mantine's global variables onto
-  them, and keyframes (`alm-in`, `alm-pop`, `alm-shake`, `alm-bounce`, `alm-pulse`,
-  `alm-spin`, used via `style={{ animation: … }}`). It also sets the cascade-layer order
-  `theme, base, mantine, components, utilities` and imports Mantine's `styles.layer.css`
-  files, so Mantine wins over Tailwind's preflight but loses to utilities if one is used.
+- **`src/lib/mantine/tokens.ts` is the single source of truth** — palettes, the dark/light
+  semantic colors, fonts, spacing/radius/font-size/line-height/weight scales, shadows,
+  motion, letter-spacing, control sizes. Change a value there and every screen follows.
+  Fonts are bound to `--font-sans`/`--font-mono`, set by the `next/font` loaders in
+  `src/app/layout.tsx` — swapping the typeface is those two loaders only.
+- `src/lib/mantine/theme.ts` builds the Mantine theme from the tokens (nothing visual is
+  hard-coded there) and exports `cssVariablesResolver`, which emits the `--sf`/`--tx`/…
+  variables per color scheme and rebinds Mantine's own globals to them. Button variants:
+  `filled` (green CTA with glow, default), `default` (bordered secondary), `subtle`
+  (ghost), `surface` (`--sf2` chip), `glass` (translucent round control), `gradient`,
+  `light`; `ActionIcon` defaults to a 42px glass circle; `ThemeIcon` is the 34px accent
+  icon tile; `Card`/`Paper` are the 24px-radius `--sf` cards; `Tabs` are pill tabs in a
+  glass track. The theme contains functions, so it is only imported by
+  `src/providers/MantineThemeProvider.tsx` (`"use client"`) — never from a server component.
+- `src/app/globals.css` — only the cascade-layer order (`theme, base, mantine, components,
+utilities`, with Mantine's `styles.layer.css` imports) and keyframes (`alm-in`, `alm-pop`,
+  `alm-shake`, `alm-bounce`, `alm-pulse`, `alm-spin`, used via `style={{ animation: … }}`).
 - App shell: `src/components/layout/AppShellLayout.tsx` (Mantine `AppShell`, floating glass
   navbar), `sidebar-nav.tsx` (`NavLink`s), `app-header/AppHeader.tsx`. The header renders
   each route's kicker + title from `src/lib/page-headings.ts` — **pages do not render

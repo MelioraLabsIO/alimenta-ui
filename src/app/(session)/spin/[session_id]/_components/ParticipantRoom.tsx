@@ -264,22 +264,22 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
     const showEntryForm = !sessionLocked && (!myPick || editingPick);
 
     return (
-        <Stack gap={16}>
+        <Stack gap="lg">
             {/* Guests get no app chrome — the (session) layout is a bare
                 <main> — so the room carries its own brand row. */}
-            <Group gap={10} align="center" wrap="nowrap">
+            <Group gap="sm" align="center" wrap="nowrap">
                 <Brand />
                 <Group
                     ml="auto"
-                    gap={8}
+                    gap="sm"
                     align="center"
                     wrap="nowrap"
                     h={36}
-                    px={5}
-                    fz={13}
+                    px="xs"
+                    fz="sm"
                     bg="var(--glass)"
                     style={{
-                        borderRadius: 999,
+                        borderRadius: "var(--mantine-radius-pill)",
                         border: "1px solid var(--bd)",
                         backdropFilter: "blur(20px)",
                         whiteSpace: "nowrap",
@@ -287,14 +287,14 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
                 >
                     <Avatar
                         size={26}
-                        fz={11}
+                        fz="xxs"
                         gradient={avatarGradient(
                             participantIndex === -1 ? 1 : participantIndex
                         )}
                     >
                         {getInitialsFromName(participant.displayName)}
                     </Avatar>
-                    <Text fz={13} visibleFrom="xs">
+                    <Text fz="sm" visibleFrom="xs">
                         Joined as{" "}
                         <Text component="span" fw={700}>
                             {participant.displayName}
@@ -304,7 +304,7 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
                         variant="surface"
                         size="xs"
                         h={26}
-                        px={10}
+                        px="sm"
                         c="var(--tx2)"
                         onClick={() => setLeaveDialogOpen(true)}
                         aria-label="Leave session"
@@ -315,26 +315,26 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
             </Group>
 
             <Box>
-                <Text fz={13} c="var(--tx2)">
+                <Text fz="sm" c="var(--tx2)">
                     Shared session · hosted by {hostName}
                 </Text>
-                <Title order={1} fz={32} mt={2}>
+                <Title order={1} mt="xxs">
                     {heading}
                 </Title>
             </Box>
 
             {sessionLocked && (
                 <Paper
-                    radius={18}
-                    px={18}
-                    py={14}
+                    radius="lg"
+                    px="lg"
+                    py="md"
                     shadow="none"
                     bg="var(--acs)"
                     style={{
                         border: "1px solid color-mix(in srgb, var(--ac) 35%, transparent)",
                     }}
                 >
-                    <Group gap={12} align="center" wrap="nowrap">
+                    <Group gap="md" align="center" wrap="nowrap">
                         <PartyPopper
                             size={18}
                             color="var(--ac)"
@@ -347,7 +347,7 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
                                     ? `${displayWinner.displayName}'s pick, ${displayWinner.foodName}, won the spin.`
                                     : "A winner has been picked."}
                             </Text>
-                            <Text component="span" c="var(--tx2)" ml={6}>
+                            <Text component="span" c="var(--tx2)" ml="xs">
                                 This session is now read-only.
                             </Text>
                         </Box>
@@ -355,7 +355,7 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
                 </Paper>
             )}
 
-            <Flex wrap="wrap" gap={12} align="flex-start">
+            <Flex wrap="wrap" gap="md" align="flex-start">
                 <Box style={{ flex: "7 1 420px", minWidth: 0 }}>
                     <WheelCard>
                         {hasEntries ? (
@@ -376,21 +376,23 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
                         )}
 
                         <Group
-                            gap={12}
+                            gap="md"
                             align="center"
                             wrap="nowrap"
                             h={52}
-                            px={22}
+                            px="xl"
                             bg="var(--sf2)"
                             c="var(--tx2)"
                             fw={600}
-                            fz={14}
+                            fz="md"
                             maw="100%"
-                            style={{ borderRadius: 999 }}
+                            style={{
+                                borderRadius: "var(--mantine-radius-pill)",
+                            }}
                             aria-label={spinDisabledReason}
                         >
                             {!sessionLocked && (
-                                <Group gap={4} wrap="nowrap">
+                                <Group gap="xxs" wrap="nowrap">
                                     {[0, 150, 300].map((delay) => (
                                         <Box
                                             key={delay}
@@ -398,7 +400,8 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
                                             h={7}
                                             bg="var(--ac)"
                                             style={{
-                                                borderRadius: 999,
+                                                borderRadius:
+                                                    "var(--mantine-radius-pill)",
                                                 animation:
                                                     "alm-bounce 1.2s ease-in-out infinite",
                                                 animationDelay: `${delay}ms`,
@@ -407,7 +410,7 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
                                     ))}
                                 </Group>
                             )}
-                            <Text fz={14} fw={600} truncate>
+                            <Text fz="md" fw={600} truncate>
                                 {sessionLocked
                                     ? "This session is complete"
                                     : `${hostName} will spin once everyone's in`}
@@ -416,28 +419,35 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
                     </WheelCard>
                 </Box>
 
-                <Stack gap={12} style={{ flex: "5 1 320px", minWidth: 0 }}>
+                <Stack gap="md" style={{ flex: "5 1 320px", minWidth: 0 }}>
                     <Box
                         p={1.5}
                         style={{
-                            borderRadius: 24,
+                            borderRadius: "var(--mantine-radius-xl)",
                             background: "var(--gradient-accent)",
                             boxShadow: "var(--sh)",
                         }}
                     >
-                        <Paper radius={22.5} p={18} shadow="none">
-                            <Group gap={14} align="center" wrap="nowrap">
-                                <ThemeIcon size={44} radius={14}>
+                        <Paper
+                            p="lg"
+                            shadow="none"
+                            style={{
+                                borderRadius:
+                                    "calc(var(--mantine-radius-xl) - 1.5px)",
+                            }}
+                        >
+                            <Group gap="md" align="center" wrap="nowrap">
+                                <ThemeIcon size={44} radius="md">
                                     <Utensils size={19} />
                                 </ThemeIcon>
                                 <Box flex={1} miw={0}>
-                                    <Text fz={12} c="var(--tx3)">
+                                    <Text fz="xs" c="var(--tx3)">
                                         Your pick
                                     </Text>
                                     <Text
                                         fw={700}
-                                        fz={18}
-                                        lts="-0.02em"
+                                        fz="xl"
+                                        lts="var(--ls-snug)"
                                         c={myPick ? undefined : "var(--tx3)"}
                                         truncate
                                     >
@@ -449,7 +459,7 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
                                         variant="default"
                                         size="xs"
                                         h={34}
-                                        px={14}
+                                        px="md"
                                         onClick={() =>
                                             setEditingPick((v) => !v)
                                         }
@@ -495,12 +505,12 @@ export function ParticipantRoom({ session, participant, onLeftAction }: Props) {
                 title="Leave this session?"
                 size={420}
             >
-                <Text fz={14} c="var(--tx2)">
+                <Text fz="md" c="var(--tx2)">
                     You&apos;ll be removed from the session and your food
                     choice, if any, will be cleared. You can rejoin later with
                     the same join link.
                 </Text>
-                <Group justify="flex-end" gap={8} mt={24}>
+                <Group justify="flex-end" gap="sm" mt="xl">
                     <Button
                         variant="default"
                         onClick={() => setLeaveDialogOpen(false)}

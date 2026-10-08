@@ -17,13 +17,16 @@ function Chip({
         <UnstyledButton
             type="button"
             onClick={onClick}
-            px={10}
+            px="sm"
             bg={tint(token)}
             c={token}
             fz="inherit"
             fw="inherit"
             lh="inherit"
-            style={{ borderRadius: 10, letterSpacing: "inherit" }}
+            style={{
+                borderRadius: "var(--mantine-radius-sm)",
+                letterSpacing: "inherit",
+            }}
         >
             {children}
         </UnstyledButton>
@@ -58,23 +61,23 @@ export function FoodProfileSummary({
 
     return (
         <Box
-            p="20px 22px"
+            p="xl"
             style={{
-                borderRadius: 20,
+                borderRadius: "var(--mantine-radius-xl)",
                 background: "color-mix(in srgb, var(--sf2) 60%, transparent)",
                 border: "1px solid var(--bd)",
             }}
         >
-            <Group gap={8} wrap="nowrap" c="var(--tx3)" fz={12} mb={10}>
+            <Group gap="sm" wrap="nowrap" c="var(--tx3)" fz="xs" mb="sm">
                 <Sparkles size={14} color="var(--ac)" />
                 Your food profile · tap to change
             </Group>
             <Text
-                fz={22}
-                lh={1.65}
+                fz="xxl"
+                lh="xl"
                 fw={500}
                 c="var(--tx2)"
-                style={{ letterSpacing: "-0.02em", textWrap: "pretty" }}
+                style={{ letterSpacing: "var(--ls-snug)", textWrap: "pretty" }}
             >
                 I want to{" "}
                 <Chip token="var(--ac)" onClick={onCycleGoal}>

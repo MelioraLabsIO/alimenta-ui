@@ -23,12 +23,12 @@ export function BulkDeleteConfirmDialog({
             size={420}
             title={`Delete ${noun}?`}
         >
-            <Stack gap={18}>
-                <Group gap={14} wrap="nowrap" align="flex-start">
-                    <ThemeIcon color="rose" size={44} radius={14}>
+            <Stack gap="lg">
+                <Group gap="md" wrap="nowrap" align="flex-start">
+                    <ThemeIcon color="rose" size={44} radius="md">
                         <Trash2 size={18} />
                     </ThemeIcon>
-                    <Text fz={14} c="var(--tx2)" lh={1.5}>
+                    <Text fz="md" c="var(--tx2)" lh="lg">
                         You are about to permanently delete{" "}
                         <Text component="span" fw={700} c="var(--tx)">
                             {noun}
@@ -39,7 +39,7 @@ export function BulkDeleteConfirmDialog({
                     </Text>
                 </Group>
 
-                <Group gap={8} justify="flex-end">
+                <Group gap="sm" justify="flex-end">
                     <Button
                         variant="default"
                         size="sm"

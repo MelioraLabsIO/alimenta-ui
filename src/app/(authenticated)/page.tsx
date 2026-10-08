@@ -93,36 +93,36 @@ function MealRow({
 
     return (
         <Box
-            p={12}
+            p="md"
             style={{
-                borderRadius: 16,
+                borderRadius: "var(--mantine-radius-lg)",
                 border: "1px solid var(--bd2)",
                 background: "var(--sf)",
             }}
         >
-            <Group gap={12} wrap="nowrap">
-                <ThemeIcon size={40} radius={13} color={meta.color}>
+            <Group gap="md" wrap="nowrap">
+                <ThemeIcon size={40} radius="md" color={meta.color}>
                     <Icon size={17} />
                 </ThemeIcon>
                 <Box flex={1} miw={0}>
-                    <Text fz={12} c="var(--tx3)" truncate="end">
+                    <Text fz="xs" c="var(--tx3)" truncate="end">
                         {meta.label}
                         {time ? ` · ${time}` : ""}
                     </Text>
-                    <Text fw={600} mt={2} truncate="end">
+                    <Text fw={600} mt="xxs" truncate="end">
                         {meal.title}
                     </Text>
                 </Box>
                 {kcal && (
                     <Text
-                        fz={13}
+                        fz="sm"
                         c="var(--tx2)"
                         style={{ ...TABULAR, whiteSpace: "nowrap" }}
                     >
                         {kcal}
                     </Text>
                 )}
-                <Group gap={2} wrap="nowrap">
+                <Group gap="xxs" wrap="nowrap">
                     <Tooltip label="View in history">
                         <ActionIcon
                             component={Link}
@@ -177,32 +177,32 @@ function StatTile({
     const Icon = icon;
     return (
         <Paper
-            radius={16}
-            p={12}
+            radius="lg"
+            p="md"
             bg="var(--sf2)"
             shadow="none"
             withBorder={false}
             miw={0}
         >
-            <Group gap={6} wrap="nowrap">
-                <ThemeIcon size={22} radius={7} color={color}>
+            <Group gap="xs" wrap="nowrap">
+                <ThemeIcon size={22} radius="xs" color={color}>
                     <Icon size={12} />
                 </ThemeIcon>
-                <Text fz={11} c="var(--tx3)" truncate="end">
+                <Text fz="xxs" c="var(--tx3)" truncate="end">
                     {label}
                 </Text>
             </Group>
             <Text
-                fz={18}
+                fz="xl"
                 fw={700}
-                lh={1.1}
-                mt={8}
+                lh="xs"
+                mt="sm"
                 truncate="end"
-                style={{ letterSpacing: "-0.02em", ...TABULAR }}
+                style={{ letterSpacing: "var(--ls-snug)", ...TABULAR }}
             >
                 {value}
             </Text>
-            <Text fz={11} c="var(--tx3)" mt={2} truncate="end" mih={16}>
+            <Text fz="xxs" c="var(--tx3)" mt="xxs" truncate="end" mih={16}>
                 {sub ?? ""}
             </Text>
         </Paper>
@@ -289,7 +289,7 @@ export default function DashboardPage() {
     }
 
     return (
-        <Flex wrap="wrap" gap={12} maw={1152} mx="auto">
+        <Flex wrap="wrap" gap="md" maw={1152} mx="auto">
             {/* ---------------------------------------------------- Today */}
             <Card
                 style={{
@@ -300,36 +300,39 @@ export default function DashboardPage() {
                 }}
             >
                 <Group justify="space-between" align="center">
-                    <Text fw={700} fz={17} lts="-0.01em">
+                    <Text fw={700} fz="xl" lts="-0.01em">
                         Today
                     </Text>
-                    <Text fz={12} c="var(--tx3)">
+                    <Text fz="xs" c="var(--tx3)">
                         {todayMeals.length} of 3 meals
                     </Text>
                 </Group>
 
-                <Box mt={20} mb={22}>
+                <Box mt="xl" mb="xl">
                     <MacrosChart data={weeklyMacros} label="This week">
                         <Box>
                             <Text
-                                fz={36}
+                                fz="display"
                                 fw={700}
                                 lh={1}
-                                style={{ letterSpacing: "-0.04em", ...TABULAR }}
+                                style={{
+                                    letterSpacing: "var(--ls-snug)",
+                                    ...TABULAR,
+                                }}
                             >
                                 {todayCalories.toLocaleString()}
                                 <Text
                                     component="span"
-                                    fz={14}
+                                    fz="md"
                                     fw={500}
                                     c="var(--tx3)"
-                                    ml={5}
+                                    ml="xs"
                                     style={{ letterSpacing: 0 }}
                                 >
                                     kcal
                                 </Text>
                             </Text>
-                            <Text fz={12} c="var(--tx3)" mt={6}>
+                            <Text fz="xs" c="var(--tx3)" mt="xs">
                                 vs.{" "}
                                 {avgCalories
                                     ? avgCalories.toLocaleString()
@@ -340,7 +343,7 @@ export default function DashboardPage() {
                     </MacrosChart>
                 </Box>
 
-                <SimpleGrid cols={3} spacing={8}>
+                <SimpleGrid cols={3} spacing="sm">
                     <StatTile
                         icon={Utensils}
                         color="alimenta"
@@ -368,15 +371,15 @@ export default function DashboardPage() {
                     />
                 </SimpleGrid>
 
-                <Stack gap={8} mt={22} flex={1}>
+                <Stack gap="sm" mt="xl" flex={1}>
                     <Group justify="space-between" align="baseline">
-                        <Text fz={12} fw={600} c="var(--tx3)">
+                        <Text fz="xs" fw={600} c="var(--tx3)">
                             Recent meals
                         </Text>
                         <Anchor
                             component={Link}
                             href="/history"
-                            fz={12}
+                            fz="xs"
                             fw={600}
                             c="var(--ac)"
                         >
@@ -386,7 +389,7 @@ export default function DashboardPage() {
 
                     {recentMealsPending
                         ? [0, 1, 2].map((i) => (
-                              <Skeleton key={i} h={66} radius={16} />
+                              <Skeleton key={i} h={66} radius="lg" />
                           ))
                         : recentMeals.map((meal) => (
                               <MealRow
@@ -401,18 +404,17 @@ export default function DashboardPage() {
                             <UnstyledButton
                                 onClick={open}
                                 w="100%"
-                                p={12}
+                                p="md"
                                 style={{
-                                    borderRadius: 16,
+                                    borderRadius: "var(--mantine-radius-lg)",
                                     border: "1px dashed var(--bd2)",
-                                    transition:
-                                        "transform 160ms, background 160ms",
+                                    transition: `transform var(--motion-normal), background var(--motion-normal)`,
                                 }}
                             >
-                                <Group gap={12} wrap="nowrap">
+                                <Group gap="md" wrap="nowrap">
                                     <ThemeIcon
                                         size={40}
-                                        radius={13}
+                                        radius="md"
                                         color="gray"
                                         style={{
                                             backgroundColor: "var(--sf2)",
@@ -422,12 +424,12 @@ export default function DashboardPage() {
                                         <Plus size={17} />
                                     </ThemeIcon>
                                     <Box flex={1} miw={0}>
-                                        <Text fz={12} c="var(--tx3)">
+                                        <Text fz="xs" c="var(--tx3)">
                                             {recentMeals.length
                                                 ? "Next meal · not logged yet"
                                                 : "Nothing logged yet"}
                                         </Text>
-                                        <Text fw={600} mt={2} c="var(--tx2)">
+                                        <Text fw={600} mt="xxs" c="var(--tx2)">
                                             {recentMeals.length
                                                 ? "Add a meal"
                                                 : "Log your first meal"}
@@ -441,7 +443,7 @@ export default function DashboardPage() {
             </Card>
 
             {/* ------------------------------------------------ Right column */}
-            <Stack gap={12} style={{ flex: "7 1 440px", minWidth: 0 }}>
+            <Stack gap="md" style={{ flex: "7 1 440px", minWidth: 0 }}>
                 <Card
                     style={{
                         flex: 1,
@@ -451,21 +453,21 @@ export default function DashboardPage() {
                     }}
                 >
                     <Group justify="space-between" align="baseline">
-                        <Text fw={700} fz={17} lts="-0.01em">
+                        <Text fw={700} fz="xl" lts="-0.01em">
                             This week
                         </Text>
-                        <Text fz={12} c="var(--tx3)" style={TABULAR}>
+                        <Text fz="xs" c="var(--tx3)" style={TABULAR}>
                             {weekTotal.toLocaleString()} kcal total
                         </Text>
                     </Group>
-                    <Box mt={18} flex={1}>
+                    <Box mt="lg" flex={1}>
                         <CaloriesChart data={weeklyCalories} />
                     </Box>
                 </Card>
 
-                <Flex wrap="wrap" gap={12}>
+                <Flex wrap="wrap" gap="md">
                     <Card
-                        p={20}
+                        p="xl"
                         style={{
                             flex: "4 1 260px",
                             minWidth: 0,
@@ -474,10 +476,10 @@ export default function DashboardPage() {
                             flexDirection: "column",
                         }}
                     >
-                        <Text fw={700} fz={16}>
+                        <Text fw={700} fz="lg">
                             Mood by meal
                         </Text>
-                        <Text fz={12} c="var(--tx3)" mt={2}>
+                        <Text fz="xs" c="var(--tx3)" mt="xxs">
                             Stronger green means a better mood
                         </Text>
                         <MoodScatterChart data={moodData} />
@@ -488,7 +490,7 @@ export default function DashboardPage() {
                         style={{
                             flex: "3 1 220px",
                             minWidth: 0,
-                            borderRadius: 24,
+                            borderRadius: "var(--mantine-radius-xl)",
                             background: "var(--gradient-accent)",
                             boxShadow: "var(--sh)",
                         }}
@@ -498,25 +500,26 @@ export default function DashboardPage() {
                             href="/insights"
                             w="100%"
                             h="100%"
-                            p={20}
+                            p="xl"
                             style={{
-                                borderRadius: 23,
+                                borderRadius:
+                                    "calc(var(--mantine-radius-xl) - 1px)",
                                 background: "var(--sf)",
                                 display: "flex",
                                 flexDirection: "column",
-                                gap: 12,
+                                gap: "var(--mantine-spacing-md)",
                             }}
                         >
                             <ThemeIcon>
                                 <Sparkles size={16} />
                             </ThemeIcon>
-                            <Text fz={12} fw={600} c="var(--tx3)">
+                            <Text fz="xs" fw={600} c="var(--tx3)">
                                 Weekly insight
                             </Text>
                             <Text
                                 fw={700}
-                                fz={16}
-                                lh={1.3}
+                                fz="lg"
+                                lh="sm"
                                 style={{
                                     letterSpacing: "-0.015em",
                                     textWrap: "pretty",
@@ -527,12 +530,12 @@ export default function DashboardPage() {
                                 your Salmon & Roasted Veggies and Oatmeal with
                                 Banana.
                             </Text>
-                            <Text fz={12} c="var(--tx2)" lh={1.5}>
+                            <Text fz="xs" c="var(--tx2)" lh="lg">
                                 Consider making these a regular part of your
                                 routine.
                             </Text>
-                            <Group gap={4} mt="auto" wrap="nowrap">
-                                <Text fz={12} fw={600} c="var(--ac)">
+                            <Group gap="xxs" mt="auto" wrap="nowrap">
+                                <Text fz="xs" fw={600} c="var(--ac)">
                                     See insights
                                 </Text>
                                 <ArrowRight size={13} color="var(--ac)" />

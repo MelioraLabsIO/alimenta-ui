@@ -74,25 +74,25 @@ export function JoinSpinSessionForm({
 
     return (
         <Paper
-            radius={28}
-            pt={32}
-            px={28}
-            pb={28}
+            radius="xxl"
+            pt="xxl"
+            px="xxl"
+            pb="xxl"
             style={{
                 border: "1px solid var(--bd)",
-                animation: "alm-in 500ms cubic-bezier(.2,.8,.2,1)",
+                animation: "alm-in 500ms var(--motion-spring)",
             }}
         >
-            <Stack gap={20}>
-                <Group gap={12} wrap="nowrap">
-                    <ThemeIcon variant="gradient" size={40} radius={13}>
+            <Stack gap="xl">
+                <Group gap="md" wrap="nowrap">
+                    <ThemeIcon variant="gradient" size={40} radius="md">
                         <Dices size={19} />
                     </ThemeIcon>
                     <Box miw={0}>
-                        <Text fz={20} fw={700} lts="-0.025em">
+                        <Text fz="xxl" fw={700} lts="var(--ls-snug)">
                             Join this session
                         </Text>
-                        <Text fz={13} c="var(--tx2)">
+                        <Text fz="sm" c="var(--tx2)">
                             {participantCount === 0
                                 ? "Be the first one in."
                                 : `${participantCount} ${
@@ -105,17 +105,17 @@ export function JoinSpinSessionForm({
                 </Group>
 
                 {currentUser ? (
-                    <Stack gap={12}>
-                        <Paper radius={16} p={12} bg="var(--sf2)" shadow="none">
-                            <Group gap={12} wrap="nowrap">
-                                <Avatar size={36} fz={12}>
+                    <Stack gap="md">
+                        <Paper radius="lg" p="md" bg="var(--sf2)" shadow="none">
+                            <Group gap="md" wrap="nowrap">
+                                <Avatar size={36} fz="xs">
                                     {getProfileInitials(currentUser)}
                                 </Avatar>
                                 <Box miw={0}>
-                                    <Text fz={12} c="var(--tx3)">
+                                    <Text fz="xs" c="var(--tx3)">
                                         Joining as
                                     </Text>
-                                    <Text fz={14} fw={600} truncate>
+                                    <Text fz="md" fw={600} truncate>
                                         {currentUser.displayName}
                                     </Text>
                                 </Box>
@@ -124,7 +124,7 @@ export function JoinSpinSessionForm({
 
                         <Button
                             size="lg"
-                            radius={16}
+                            radius="lg"
                             fullWidth
                             fw={700}
                             loading={isPending}

@@ -13,6 +13,7 @@ import {
     Stack,
     Text,
     ThemeIcon,
+    Title,
 } from "@mantine/core";
 import { Link2Off, PartyPopper } from "lucide-react";
 import { JoinSpinSessionForm } from "./JoinSpinSessionForm";
@@ -31,8 +32,8 @@ import { Brand } from "@/components/layout/Brand";
 /** Full-height centering for the single-panel states (loading, join, dead link). */
 function CenteredScreen({ children }: { children: ReactNode }) {
     return (
-        <Center mih="100dvh" p={24}>
-            <Stack w="100%" maw={460} gap={20} align="center">
+        <Center mih="100dvh" p="xl">
+            <Stack w="100%" maw={460} gap="xl" align="center">
                 {children}
             </Stack>
         </Center>
@@ -60,36 +61,45 @@ function NoticePanel({
     return (
         <Paper
             w="100%"
-            radius={28}
+            radius="xxl"
             pt={40}
-            px={32}
-            pb={32}
+            px="xxl"
+            pb="xxl"
             style={{
                 border: "1px solid var(--bd)",
-                animation: "alm-in 500ms cubic-bezier(.2,.8,.2,1)",
+                animation: "alm-in 500ms var(--motion-spring)",
             }}
         >
-            <Stack align="center" gap={14} ta="center">
+            <Stack align="center" gap="md" ta="center">
                 <ThemeIcon
                     variant="gradient"
                     gradient={gradient}
                     size={80}
-                    radius={24}
-                    style={{ boxShadow: shadow, color: "#fff" }}
+                    radius="xl"
+                    style={{
+                        boxShadow: shadow,
+                        color: "var(--mantine-color-white)",
+                    }}
                 >
                     {icon}
                 </ThemeIcon>
-                <Text fz={26} fw={700} lts="-0.035em" lh={1.15} mt={4}>
+                <Title
+                    order={2}
+                    fw={700}
+                    lts="var(--ls-tight)"
+                    lh="xs"
+                    mt="xxs"
+                >
                     {title}
-                </Text>
-                <Text fz={14} c="var(--tx2)" lh={1.55}>
+                </Title>
+                <Text fz="md" c="var(--tx2)" lh="lg">
                     {body}
                 </Text>
-                <Stack w="100%" gap={8} mt={8}>
+                <Stack w="100%" gap="sm" mt="sm">
                     {children}
                 </Stack>
                 {caption && (
-                    <Text fz={12} c="var(--tx3)">
+                    <Text fz="xs" c="var(--tx3)">
                         {caption}
                     </Text>
                 )}
@@ -101,9 +111,9 @@ function NoticePanel({
 function LoadingScreen({ label }: { label: string }) {
     return (
         <CenteredScreen>
-            <Stack align="center" gap={12} py={96} role="status">
+            <Stack align="center" gap="md" py={96} role="status">
                 <Loader />
-                <Text fz={13} c="var(--tx2)">
+                <Text fz="sm" c="var(--tx2)">
                     {label}
                 </Text>
             </Stack>
@@ -187,7 +197,7 @@ export function SharedSessionView() {
                         component={Link}
                         href={routes.home()}
                         h={48}
-                        radius={16}
+                        radius="lg"
                         fullWidth
                         fw={700}
                     >
@@ -198,7 +208,7 @@ export function SharedSessionView() {
                         href={routes.spinShared()}
                         variant="default"
                         h={48}
-                        radius={16}
+                        radius="lg"
                         fullWidth
                     >
                         Start my own session
@@ -229,7 +239,7 @@ export function SharedSessionView() {
                 <NoticePanel
                     icon={<PartyPopper size={34} aria-hidden="true" />}
                     gradient={{ from: "alimenta", to: "sky", deg: 135 }}
-                    shadow="0 16px 40px rgba(59,214,146,0.35)"
+                    shadow="0 16px 40px color-mix(in srgb, var(--ac) 35%, transparent)"
                     title="This session has already finished"
                     body="The wheel has been spun and a winner picked, so the session is closed to new participants."
                 >
@@ -237,7 +247,7 @@ export function SharedSessionView() {
                         component={Link}
                         href={routes.home()}
                         h={48}
-                        radius={16}
+                        radius="lg"
                         fullWidth
                         fw={700}
                     >
@@ -248,7 +258,7 @@ export function SharedSessionView() {
                         href={routes.spinShared()}
                         variant="default"
                         h={48}
-                        radius={16}
+                        radius="lg"
                         fullWidth
                     >
                         Start my own session
@@ -282,7 +292,7 @@ export function SharedSessionView() {
      * Account capabilities can be enabled based on `user`.
      */
     return (
-        <Box maw={1040} mx="auto" pt={20} px={24} pb={40}>
+        <Box maw={1040} mx="auto" pt="xl" px="xl" pb={40}>
             <ParticipantRoom
                 session={session}
                 participant={resolvedParticipant}

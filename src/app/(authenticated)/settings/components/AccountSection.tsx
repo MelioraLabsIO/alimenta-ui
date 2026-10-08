@@ -16,7 +16,7 @@ export function AccountSection() {
                 <Text fw={500} style={{ flex: 1 }}>
                     Email
                 </Text>
-                <Text fz={13} c="var(--tx2)">
+                <Text fz="sm" c="var(--tx2)">
                     {profile?.email ?? "—"}
                 </Text>
             </SettingsRow>

@@ -10,6 +10,7 @@ import {
     PasswordInput,
     Stack,
     Text,
+    Title,
 } from "@mantine/core";
 import { Brand } from "@/components/layout/Brand";
 import { toast } from "@/lib/notifications";
@@ -73,39 +74,31 @@ export default function ResetPasswordPage() {
                 backgroundAttachment: "fixed",
             }}
         >
-            <Center mih="100dvh" p={24}>
-                <Stack align="center" gap={22} w="100%" maw={460}>
+            <Center mih="100dvh" p="xl">
+                <Stack align="center" gap="xl" w="100%" maw={460}>
                     <Brand />
 
                     <Paper
-                        radius={28}
-                        p={32}
+                        radius="xxl"
+                        p="xxl"
                         pt={36}
                         w="100%"
                         withBorder
                         style={{
-                            animation:
-                                "alm-in 500ms cubic-bezier(.2,.8,.2,1) both",
+                            animation: "alm-in 500ms var(--motion-spring) both",
                         }}
                     >
                         <Box component="form" onSubmit={handleSubmit}>
-                            <Stack gap={20}>
-                                <Stack gap={8}>
-                                    <Text
-                                        fz={26}
-                                        fw={700}
-                                        lh={1.15}
-                                        style={{ letterSpacing: "-0.035em" }}
-                                    >
-                                        Set a new password
-                                    </Text>
-                                    <Text fz={14} c="var(--tx2)" lh={1.55}>
+                            <Stack gap="xl">
+                                <Stack gap="sm">
+                                    <Title order={2}>Set a new password</Title>
+                                    <Text fz="md" c="var(--tx2)" lh="lg">
                                         Enter your new password below. It needs
                                         at least 6 characters.
                                     </Text>
                                 </Stack>
 
-                                <Stack gap={14}>
+                                <Stack gap="md">
                                     <PasswordInput
                                         id="password"
                                         name="password"

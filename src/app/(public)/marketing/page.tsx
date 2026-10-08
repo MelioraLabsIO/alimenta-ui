@@ -50,8 +50,8 @@ export default function LandingPage() {
                 backgroundAttachment: "fixed",
             }}
         >
-            <Container size={1100} px={{ base: 16, md: 24 }} py={20}>
-                <Stack gap={28}>
+            <Container size={1100} px={{ base: "lg", md: "xl" }} py="xl">
+                <Stack gap="xxl">
                     {/* Nav */}
                     <Group
                         component="nav"
@@ -68,19 +68,18 @@ export default function LandingPage() {
                     {/* Hero */}
                     <Paper
                         component="section"
-                        radius={28}
-                        px={{ base: 24, md: 48 }}
+                        radius="xxl"
+                        px={{ base: "xl", md: 48 }}
                         py={{ base: 56, md: 88 }}
                         shadow="none"
                         withBorder={false}
-                        c="#fff"
+                        c="white"
                         style={{
                             background:
                                 "linear-gradient(120deg, color-mix(in srgb, var(--ac) 88%, #000), color-mix(in srgb, var(--bl) 80%, #000))",
                             position: "relative",
                             overflow: "hidden",
-                            animation:
-                                "alm-in 500ms cubic-bezier(.2,.8,.2,1) both",
+                            animation: "alm-in 500ms var(--motion-spring) both",
                         }}
                     >
                         <Box
@@ -90,7 +89,7 @@ export default function LandingPage() {
                             w={320}
                             h={320}
                             style={{
-                                borderRadius: 999,
+                                borderRadius: "var(--mantine-radius-pill)",
                                 background: "rgba(255,255,255,0.12)",
                                 pointerEvents: "none",
                             }}
@@ -102,7 +101,7 @@ export default function LandingPage() {
                             w={360}
                             h={360}
                             style={{
-                                borderRadius: 999,
+                                borderRadius: "var(--mantine-radius-pill)",
                                 background: "rgba(255,255,255,0.08)",
                                 pointerEvents: "none",
                             }}
@@ -111,14 +110,14 @@ export default function LandingPage() {
                         <Stack
                             align="center"
                             ta="center"
-                            gap={20}
+                            gap="xl"
                             pos="relative"
                             maw={760}
                             mx="auto"
                         >
                             <Badge
                                 variant="outline"
-                                c="#fff"
+                                c="white"
                                 style={{
                                     borderColor: "rgba(255,255,255,0.4)",
                                     background: "rgba(255,255,255,0.14)",
@@ -129,10 +128,10 @@ export default function LandingPage() {
 
                             <Title
                                 order={1}
-                                fz={{ base: 42, md: 68 }}
+                                fz={{ base: "display", md: 68 }}
                                 fw={700}
                                 lh={1.05}
-                                style={{ letterSpacing: "-0.04em" }}
+                                style={{ letterSpacing: "var(--ls-snug)" }}
                             >
                                 Eat well.{" "}
                                 <Text span inherit c="rgba(255,255,255,0.78)">
@@ -141,8 +140,8 @@ export default function LandingPage() {
                             </Title>
 
                             <Text
-                                fz={{ base: 16, md: 19 }}
-                                lh={1.55}
+                                fz={{ base: "lg", md: 19 }}
+                                lh="lg"
                                 maw={620}
                                 style={{ opacity: 0.88 }}
                             >
@@ -152,12 +151,12 @@ export default function LandingPage() {
                                 build a diet that actually works for you.
                             </Text>
 
-                            <Group gap={10} justify="center">
+                            <Group gap="sm" justify="center">
                                 <Button
                                     component={Link}
                                     href="/login"
                                     size="lg"
-                                    bg="#fff"
+                                    bg="white"
                                     c="var(--ink-on-gradient)"
                                     rightSection={<ArrowRight size={16} />}
                                     style={{
@@ -170,7 +169,7 @@ export default function LandingPage() {
                                 <Button
                                     size="lg"
                                     variant="default"
-                                    c="#fff"
+                                    c="white"
                                     style={{
                                         borderColor: "rgba(255,255,255,0.45)",
                                     }}
@@ -185,7 +184,7 @@ export default function LandingPage() {
                     <SimpleGrid
                         component="section"
                         cols={{ base: 1, md: 3 }}
-                        spacing={12}
+                        spacing="md"
                     >
                         {FEATURES.map((feature) => {
                             const Icon = feature.icon;
@@ -193,22 +192,22 @@ export default function LandingPage() {
                             return (
                                 <Paper
                                     key={feature.title}
-                                    radius={24}
-                                    p={22}
+                                    radius="xl"
+                                    p="xl"
                                     withBorder
                                 >
-                                    <Stack gap={12}>
+                                    <Stack gap="md">
                                         <ThemeIcon
                                             size={40}
-                                            radius={13}
+                                            radius="md"
                                             color={feature.color}
                                         >
                                             <Icon size={19} />
                                         </ThemeIcon>
-                                        <Text fw={700} fz={16}>
+                                        <Text fw={700} fz="lg">
                                             {feature.title}
                                         </Text>
-                                        <Text fz={14} c="var(--tx2)" lh={1.5}>
+                                        <Text fz="md" c="var(--tx2)" lh="lg">
                                             {feature.desc}
                                         </Text>
                                     </Stack>
@@ -219,8 +218,8 @@ export default function LandingPage() {
 
                     {/* Footer */}
                     <Box component="footer">
-                        <Divider mb={20} />
-                        <Text ta="center" fz={12} c="var(--tx3)">
+                        <Divider mb="xl" />
+                        <Text ta="center" fz="xs" c="var(--tx3)">
                             © {new Date().getFullYear()} Alimenta. Built for
                             your wellbeing.
                         </Text>

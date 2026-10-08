@@ -205,7 +205,7 @@ export function NaturalLanguageForm({ onSuccess }: { onSuccess?: () => void }) {
 
     if (editMode && draft) {
         return (
-            <Stack gap={12}>
+            <Stack gap="md">
                 <BackToPreviewButton onBack={() => setEditMode(false)} />
                 <ManualForm
                     onSuccess={onSuccess}
@@ -216,7 +216,7 @@ export function NaturalLanguageForm({ onSuccess }: { onSuccess?: () => void }) {
     }
 
     return (
-        <Stack gap={12}>
+        <Stack gap="md">
             <NaturalLanguageInputSection
                 text={text}
                 error={error}

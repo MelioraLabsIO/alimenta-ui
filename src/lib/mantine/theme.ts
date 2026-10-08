@@ -15,119 +15,46 @@ import {
     createTheme,
     defaultVariantColorsResolver,
     rem,
-    type MantineColorsTuple,
+    type CSSVariablesResolver,
     type VariantColorsResolver,
 } from "@mantine/core";
+import {
+    controlSizes,
+    fontSizes,
+    fontWeights,
+    fonts,
+    headingSizes,
+    letterSpacing,
+    lineHeights,
+    motion,
+    palettes,
+    radius,
+    schemes,
+    shadows,
+    shared,
+    spacing,
+    type SchemeToken,
+} from "./tokens";
 
 /**
- * Alimenta v2 theme — the single place component styling is defined.
+ * The Mantine theme, built entirely from `tokens.ts`. Nothing visual is
+ * hard-coded here: scales, fonts and colors come from the tokens, and the
+ * per-component `defaultProps` / `vars` / `styles` reference them by key or
+ * by CSS variable.
  *
- * Every color below is paired with a CSS custom property declared in
- * `src/app/globals.css` (`--ac`, `--sf`, `--tx2`, …); Mantine's own variables
- * (`--mantine-color-body`, `--mantine-primary-color-filled`, …) are bridged to
- * those tokens there too. The palette tuples here feed Mantine's shade math
- * (hover states, `light` tints, gradients) and `color="sky"`-style props.
- * Shade 5 is the dark-scheme accent, shade 7 the light-scheme one —
- * `primaryShade` points at them, and since Mantine uses `primaryShade` for the
- * filled variant of *every* color the other tuples follow the same rule.
- *
- * Component styling uses `defaultProps`, `vars` (Mantine's own CSS variables,
- * which its hover/focus rules consume) and `styles` (inline, per element).
- * This module contains functions, so it must only be imported from a client
- * module — see `src/providers/MantineThemeProvider.tsx`.
+ * This module contains functions, so it is only imported from the client-side
+ * `src/providers/MantineThemeProvider.tsx`, never from a server component.
  */
 
-/** Green accent — `#3bd692` (dark) / `#12936a` (light). */
-const alimenta: MantineColorsTuple = [
-    "#effdf6",
-    "#d9f8ea",
-    "#b4f0d5",
-    "#86e5bb",
-    "#5ddba3",
-    "#3bd692",
-    "#23bf7c",
-    "#12936a",
-    "#0f7556",
-    "#0b5c45",
-];
-
-/** Blue — `#60a5fa` (dark) / `#2f6fe4` (light). Dinner, energy, gradients. */
-const sky: MantineColorsTuple = [
-    "#eef5ff",
-    "#d9e8ff",
-    "#b6d3fe",
-    "#8fbcfd",
-    "#74b0fb",
-    "#60a5fa",
-    "#4a8df0",
-    "#2f6fe4",
-    "#2559c0",
-    "#1d479a",
-];
-
-/** Amber — `#fbbf24` (dark) / `#c26a00` (light). Breakfast, warnings, host crown. */
-const amber: MantineColorsTuple = [
-    "#fff8e6",
-    "#ffeec2",
-    "#ffe08f",
-    "#fdd15c",
-    "#fcc83a",
-    "#fbbf24",
-    "#e9a60f",
-    "#c26a00",
-    "#9d5600",
-    "#7a4300",
-];
-
-/** Rose — `#f472b6` (dark) / `#d0266f` (light). Snacks, errors, destructive. */
-const rose: MantineColorsTuple = [
-    "#fff0f7",
-    "#ffdcec",
-    "#ffbdd9",
-    "#fb9bc6",
-    "#f786bd",
-    "#f472b6",
-    "#e9509c",
-    "#d0266f",
-    "#a81e5a",
-    "#86194a",
-];
+const px = (value: number) => rem(value);
+const toRem = <T extends Record<string, number>>(scale: T) =>
+    Object.fromEntries(
+        Object.entries(scale).map(([key, value]) => [key, px(value)])
+    ) as Record<keyof T, string>;
 
 /**
- * Dark-scheme neutrals. Mantine reaches for `dark-4`…`dark-8` as its hover,
- * disabled, surface, body and border colors, so these are the design's
- * `--sf2`, `--sf` and `--bg` with the text tiers at the light end.
- */
-const dark: MantineColorsTuple = [
-    "#eef4f0",
-    "#a3b0a8",
-    "#6f7c75",
-    "#4a5650",
-    "#1f2622",
-    "#1a211d",
-    "#161c19",
-    "#0d110f",
-    "#070908",
-    "#040605",
-];
-
-/** Light-scheme neutrals, tuned green-grey to match the design's surfaces. */
-const gray: MantineColorsTuple = [
-    "#f7f8f7",
-    "#eff3f0",
-    "#e2e8e4",
-    "#cfd7d2",
-    "#b4beb8",
-    "#86928b",
-    "#4f5c54",
-    "#36413b",
-    "#1f2823",
-    "#0f1712",
-];
-
-/**
- * Extra button/badge/action-icon variants on top of Mantine's defaults, all
- * expressed in the design tokens so they follow the color scheme:
+ * Extra button/badge/action-icon variants on top of Mantine's defaults, all in
+ * scheme variables so they follow the color scheme:
  *
  * - `default` — the design's secondary button: transparent, `--bd2` border,
  *   `--sf2` on hover.
@@ -185,94 +112,112 @@ const variantColorResolver: VariantColorsResolver = (input) => {
     }
 };
 
-type SizeSpec = [height: string, paddingX: string, fontSize: string];
-
-const BUTTON_SIZES: Record<string, SizeSpec> = {
-    xs: ["30px", "12px", "12px"],
-    sm: ["36px", "14px", "13px"],
-    md: ["42px", "20px", "14px"],
-    lg: ["48px", "22px", "15px"],
-    xl: ["54px", "30px", "17px"],
+/** Per-size button padding and font, keyed like `controlSizes`. */
+const BUTTON_SIZES: Record<string, [paddingX: number, fontSize: number]> = {
+    xs: [spacing.md, fontSizes.xs],
+    sm: [spacing.lg - 2, fontSizes.sm],
+    md: [20, fontSizes.md],
+    lg: [spacing.xl, 15],
+    xl: [30, fontSizes.xl],
 };
 
-const INPUT_SIZES: Record<string, SizeSpec> = {
-    xs: ["32px", "12px", "13px"],
-    sm: ["38px", "12px", "13px"],
-    md: ["44px", "14px", "14px"],
-    lg: ["48px", "16px", "16px"],
-    xl: ["54px", "18px", "17px"],
+/** Input heights deviate slightly from buttons (44 not 42 at `md`). */
+const INPUT_SIZES: Record<
+    string,
+    [height: number, paddingX: number, fontSize: number]
+> = {
+    xs: [32, spacing.md, fontSizes.sm],
+    sm: [38, spacing.md, fontSizes.sm],
+    md: [44, spacing.md + 2, fontSizes.md],
+    lg: [48, spacing.lg, fontSizes.lg],
+    xl: [54, 18, fontSizes.xl],
 };
 
 /** Inline custom properties need a cast — `CSSProperties` doesn't know `--x`. */
 const cssVars = (vars: Record<`--${string}`, string>) => vars as CSSProperties;
 
-const PANEL_SHADOW = "0 40px 100px rgba(0, 0, 0, 0.45)";
-const FLOAT_SHADOW = "0 20px 50px rgba(0, 0, 0, 0.3)";
-const MOTION = "150ms ease";
+const closeButtonStyle = {
+    width: px(34),
+    height: px(34),
+    minWidth: px(34),
+    minHeight: px(34),
+    borderRadius: radius.pill,
+    backgroundColor: "var(--sf2)",
+    color: "var(--tx2)",
+};
+
+const overlayPanelStyle = {
+    backgroundColor: "var(--sf)",
+    border: "1px solid var(--bd)",
+    boxShadow: shadows.xl,
+    color: "var(--tx)",
+};
+
+const overlayTitleStyle = {
+    fontSize: px(fontSizes.xxl),
+    fontWeight: Number(fontWeights.bold),
+    letterSpacing: letterSpacing.snug,
+};
 
 export const alimentaTheme = createTheme({
     primaryColor: "alimenta",
     primaryShade: { light: 7, dark: 5 },
     // Filled surfaces pick black or white text by luminance; `black` is the
-    // design's ink-on-green (`--act`), not pure black.
+    // design's ink-on-green, not pure black.
     autoContrast: true,
     luminanceThreshold: 0.4,
-    black: "#04110a",
+    black: schemes.dark.act,
     white: "#ffffff",
-    colors: { alimenta, sky, amber, rose, dark, gray },
+    colors: palettes,
     variantColorResolver,
     defaultGradient: { from: "alimenta", to: "sky", deg: 135 },
 
-    fontFamily: "var(--font-geist-sans), Geist, system-ui, sans-serif",
-    fontFamilyMonospace:
-        "var(--font-geist-mono), 'Geist Mono', ui-monospace, monospace",
+    fontFamily: fonts.sans,
+    fontFamilyMonospace: fonts.mono,
     fontSmoothing: true,
+    fontSizes: toRem(fontSizes),
+    lineHeights,
+    fontWeights,
     headings: {
-        fontFamily: "var(--font-geist-sans), Geist, system-ui, sans-serif",
-        fontWeight: "700",
+        fontFamily: fonts.sans,
+        fontWeight: fontWeights.bold,
         textWrap: "balance",
         sizes: {
-            h1: { fontSize: rem(30), lineHeight: "1.15" },
-            h2: { fontSize: rem(24), lineHeight: "1.15" },
-            h3: { fontSize: rem(17), lineHeight: "1.25" },
-            h4: { fontSize: rem(16), lineHeight: "1.3" },
-            h5: { fontSize: rem(15), lineHeight: "1.3" },
-            h6: { fontSize: rem(13), lineHeight: "1.4" },
+            h1: { fontSize: px(headingSizes.h1), lineHeight: lineHeights.xs },
+            h2: { fontSize: px(headingSizes.h2), lineHeight: lineHeights.xs },
+            h3: { fontSize: px(headingSizes.h3), lineHeight: "1.25" },
+            h4: { fontSize: px(headingSizes.h4), lineHeight: lineHeights.sm },
+            h5: { fontSize: px(headingSizes.h5), lineHeight: lineHeights.sm },
+            h6: { fontSize: px(headingSizes.h6), lineHeight: "1.4" },
         },
     },
 
-    // Rounded everything: fields 14, rows 16-18, cards 24. Pills use `999px`.
-    radius: {
-        xs: rem(8),
-        sm: rem(10),
-        md: rem(14),
-        lg: rem(18),
-        xl: rem(24),
-    },
+    spacing: toRem(spacing),
+    radius: toRem(radius),
     defaultRadius: "md",
-    shadows: {
-        xs: "0 1px 2px rgba(0, 0, 0, 0.08)",
-        sm: "0 6px 18px rgba(0, 0, 0, 0.12)",
-        md: "var(--sh)",
-        lg: FLOAT_SHADOW,
-        xl: PANEL_SHADOW,
-    },
+    shadows,
     cursorType: "pointer",
     respectReducedMotion: true,
+
+    other: { letterSpacing, motion, controlSizes, shared },
 
     components: {
         /* ---------------------------------------------------- buttons */
         Button: Button.extend({
-            defaultProps: { radius: "999px" },
+            defaultProps: { radius: "pill" },
             vars: (_theme, props) => {
-                const [height, paddingX, fontSize] =
-                    BUTTON_SIZES[String(props.size ?? "md")] ?? BUTTON_SIZES.md;
+                const size = String(props.size ?? "md");
+                const [paddingX, fontSize] =
+                    BUTTON_SIZES[size] ?? BUTTON_SIZES.md;
+                const height =
+                    controlSizes[size as keyof typeof controlSizes] ??
+                    controlSizes.md;
 
                 return {
                     root: {
-                        "--button-height": height,
-                        "--button-padding-x": paddingX,
-                        "--button-fz": fontSize,
+                        "--button-height": px(height),
+                        "--button-padding-x": px(paddingX),
+                        "--button-fz": px(fontSize),
                     },
                 };
             },
@@ -286,8 +231,8 @@ export const alimentaTheme = createTheme({
 
                 return {
                     root: {
-                        fontWeight: 600,
-                        transition: `transform ${MOTION}, box-shadow ${MOTION}, background-color ${MOTION}, color ${MOTION}`,
+                        fontWeight: Number(fontWeights.semibold),
+                        transition: `transform ${motion.fast}, box-shadow ${motion.fast}, background-color ${motion.fast}, color ${motion.fast}`,
                         boxShadow: glows
                             ? props.variant === "gradient"
                                 ? "0 14px 34px var(--acs)"
@@ -303,23 +248,26 @@ export const alimentaTheme = createTheme({
             },
         }),
         ActionIcon: ActionIcon.extend({
-            defaultProps: { radius: "999px", variant: "glass", size: 42 },
+            defaultProps: {
+                radius: "pill",
+                variant: "glass",
+                size: controlSizes.md,
+            },
             styles: (_theme, props) => ({
                 root: {
                     backdropFilter:
                         props.variant === "glass" ? "blur(20px)" : undefined,
-                    transition: `transform ${MOTION}, color ${MOTION}, background-color ${MOTION}`,
+                    transition: `transform ${motion.fast}, color ${motion.fast}, background-color ${motion.fast}`,
                 },
             }),
         }),
         CloseButton: {
-            defaultProps: { radius: "999px" },
+            defaultProps: { radius: "pill" },
         },
         ThemeIcon: ThemeIcon.extend({
-            // The design's 34px icon tile, accent-tinted by default; pass
-            // `color="amber"` etc. for meal types, `variant="gradient"` for
-            // the brand mark.
-            defaultProps: { variant: "light", radius: 11, size: 34 },
+            // The 34px icon tile, accent-tinted by default; `color="amber"` etc.
+            // for meal types, `variant="gradient"` for the brand mark.
+            defaultProps: { variant: "light", radius: "sm", size: 34 },
             styles: (_theme, props) => ({
                 root: {
                     color:
@@ -336,7 +284,7 @@ export const alimentaTheme = createTheme({
                 radius: "xl",
                 shadow: "md",
                 withBorder: true,
-                padding: 22,
+                padding: "xl",
             },
             styles: {
                 root: {
@@ -355,10 +303,10 @@ export const alimentaTheme = createTheme({
             },
         },
         Avatar: Avatar.extend({
-            defaultProps: { variant: "gradient", radius: "xl" },
+            defaultProps: { variant: "gradient", radius: "pill" },
             styles: (_theme, props) => ({
                 placeholder: {
-                    fontWeight: 700,
+                    fontWeight: Number(fontWeights.bold),
                     color:
                         props.variant === "gradient" || !props.variant
                             ? "var(--ink-on-gradient)"
@@ -370,34 +318,17 @@ export const alimentaTheme = createTheme({
         /* --------------------------------------------------- overlays */
         Modal: Modal.extend({
             defaultProps: {
-                radius: 28,
+                radius: "xxl",
                 padding: 26,
                 centered: true,
                 overlayProps: { blur: 8, backgroundOpacity: 0.45 },
                 transitionProps: { transition: "pop", duration: 240 },
             },
             styles: {
-                content: {
-                    backgroundColor: "var(--sf)",
-                    border: "1px solid var(--bd)",
-                    boxShadow: PANEL_SHADOW,
-                    color: "var(--tx)",
-                },
+                content: overlayPanelStyle,
                 header: { backgroundColor: "transparent" },
-                title: {
-                    fontSize: rem(22),
-                    fontWeight: 700,
-                    letterSpacing: "-0.025em",
-                },
-                close: {
-                    width: rem(34),
-                    height: rem(34),
-                    minWidth: rem(34),
-                    minHeight: rem(34),
-                    borderRadius: 999,
-                    backgroundColor: "var(--sf2)",
-                    color: "var(--tx2)",
-                },
+                title: overlayTitleStyle,
+                close: closeButtonStyle,
             },
         }),
         Drawer: {
@@ -406,27 +337,10 @@ export const alimentaTheme = createTheme({
                 overlayProps: { blur: 8, backgroundOpacity: 0.45 },
             },
             styles: {
-                content: {
-                    backgroundColor: "var(--sf)",
-                    border: "1px solid var(--bd)",
-                    boxShadow: PANEL_SHADOW,
-                    color: "var(--tx)",
-                },
+                content: overlayPanelStyle,
                 header: { backgroundColor: "transparent" },
-                title: {
-                    fontSize: rem(22),
-                    fontWeight: 700,
-                    letterSpacing: "-0.025em",
-                },
-                close: {
-                    width: rem(34),
-                    height: rem(34),
-                    minWidth: rem(34),
-                    minHeight: rem(34),
-                    borderRadius: 999,
-                    backgroundColor: "var(--sf2)",
-                    color: "var(--tx2)",
-                },
+                title: overlayTitleStyle,
+                close: closeButtonStyle,
             },
         },
         Menu: {
@@ -435,11 +349,17 @@ export const alimentaTheme = createTheme({
                 dropdown: {
                     backgroundColor: "var(--sf)",
                     borderColor: "var(--bd2)",
-                    padding: rem(6),
+                    padding: px(spacing.xs),
                 },
-                item: { borderRadius: rem(10), fontWeight: 500 },
+                item: {
+                    borderRadius: px(10),
+                    fontWeight: Number(fontWeights.medium),
+                },
                 itemLabel: { color: "var(--tx)" },
-                label: { color: "var(--tx3)", fontWeight: 600 },
+                label: {
+                    color: "var(--tx3)",
+                    fontWeight: Number(fontWeights.semibold),
+                },
                 divider: { borderColor: "var(--bd)" },
             },
         },
@@ -457,18 +377,21 @@ export const alimentaTheme = createTheme({
                 dropdown: {
                     backgroundColor: "var(--sf)",
                     borderColor: "var(--bd2)",
-                    padding: rem(6),
+                    padding: px(spacing.xs),
                 },
-                option: { borderRadius: rem(10), fontWeight: 500 },
+                option: {
+                    borderRadius: px(10),
+                    fontWeight: Number(fontWeights.medium),
+                },
             },
         },
         Tooltip: {
-            defaultProps: { radius: "sm" },
+            defaultProps: { radius: "xs" },
             styles: {
                 tooltip: {
                     backgroundColor: "var(--tx)",
                     color: "var(--bg)",
-                    fontWeight: 500,
+                    fontWeight: Number(fontWeights.medium),
                 },
             },
         },
@@ -481,10 +404,10 @@ export const alimentaTheme = createTheme({
 
                 return {
                     wrapper: {
-                        "--input-height": height,
-                        "--input-padding-inline-start": paddingX,
-                        "--input-padding-inline-end": paddingX,
-                        "--input-fz": fontSize,
+                        "--input-height": px(height),
+                        "--input-padding-inline-start": px(paddingX),
+                        "--input-padding-inline-end": px(paddingX),
+                        "--input-fz": px(fontSize),
                         "--input-bg": "var(--sf2)",
                         "--input-bd": props.error ? "var(--ro)" : "var(--bd2)",
                         "--input-bd-focus": props.error
@@ -498,8 +421,8 @@ export const alimentaTheme = createTheme({
             },
             styles: (_theme, props) => ({
                 input: {
-                    fontWeight: 500,
-                    transition: `border-color ${MOTION}, box-shadow ${MOTION}`,
+                    fontWeight: Number(fontWeights.medium),
+                    transition: `border-color ${motion.fast}, box-shadow ${motion.fast}`,
                     animation: props.error ? "alm-shake 400ms ease" : undefined,
                 },
             }),
@@ -507,15 +430,18 @@ export const alimentaTheme = createTheme({
         InputWrapper: {
             styles: {
                 label: {
-                    fontSize: rem(12),
-                    fontWeight: 600,
+                    fontSize: px(fontSizes.xs),
+                    fontWeight: Number(fontWeights.semibold),
                     color: "var(--tx2)",
-                    marginBottom: rem(6),
+                    marginBottom: px(spacing.xs),
                 },
-                description: { color: "var(--tx3)", fontSize: rem(12) },
+                description: {
+                    color: "var(--tx3)",
+                    fontSize: px(fontSizes.xs),
+                },
                 error: {
-                    fontSize: rem(12),
-                    fontWeight: 500,
+                    fontSize: px(fontSizes.xs),
+                    fontWeight: Number(fontWeights.medium),
                     color: "var(--ro)",
                 },
             },
@@ -524,21 +450,21 @@ export const alimentaTheme = createTheme({
             defaultProps: { minRows: 4 },
             styles: {
                 input: {
-                    paddingTop: rem(12),
-                    paddingBottom: rem(12),
-                    lineHeight: 1.5,
+                    paddingTop: px(spacing.md),
+                    paddingBottom: px(spacing.md),
+                    lineHeight: lineHeights.lg,
                 },
             },
         },
         Switch: Switch.extend({
             defaultProps: { color: "alimenta" },
-            // 46×28 track with a 22px thumb, per the design's AI toggles.
+            // 46×28 track with a 22px thumb.
             vars: () => ({
                 root: {
-                    "--switch-width": rem(46),
-                    "--switch-height": rem(28),
-                    "--switch-thumb-size": rem(22),
-                    "--switch-radius": rem(999),
+                    "--switch-width": px(46),
+                    "--switch-height": px(28),
+                    "--switch-thumb-size": px(22),
+                    "--switch-radius": px(radius.pill),
                 },
             }),
             styles: {
@@ -555,7 +481,7 @@ export const alimentaTheme = createTheme({
             },
         }),
         Checkbox: {
-            defaultProps: { radius: rem(7), color: "alimenta" },
+            defaultProps: { radius: px(7), color: "alimenta" },
             styles: {
                 input: {
                     backgroundColor: "transparent",
@@ -567,21 +493,24 @@ export const alimentaTheme = createTheme({
             defaultProps: { color: "alimenta" },
         },
         SegmentedControl: {
-            defaultProps: { radius: "999px" },
+            defaultProps: { radius: "pill" },
             styles: {
-                root: { backgroundColor: "var(--sf2)", padding: rem(3) },
+                root: { backgroundColor: "var(--sf2)", padding: px(3) },
                 indicator: {
                     backgroundColor: "var(--sf)",
                     boxShadow: "var(--sh)",
                 },
-                label: { fontWeight: 600, fontSize: rem(13) },
+                label: {
+                    fontWeight: Number(fontWeights.semibold),
+                    fontSize: px(fontSizes.sm),
+                },
             },
         },
 
         /* ------------------------------------------------- navigation */
         Tabs: Tabs.extend({
             // Pill tabs: glass track, raised `--sf` pill for the active tab.
-            defaultProps: { variant: "pills", radius: "999px" },
+            defaultProps: { variant: "pills", radius: "pill" },
             vars: () => ({
                 root: { "--tabs-color": "var(--sf)" },
             }),
@@ -589,24 +518,24 @@ export const alimentaTheme = createTheme({
                 root: cssVars({ "--tabs-text-color": "var(--tx)" }),
                 list: {
                     display: "inline-flex",
-                    gap: rem(2),
-                    padding: rem(4),
-                    borderRadius: 999,
+                    gap: px(2),
+                    padding: px(spacing.xxs),
+                    borderRadius: radius.pill,
                     backgroundColor: "var(--glass)",
                     border: "1px solid var(--bd)",
                     backdropFilter: "blur(20px)",
                 },
                 tab: {
-                    height: rem(38),
-                    paddingInline: rem(18),
-                    fontWeight: 600,
-                    fontSize: rem(13),
-                    transition: `background-color ${MOTION}, color ${MOTION}`,
+                    height: px(38),
+                    paddingInline: px(18),
+                    fontWeight: Number(fontWeights.semibold),
+                    fontSize: px(fontSizes.sm),
+                    transition: `background-color ${motion.normal}, color ${motion.normal}`,
                 },
             },
         }),
         NavLink: NavLink.extend({
-            // Sidebar rows: 40px, 13px radius, raised `--sf` when active.
+            // Sidebar rows: 40px, raised `--sf` when active.
             vars: () => ({
                 root: {
                     "--nl-bg": "var(--sf)",
@@ -617,42 +546,45 @@ export const alimentaTheme = createTheme({
             }),
             styles: (_theme, props) => ({
                 root: {
-                    height: rem(40),
-                    paddingInline: rem(12),
-                    borderRadius: rem(13),
+                    height: px(40),
+                    paddingInline: px(spacing.md),
+                    borderRadius: px(13),
                     color: props.active ? "var(--tx)" : "var(--tx2)",
                     boxShadow: props.active ? "var(--sh)" : "none",
-                    transition: `background-color ${MOTION}, color ${MOTION}`,
+                    transition: `background-color ${motion.normal}, color ${motion.normal}`,
                 },
-                label: { fontWeight: 500, fontSize: rem(14) },
+                label: {
+                    fontWeight: Number(fontWeights.medium),
+                    fontSize: px(fontSizes.md),
+                },
                 section: { color: props.active ? "var(--ac)" : undefined },
             }),
         }),
 
         /* ------------------------------------------------- data/feedback */
         Badge: {
-            defaultProps: { radius: "999px", variant: "light", tt: "none" },
+            defaultProps: { radius: "pill", variant: "light", tt: "none" },
             styles: {
                 root: {
-                    fontWeight: 700,
-                    letterSpacing: 0,
-                    height: rem(26),
-                    paddingInline: rem(10),
-                    fontSize: rem(12),
+                    fontWeight: Number(fontWeights.bold),
+                    letterSpacing: letterSpacing.normal,
+                    height: px(26),
+                    paddingInline: px(10),
+                    fontSize: px(fontSizes.xs),
                 },
             },
         },
         Chip: {
-            defaultProps: { radius: "999px" },
+            defaultProps: { radius: "pill" },
         },
         Pill: {
-            defaultProps: { radius: "999px" },
+            defaultProps: { radius: "pill" },
         },
         Loader: {
             defaultProps: { color: "alimenta", type: "dots" },
         },
         Progress: {
-            defaultProps: { radius: "999px", color: "alimenta" },
+            defaultProps: { radius: "pill", color: "alimenta" },
             styles: { root: { backgroundColor: "var(--sf2)" } },
         },
         RingProgress: {
@@ -677,19 +609,28 @@ export const alimentaTheme = createTheme({
                     backgroundColor: "var(--glass)",
                     borderColor: "var(--bd2)",
                     backdropFilter: "blur(24px)",
-                    boxShadow: FLOAT_SHADOW,
-                    padding: `${rem(12)} ${rem(12)} ${rem(12)} ${rem(14)}`,
-                    animation: "alm-in 320ms cubic-bezier(0.2, 0.8, 0.2, 1)",
+                    boxShadow: shadows.lg,
+                    padding: `${px(spacing.md)} ${px(spacing.md)} ${px(spacing.md)} ${px(14)}`,
+                    animation: `alm-in 320ms ${motion.spring}`,
                 },
                 icon: {
-                    width: rem(30),
-                    height: rem(30),
-                    borderRadius: rem(10),
-                    marginInlineEnd: rem(12),
+                    width: px(30),
+                    height: px(30),
+                    borderRadius: px(10),
+                    marginInlineEnd: px(spacing.md),
                 },
-                title: { color: "var(--tx)", fontWeight: 600 },
-                description: { color: "var(--tx2)", fontSize: rem(12) },
-                closeButton: { color: "var(--tx3)", borderRadius: rem(8) },
+                title: {
+                    color: "var(--tx)",
+                    fontWeight: Number(fontWeights.semibold),
+                },
+                description: {
+                    color: "var(--tx2)",
+                    fontSize: px(fontSizes.xs),
+                },
+                closeButton: {
+                    color: "var(--tx3)",
+                    borderRadius: px(radius.xs),
+                },
             },
         }),
         Table: {
@@ -704,7 +645,11 @@ export const alimentaTheme = createTheme({
                     "--table-hover-color": "var(--sf2)",
                     "--table-striped-color": "var(--sf2)",
                 }),
-                th: { color: "var(--tx3)", fontSize: rem(12), fontWeight: 600 },
+                th: {
+                    color: "var(--tx3)",
+                    fontSize: px(fontSizes.xs),
+                    fontWeight: Number(fontWeights.semibold),
+                },
             },
         },
 
@@ -714,9 +659,9 @@ export const alimentaTheme = createTheme({
                 root: {
                     letterSpacing:
                         props.order === 1 || props.order === 2
-                            ? "-0.035em"
+                            ? letterSpacing.tight
                             : props.order === 3
-                              ? "-0.02em"
+                              ? letterSpacing.snug
                               : "-0.01em",
                 },
             }),
@@ -726,3 +671,54 @@ export const alimentaTheme = createTheme({
         },
     },
 });
+
+/**
+ * Emits the semantic color variables (`--bg`, `--sf`, `--ac`, …) for each
+ * color scheme and points Mantine's own globals (`--mantine-color-body`,
+ * `--mantine-primary-color-filled`, …) at them, so every component — ours and
+ * Mantine's — follows `tokens.ts`.
+ */
+export const cssVariablesResolver: CSSVariablesResolver = () => {
+    const schemeVars = (scheme: Record<SchemeToken, string>) => ({
+        ...Object.fromEntries(
+            Object.entries(scheme).map(([key, value]) => [`--${key}`, value])
+        ),
+        "--mantine-color-body": "var(--bg)",
+        "--mantine-color-text": "var(--tx)",
+        "--mantine-color-bright": "var(--tx)",
+        "--mantine-color-dimmed": "var(--tx3)",
+        "--mantine-color-placeholder": "var(--tx3)",
+        "--mantine-color-anchor": "var(--ac)",
+        "--mantine-color-error": "var(--ro)",
+        "--mantine-color-default": "var(--sf)",
+        "--mantine-color-default-hover": "var(--sf2)",
+        "--mantine-color-default-color": "var(--tx)",
+        "--mantine-color-default-border": "var(--bd2)",
+        "--mantine-primary-color-filled": "var(--ac)",
+        "--mantine-primary-color-filled-hover":
+            "color-mix(in srgb, var(--ac) 88%, var(--tx))",
+        "--mantine-primary-color-light": "var(--acs)",
+        "--mantine-primary-color-light-hover":
+            "color-mix(in srgb, var(--acs) 70%, var(--ac))",
+        "--mantine-primary-color-light-color": "var(--ac)",
+        "--mantine-primary-color-contrast": "var(--act)",
+    });
+
+    return {
+        variables: {
+            "--ink-on-gradient": shared.inkOnGradient,
+            "--gradient-accent": shared.gradientAccent,
+            // Non-color tokens components need inline: `lts="var(--ls-snug)"`,
+            // `transition: \`background var(--motion-fast)\``.
+            "--ls-tight": letterSpacing.tight,
+            "--ls-snug": letterSpacing.snug,
+            "--ls-wide": letterSpacing.wide,
+            "--motion-fast": motion.fast,
+            "--motion-normal": motion.normal,
+            "--motion-slow": motion.slow,
+            "--motion-spring": motion.spring,
+        },
+        light: schemeVars(schemes.light),
+        dark: schemeVars(schemes.dark),
+    };
+};

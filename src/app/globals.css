@@ -1,16 +1,13 @@
 /*
- * Cascade layers, declared before anything is imported so this order wins:
+ * All visual definitions live in `src/lib/mantine/tokens.ts`; the Mantine
+ * theme and the color-scheme CSS variables are generated from it. This file
+ * only holds what CSS has to hold: the cascade-layer order, the stylesheet
+ * imports and keyframes.
  *
- *   theme < base < mantine < components < utilities
- *
+ * Layer order:  theme < base < mantine < components < utilities
  * Mantine ships `styles.layer.css`, which wraps its CSS in `@layer mantine`.
- * Putting that layer *above* Tailwind's preflight (`base`) but *below*
- * `utilities` keeps Mantine's resets intact while letting a Tailwind utility
- * on a Mantine element apply when one is used.
- *
- * Styling lives in the Mantine theme (`src/lib/mantine/theme.ts`) and in
- * component props. This file only holds what CSS has to hold: the design
- * tokens, the bridge from Mantine's variables onto them, and keyframes.
+ * Putting that layer above Tailwind's preflight (`base`) keeps Mantine's own
+ * resets intact.
  */
 @layer theme, base, mantine, components, utilities;
 
@@ -19,170 +16,15 @@
 @import "@mantine/dates/styles.layer.css";
 @import "@mantine/notifications/styles.layer.css";
 
-@custom-variant dark (&:is([data-mantine-color-scheme="dark"] *));
-
-/* ------------------------------------------------------------------------ */
-/* Design tokens (Alimenta v2)                                              */
-/*                                                                          */
-/*   --bg   page wash base       --sf  card surface     --sf2 inset surface */
-/*   --tx   primary text         --tx2 secondary text   --tx3 captions      */
-/*   --bd   hairline border      --bd2 stronger border (inputs, chips)      */
-/*   --ac   accent (green)       --act ink on accent    --acs accent tint   */
-/*   --bl   blue   --am amber    --ro  rose                                 */
-/*   --glass translucent panel   --sh  card shadow      --wash page bg      */
-/*                                                                          */
-/* Use them from components as `bg="var(--sf)"`, `c="var(--tx2)"`, etc.    */
-/* ------------------------------------------------------------------------ */
-
-:root,
-[data-mantine-color-scheme="light"] {
-    --bg: #f7f8f7;
-    --sf: #ffffff;
-    --sf2: #eff3f0;
-    --bd: rgb(16 30 22 / 8%);
-    --bd2: rgb(16 30 22 / 15%);
-    --tx: #0f1712;
-    --tx2: #4f5c54;
-    --tx3: #86928b;
-    --ac: #12936a;
-    --act: #ffffff;
-    --acs: rgb(18 147 106 / 12%);
-    --bl: #2f6fe4;
-    --am: #c26a00;
-    --ro: #d0266f;
-    --glass: rgb(255 255 255 / 72%);
-    --sh: 0 1px 2px rgb(16 30 22 / 4%), 0 14px 36px rgb(16 30 22 / 8%);
-    --wash:
-        radial-gradient(
-            1100px 600px at 10% -10%,
-            rgb(59 214 146 / 26%),
-            transparent 60%
-        ),
-        radial-gradient(
-            900px 700px at 100% 110%,
-            rgb(96 165 250 / 24%),
-            transparent 60%
-        ),
-        #f1f5f2;
-    /* Ink on the green→blue gradient, which stays bright in both schemes. */
-    --ink-on-gradient: #04110a;
-    --gradient-accent: linear-gradient(135deg, #3bd692, #60a5fa);
-}
-
-[data-mantine-color-scheme="dark"] {
-    --bg: #070908;
-    --sf: #0d110f;
-    --sf2: #161c19;
-    --bd: rgb(235 245 238 / 7%);
-    --bd2: rgb(235 245 238 / 14%);
-    --tx: #eef4f0;
-    --tx2: #a3b0a8;
-    --tx3: #6f7c75;
-    --ac: #3bd692;
-    --act: #04110a;
-    --acs: rgb(59 214 146 / 14%);
-    --bl: #60a5fa;
-    --am: #fbbf24;
-    --ro: #f472b6;
-    --glass: rgb(18 24 21 / 62%);
-    --sh: 0 1px 0 rgb(255 255 255 / 4%) inset, 0 14px 36px rgb(0 0 0 / 30%);
-    --wash:
-        radial-gradient(
-            1100px 600px at 10% -10%,
-            rgb(59 214 146 / 18%),
-            transparent 60%
-        ),
-        radial-gradient(
-            900px 700px at 100% 110%,
-            rgb(96 165 250 / 14%),
-            transparent 60%
-        ),
-        #070a09;
-}
-
-/*
- * Bridge Mantine's global variables onto the tokens. Mantine injects its own
- * values from a `<style>` inside the provider with `:root[data-mantine-color-
- * scheme]` selectors, so these carry one extra type selector to outrank them
- * regardless of source order.
- */
-html:root,
-html[data-mantine-color-scheme]:root {
-    --mantine-color-body: var(--bg);
-    --mantine-color-text: var(--tx);
-    --mantine-color-bright: var(--tx);
-    --mantine-color-dimmed: var(--tx3);
-    --mantine-color-placeholder: var(--tx3);
-    --mantine-color-anchor: var(--ac);
-    --mantine-color-error: var(--ro);
-    --mantine-color-default: var(--sf);
-    --mantine-color-default-hover: var(--sf2);
-    --mantine-color-default-color: var(--tx);
-    --mantine-color-default-border: var(--bd2);
-    --mantine-primary-color-filled: var(--ac);
-    --mantine-primary-color-filled-hover: color-mix(
-        in srgb,
-        var(--ac) 88%,
-        var(--tx)
-    );
-    --mantine-primary-color-light: var(--acs);
-    --mantine-primary-color-light-hover: color-mix(
-        in srgb,
-        var(--acs) 70%,
-        var(--ac)
-    );
-    --mantine-primary-color-light-color: var(--ac);
-    --mantine-primary-color-contrast: var(--act);
-}
-
-/* Tokens exposed to Tailwind for the few utilities still in use. */
-@theme inline {
-    --font-sans: var(--font-geist-sans);
-    --font-mono: var(--font-geist-mono);
-
-    --color-bg: var(--bg);
-    --color-sf: var(--sf);
-    --color-sf2: var(--sf2);
-    --color-bd: var(--bd);
-    --color-bd2: var(--bd2);
-    --color-tx: var(--tx);
-    --color-tx2: var(--tx2);
-    --color-tx3: var(--tx3);
-    --color-ac: var(--ac);
-    --color-act: var(--act);
-    --color-acs: var(--acs);
-    --color-bl: var(--bl);
-    --color-am: var(--am);
-    --color-ro: var(--ro);
-
-    --color-background: var(--bg);
-    --color-foreground: var(--tx);
-    --color-card: var(--sf);
-    --color-card-foreground: var(--tx);
-    --color-popover: var(--sf);
-    --color-popover-foreground: var(--tx);
-    --color-primary: var(--ac);
-    --color-primary-foreground: var(--act);
-    --color-secondary: var(--sf2);
-    --color-secondary-foreground: var(--tx);
-    --color-muted: var(--sf2);
-    --color-muted-foreground: var(--tx2);
-    --color-accent: var(--acs);
-    --color-accent-foreground: var(--ac);
-    --color-destructive: var(--ro);
-    --color-border: var(--bd);
-    --color-input: var(--bd2);
-    --color-ring: var(--ac);
-}
-
 @layer base {
     body {
         background: var(--bg);
         color: var(--tx);
-        font-size: 14px;
+        font-size: var(--mantine-font-size-md);
     }
 }
 
+/* Motion used via `style={{ animation: "alm-in 500ms …" }}`. */
 @keyframes alm-spin {
     to {
         transform: rotate(360deg);

@@ -19,10 +19,10 @@ const MOOD_FILL_ID = "alm-mood-fill";
 const TOOLTIP_STYLE = {
     background: "var(--sf)",
     border: "1px solid var(--bd)",
-    borderRadius: 14,
+    borderRadius: "var(--mantine-radius-md)",
     boxShadow: "var(--sh)",
-    padding: "8px 12px",
-    fontSize: 12,
+    padding: "var(--mantine-spacing-sm) var(--mantine-spacing-md)",
+    fontSize: "var(--mantine-font-size-xs)",
     color: "var(--tx)",
 };
 
@@ -36,7 +36,7 @@ function formatScore(value: unknown) {
  */
 export function MoodTrendChart({ data }: Props) {
     return (
-        <Box h={210} w="100%" mt={16}>
+        <Box h={210} w="100%" mt="lg">
             <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart
                     data={data}
@@ -85,7 +85,7 @@ export function MoodTrendChart({ data }: Props) {
                         labelStyle={{
                             color: "var(--tx3)",
                             fontWeight: 600,
-                            marginBottom: 4,
+                            marginBottom: "var(--mantine-spacing-xxs)",
                         }}
                         itemStyle={{ color: "var(--tx)", padding: 0 }}
                         formatter={(value, name) => [

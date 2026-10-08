@@ -31,7 +31,7 @@ export function AppHeader({ navOpened, onToggleNav }: AppHeaderProps) {
     const onLogPage = pathname.startsWith("/log");
 
     return (
-        <Group component="header" gap={12} wrap="wrap" px={4} pb={4}>
+        <Group component="header" gap="md" wrap="wrap" px="xxs" pb="xxs">
             <Burger
                 opened={navOpened}
                 onClick={onToggleNav}
@@ -41,15 +41,15 @@ export function AppHeader({ navOpened, onToggleNav }: AppHeaderProps) {
             />
 
             <Box miw={0}>
-                <Text fz={13} c="var(--tx2)">
+                <Text fz="sm" c="var(--tx2)">
                     {kicker}
                 </Text>
-                <Title order={1} mt={2}>
+                <Title order={1} mt="xxs">
                     {title}
                 </Title>
             </Box>
 
-            <Group gap={8} ml="auto" wrap="nowrap">
+            <Group gap="sm" ml="auto" wrap="nowrap">
                 <HeaderSearch />
                 <ThemeToggle />
                 <HeaderNotifications />

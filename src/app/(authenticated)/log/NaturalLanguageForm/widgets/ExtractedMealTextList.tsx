@@ -20,9 +20,9 @@ export function ExtractedMealTextList({
 
     return (
         <Paper
-            radius={16}
-            px={14}
-            py={12}
+            radius="lg"
+            px="md"
+            py="md"
             shadow="none"
             withBorder={false}
             bg={
@@ -33,16 +33,16 @@ export function ExtractedMealTextList({
             style={{ border: isAmber ? "none" : "1px solid var(--bd)" }}
         >
             <Text
-                fz={12}
+                fz="xs"
                 fw={600}
                 c={isAmber ? "var(--am)" : "var(--tx2)"}
-                mb={6}
+                mb="xs"
             >
                 {title}
             </Text>
-            <Stack gap={4}>
+            <Stack gap="xxs">
                 {items.map((item) => (
-                    <Text key={item} fz={13} lh={1.5}>
+                    <Text key={item} fz="sm" lh="lg">
                         {item}
                     </Text>
                 ))}

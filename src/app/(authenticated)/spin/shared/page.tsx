@@ -301,19 +301,19 @@ export default function Shared() {
     }
 
     return (
-        <Stack gap={12}>
+        <Stack gap="md">
             {sessionLocked && (
                 <Paper
-                    radius={18}
-                    px={18}
-                    py={14}
+                    radius="lg"
+                    px="lg"
+                    py="md"
                     shadow="none"
                     bg="var(--acs)"
                     style={{
                         border: "1px solid color-mix(in srgb, var(--ac) 35%, transparent)",
                     }}
                 >
-                    <Group gap={12} align="center" wrap="nowrap">
+                    <Group gap="md" align="center" wrap="nowrap">
                         <PartyPopper
                             size={18}
                             color="var(--ac)"
@@ -326,7 +326,7 @@ export default function Shared() {
                                     ? `${displayWinner.displayName}'s pick, ${displayWinner.foodName}, won the spin.`
                                     : "A winner has been picked."}
                             </Text>
-                            <Text component="span" c="var(--tx2)" ml={6}>
+                            <Text component="span" c="var(--tx2)" ml="xs">
                                 This session is now read-only.
                             </Text>
                         </Box>
@@ -334,7 +334,7 @@ export default function Shared() {
                             <Button
                                 size="sm"
                                 h={40}
-                                px={18}
+                                px="lg"
                                 leftSection={<RotateCcw size={15} />}
                                 onClick={() => setDeleteSessionDialogOpen(true)}
                                 style={{ flexShrink: 0 }}
@@ -345,7 +345,7 @@ export default function Shared() {
                             <Button
                                 size="sm"
                                 h={40}
-                                px={18}
+                                px="lg"
                                 variant="default"
                                 leftSection={<LogOut size={15} />}
                                 onClick={() => setLeaveDialogOpen(true)}
@@ -358,8 +358,8 @@ export default function Shared() {
                 </Paper>
             )}
 
-            <Flex wrap="wrap" gap={12} align="flex-start">
-                <Stack gap={12} style={{ flex: "7 1 440px", minWidth: 0 }}>
+            <Flex wrap="wrap" gap="md" align="flex-start">
+                <Stack gap="md" style={{ flex: "7 1 440px", minWidth: 0 }}>
                     <WheelCard>
                         {hasEntries ? (
                             <MealSpinWheel
@@ -399,7 +399,7 @@ export default function Shared() {
                         )}
 
                         {!sessionLocked && (
-                            <Text fz={12} c="var(--tx3)" mt={-10}>
+                            <Text fz="xs" c="var(--tx3)" mt={-10}>
                                 Only the host can spin.
                                 {isHost ? " That's you." : ""}
                             </Text>
@@ -409,7 +409,7 @@ export default function Shared() {
                     <WheelInstructions steps={INSTRUCTION_STEPS} />
                 </Stack>
 
-                <Stack gap={12} style={{ flex: "5 1 360px", minWidth: 0 }}>
+                <Stack gap="md" style={{ flex: "5 1 360px", minWidth: 0 }}>
                     <SessionShareCard
                         session={session}
                         isHost={isHost}
@@ -468,12 +468,12 @@ export default function Shared() {
                 title="Leave this session?"
                 size={420}
             >
-                <Text fz={14} c="var(--tx2)">
+                <Text fz="md" c="var(--tx2)">
                     You&apos;ll be removed from the session and your food
                     choice, if any, will be cleared. You can rejoin later with
                     the same join link.
                 </Text>
-                <Group justify="flex-end" gap={8} mt={24}>
+                <Group justify="flex-end" gap="sm" mt="xl">
                     <Button
                         variant="default"
                         onClick={() => setLeaveDialogOpen(false)}
@@ -492,11 +492,11 @@ export default function Shared() {
                 title="End this session?"
                 size={420}
             >
-                <Text fz={14} c="var(--tx2)">
+                <Text fz="md" c="var(--tx2)">
                     This ends the session for everyone and can&apos;t be undone.
                     All participants will be removed.
                 </Text>
-                <Group justify="flex-end" gap={8} mt={24}>
+                <Group justify="flex-end" gap="sm" mt="xl">
                     <Button
                         variant="default"
                         onClick={() => setDeleteSessionDialogOpen(false)}

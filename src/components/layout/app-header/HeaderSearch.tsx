@@ -14,7 +14,7 @@ export function HeaderSearch() {
             leftSection={<Search size={15} />}
             aria-label="Search"
             w={250}
-            radius="999px"
+            radius="pill"
             visibleFrom="lg"
             styles={{
                 input: {

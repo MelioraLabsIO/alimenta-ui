@@ -7,7 +7,7 @@ type BackToPreviewButtonProps = {
 
 export function BackToPreviewButton({ onBack }: BackToPreviewButtonProps) {
     return (
-        <Group gap={8}>
+        <Group gap="sm">
             <Button
                 type="button"
                 variant="subtle"

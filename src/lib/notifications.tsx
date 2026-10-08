@@ -21,7 +21,7 @@ export const toast = {
             title: message,
             message: options?.description,
             color: "alimenta",
-            icon: <Check size={ICON_SIZE} className="text-act" />,
+            icon: <Check size={ICON_SIZE} color="var(--act)" />,
         });
     },
     error(message: string, options?: ToastOptions) {
@@ -29,7 +29,7 @@ export const toast = {
             title: message,
             message: options?.description,
             color: "rose",
-            icon: <CircleAlert size={ICON_SIZE} className="text-white" />,
+            icon: <CircleAlert size={ICON_SIZE} color="white" />,
         });
     },
     info(message: string, options?: ToastOptions) {
@@ -37,7 +37,7 @@ export const toast = {
             title: message,
             message: options?.description,
             color: "sky",
-            icon: <Info size={ICON_SIZE} className="text-white" />,
+            icon: <Info size={ICON_SIZE} color="white" />,
         });
     },
     /** Neutral tile — for "deleted"-style messages that offer an undo. */
@@ -47,7 +47,7 @@ export const toast = {
             message: options?.description,
             color: "gray",
             autoClose: 5200,
-            icon: <Trash2 size={ICON_SIZE} className="text-tx" />,
+            icon: <Trash2 size={ICON_SIZE} color="var(--tx)" />,
             styles: { icon: { backgroundColor: "var(--sf2)" } },
         });
     },

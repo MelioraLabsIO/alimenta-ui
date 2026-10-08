@@ -27,8 +27,8 @@ export default function SpinLayout({
         : "personal";
 
     return (
-        <Stack gap={12}>
-            <Group gap={12} align="center" wrap="wrap">
+        <Stack gap="md">
+            <Group gap="md" align="center" wrap="wrap">
                 <Tabs value={activeTab}>
                     <Tabs.List aria-label="Spin wheel modes">
                         <Tabs.Tab
@@ -49,7 +49,7 @@ export default function SpinLayout({
                         </Tabs.Tab>
                     </Tabs.List>
                 </Tabs>
-                <Text fz={13} c="var(--tx2)">
+                <Text fz="sm" c="var(--tx2)">
                     {INTRO[activeTab]}
                 </Text>
             </Group>

@@ -23,7 +23,7 @@ export function CaloriesChart({ data }: Props) {
 
     return (
         <Box pos="relative">
-            <SimpleGrid cols={values.length} spacing={12}>
+            <SimpleGrid cols={values.length} spacing="md">
                 {values.map((item, index) => {
                     const on = !isEmpty && index === active;
                     const height = isEmpty
@@ -35,13 +35,13 @@ export function CaloriesChart({ data }: Props) {
                             direction="column"
                             align="center"
                             justify="flex-end"
-                            gap={8}
+                            gap="sm"
                             h={AREA_HEIGHT}
                             onMouseEnter={() => setHovered(index)}
                             onMouseLeave={() => setHovered(null)}
                         >
                             <Text
-                                fz={12}
+                                fz="xs"
                                 fw={700}
                                 style={{
                                     fontVariantNumeric: "tabular-nums",
@@ -49,8 +49,7 @@ export function CaloriesChart({ data }: Props) {
                                     transform: on
                                         ? "translateY(0)"
                                         : "translateY(4px)",
-                                    transition:
-                                        "opacity 150ms, transform 150ms",
+                                    transition: `opacity var(--motion-fast), transform var(--motion-fast)`,
                                 }}
                             >
                                 {Math.round(item.calories).toLocaleString()}
@@ -60,7 +59,7 @@ export function CaloriesChart({ data }: Props) {
                                 maw={48}
                                 h={height}
                                 style={{
-                                    borderRadius: 14,
+                                    borderRadius: "var(--mantine-radius-md)",
                                     background: isEmpty
                                         ? "transparent"
                                         : on
@@ -69,13 +68,12 @@ export function CaloriesChart({ data }: Props) {
                                     border: isEmpty
                                         ? "1.5px dashed var(--bd2)"
                                         : undefined,
-                                    transition:
-                                        "height 800ms cubic-bezier(.2,.8,.2,1), background 160ms",
+                                    transition: `height 800ms var(--motion-spring), background var(--motion-normal)`,
                                     transitionDelay: `${index * 40}ms`,
                                 }}
                             />
                             <Text
-                                fz={12}
+                                fz="xs"
                                 fw={500}
                                 c={on ? "var(--tx)" : "var(--tx3)"}
                             >
@@ -88,15 +86,15 @@ export function CaloriesChart({ data }: Props) {
             {isEmpty && (
                 <Center pos="absolute" style={{ inset: "0 0 28px" }}>
                     <Paper
-                        radius={999}
-                        px={14}
-                        py={8}
+                        radius="pill"
+                        px="md"
+                        py="sm"
                         bg="var(--glass)"
                         shadow="none"
                         withBorder
                         style={{ backdropFilter: "blur(10px)" }}
                     >
-                        <Text fz={13} c="var(--tx2)">
+                        <Text fz="sm" c="var(--tx2)">
                             Your week shows up here after your first meal
                         </Text>
                     </Paper>

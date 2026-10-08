@@ -27,22 +27,22 @@ export function WheelInstructions({
     steps: WheelInstructionStep[];
 }) {
     return (
-        <Paper p={18} style={{ border: "1px solid var(--bd)" }}>
-            <Text fw={700} fz={15} mb={12}>
+        <Paper p="lg" style={{ border: "1px solid var(--bd)" }}>
+            <Text fw={700} fz="md" mb="md">
                 How it works
             </Text>
-            <SimpleGrid cols={{ base: 1, sm: 3 }} spacing={12}>
+            <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
                 {steps.map(({ icon: Icon, title, description }) => (
-                    <Stack key={title} gap={6}>
-                        <Group gap={8} wrap="nowrap">
-                            <ThemeIcon size={28} radius={9}>
+                    <Stack key={title} gap="xs">
+                        <Group gap="sm" wrap="nowrap">
+                            <ThemeIcon size={28} radius="xs">
                                 <Icon size={14} aria-hidden="true" />
                             </ThemeIcon>
-                            <Text fz={13} fw={600}>
+                            <Text fz="sm" fw={600}>
                                 {title}
                             </Text>
                         </Group>
-                        <Text fz={12} c="var(--tx2)" lh={1.45}>
+                        <Text fz="xs" c="var(--tx2)" lh="md">
                             {description}
                         </Text>
                     </Stack>

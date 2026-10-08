@@ -32,27 +32,27 @@ export function PreferenceTagInput({
 }: PreferenceTagInputProps) {
     return (
         <SettingsGroup label={label} padded>
-            <Group gap={6} mih={32}>
+            <Group gap="xs" mih={32}>
                 {items.map((item) => (
                     <Group
                         key={item}
-                        gap={4}
+                        gap="xxs"
                         wrap="nowrap"
                         h={32}
-                        pl={12}
-                        pr={6}
+                        pl="md"
+                        pr="xs"
                         bg={tint(accent)}
                         c={accent}
-                        style={{ borderRadius: 10 }}
+                        style={{ borderRadius: "var(--mantine-radius-sm)" }}
                     >
-                        <Text fz={13} fw={600} c="inherit">
+                        <Text fz="sm" fw={600} c="inherit">
                             {item}
                         </Text>
                         <ActionIcon
                             type="button"
                             variant="transparent"
                             size={22}
-                            radius={999}
+                            radius="pill"
                             aria-label={`Remove ${item}`}
                             style={{ color: "inherit" }}
                             onClick={() => onRemoveItemAction(item)}
@@ -63,7 +63,7 @@ export function PreferenceTagInput({
                 ))}
             </Group>
 
-            <Group gap={6} wrap="nowrap" align="stretch" mt={12}>
+            <Group gap="xs" wrap="nowrap" align="stretch" mt="md">
                 <Box style={{ flex: 1, minWidth: 0 }}>
                     <Autocomplete
                         value={selectedFood}
@@ -75,7 +75,7 @@ export function PreferenceTagInput({
                     type="button"
                     variant="surface"
                     size={44}
-                    radius={12}
+                    radius="sm"
                     bg="var(--sf)"
                     aria-label={`Add ${label.toLowerCase()}`}
                     onClick={onAddItemAction}

@@ -63,9 +63,9 @@ export function PastMealsSearch({
         addedLabels.some((l) => l.toLowerCase() === title.toLowerCase());
 
     return (
-        <Stack gap={8}>
-            <Group justify="space-between" align="center" gap={8}>
-                <Text fz={12} c="var(--tx3)">
+        <Stack gap="sm">
+            <Group justify="space-between" align="center" gap="sm">
+                <Text fz="xs" c="var(--tx3)">
                     From your recent meals
                 </Text>
                 <TextInput
@@ -79,17 +79,17 @@ export function PastMealsSearch({
                 />
             </Group>
             {isLoadingMeals ? (
-                <Center py={12} aria-label="Loading past meals">
+                <Center py="md" aria-label="Loading past meals">
                     <Loader size="sm" />
                 </Center>
             ) : filteredPastMeals.length === 0 ? (
-                <Text fz={12} c="var(--tx3)" py={8} ta="center">
+                <Text fz="xs" c="var(--tx3)" py="sm" ta="center">
                     {searchQuery
                         ? "No meals match your search."
                         : "No past meals found."}
                 </Text>
             ) : (
-                <Group gap={6} role="list" aria-label="Past meals">
+                <Group gap="xs" role="list" aria-label="Past meals">
                     {filteredPastMeals.map((title) => {
                         const added = isAdded(title);
                         return (
@@ -99,7 +99,7 @@ export function PastMealsSearch({
                                 variant={added ? "light" : "default"}
                                 size="sm"
                                 h={34}
-                                px={12}
+                                px="md"
                                 fw={500}
                                 maw="100%"
                                 leftSection={

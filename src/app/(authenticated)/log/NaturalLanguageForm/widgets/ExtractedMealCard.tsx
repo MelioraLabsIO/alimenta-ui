@@ -41,28 +41,28 @@ export function ExtractedMealCard({
 
     return (
         <Paper
-            p={22}
-            style={{ animation: "alm-in 500ms cubic-bezier(.2,.8,.2,1) both" }}
+            p="xl"
+            style={{ animation: "alm-in 500ms var(--motion-spring) both" }}
         >
-            <Stack gap={16}>
+            <Stack gap="lg">
                 <Group
                     justify="space-between"
                     align="center"
-                    gap={12}
+                    gap="md"
                     wrap="nowrap"
                 >
                     <Box miw={0}>
-                        <Text fz={12} c="var(--tx3)">
+                        <Text fz="xs" c="var(--tx3)">
                             We found
                         </Text>
-                        <Text fz={22} fw={700} lh={1.2} lts="-0.025em">
+                        <Text fz="xxl" fw={700} lh={1.2} lts="var(--ls-snug)">
                             {draft.mealName}
                         </Text>
                     </Box>
                     <Badge
                         color={meta.color}
                         h={30}
-                        px={12}
+                        px="md"
                         leftSection={<meta.Icon size={13} />}
                         style={{ flexShrink: 0 }}
                     >
@@ -73,7 +73,7 @@ export function ExtractedMealCard({
                 <ExtractedMealIngredients ingredients={draft.ingredients} />
 
                 {hasNotes && (
-                    <SimpleGrid cols={{ base: 1, sm: 2 }} spacing={10}>
+                    <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
                         <ExtractedMealTextList
                             title="Assumed"
                             items={draft.assumptions}
@@ -86,7 +86,7 @@ export function ExtractedMealCard({
                     </SimpleGrid>
                 )}
 
-                <Group gap={8}>
+                <Group gap="sm">
                     <Button
                         type="button"
                         onClick={onConfirm}

@@ -3,13 +3,14 @@
 import type { ReactNode } from "react";
 import { MantineProvider } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
-import { alimentaTheme } from "@/lib/mantine/theme";
+import { alimentaTheme, cssVariablesResolver } from "@/lib/mantine/theme";
 
 /**
  * Owns `MantineProvider`. The theme contains functions (variant resolver,
  * `vars`/`styles` callbacks), which can't cross the server→client boundary as
  * a prop, so the provider has to be a client module that imports the theme
- * itself.
+ * itself. `cssVariablesResolver` turns the tokens into the `--sf`/`--tx`/…
+ * variables for each color scheme.
  */
 export default function MantineThemeProvider({
     children,
@@ -17,7 +18,11 @@ export default function MantineThemeProvider({
     children: ReactNode;
 }) {
     return (
-        <MantineProvider theme={alimentaTheme} defaultColorScheme="dark">
+        <MantineProvider
+            theme={alimentaTheme}
+            cssVariablesResolver={cssVariablesResolver}
+            defaultColorScheme="dark"
+        >
             {children}
             <Notifications
                 position="top-right"

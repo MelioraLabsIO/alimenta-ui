@@ -73,7 +73,7 @@ export function Autocomplete({
 
     const options = data.map((food) => (
         <Combobox.Option value={food.id} key={food.id}>
-            <Group justify="space-between" gap={12} wrap="nowrap" miw={0}>
+            <Group justify="space-between" gap="md" wrap="nowrap" miw={0}>
                 <Box miw={0}>
                     <Text size="sm" fw={500} truncate>
                         {food.name}

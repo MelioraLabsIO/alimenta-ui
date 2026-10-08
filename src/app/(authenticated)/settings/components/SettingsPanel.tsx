@@ -35,7 +35,7 @@ export function SettingsPanel() {
 
     return (
         <Paper
-            radius={26}
+            radius="xxl"
             p={0}
             mih={640}
             pos="relative"
@@ -55,8 +55,8 @@ export function SettingsPanel() {
                 <SettingsNav active={tab} onChange={setTab} />
 
                 <Stack
-                    gap={24}
-                    pt={28}
+                    gap="xl"
+                    pt="xxl"
                     pb={36}
                     px="clamp(18px, 3vw, 36px)"
                     style={{ flex: "1 1 300px", minWidth: 0 }}

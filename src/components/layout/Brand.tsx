@@ -11,16 +11,19 @@ import { Leaf } from "lucide-react";
  */
 export function Brand({ href = "/" }: { href?: string | null }) {
     const content = (
-        <Group gap={10} wrap="nowrap">
+        <Group gap="sm" wrap="nowrap">
             <ThemeIcon
                 variant="gradient"
                 size={34}
-                radius={11}
-                style={{ boxShadow: "0 8px 20px rgba(59, 214, 146, 0.3)" }}
+                radius="sm"
+                style={{
+                    boxShadow:
+                        "0 8px 20px color-mix(in srgb, var(--ac) 30%, transparent)",
+                }}
             >
                 <Leaf size={17} />
             </ThemeIcon>
-            <Text fw={700} fz={17} lts="-0.02em" c="var(--tx)">
+            <Text fw={700} fz="xl" lts="var(--ls-snug)" c="var(--tx)">
                 Alimenta
             </Text>
         </Group>

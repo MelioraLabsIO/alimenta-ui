@@ -41,14 +41,14 @@ export function HeaderUserMenu() {
                                 : "Account menu"
                         }
                     >
-                        <Avatar size={28} fz={11}>
+                        <Avatar size={28} fz="xxs">
                             {initials || <User size={14} aria-hidden="true" />}
                         </Avatar>
                     </ActionIcon>
                 </Menu.Target>
                 <Menu.Dropdown>
                     <Menu.Label>
-                        <Stack gap={2}>
+                        <Stack gap="xxs">
                             <Text fz="sm" fw={600} c="var(--tx)">
                                 {displayName}
                             </Text>
