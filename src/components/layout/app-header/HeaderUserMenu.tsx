@@ -2,15 +2,16 @@
 
 import Link from "next/link";
 import { ActionIcon, Avatar, Box, Menu, Stack, Text } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import { User } from "lucide-react";
-import { logout } from "@/app/(public)/login/actions";
+import { SignOutConfirmModal } from "@/components/layout/SignOutConfirmModal";
 import { useProfileStore } from "@/stores/profile.store";
 import { getProfileInitials } from "@/lib/profile";
 
 /**
  * Avatar button opening the account menu: who you're signed in as, links into
- * settings, and sign out. Sign out calls the `logout` server action, which
- * clears the Supabase session and redirects.
+ * settings, and sign out. Sign out opens the same confirmation as the sidebar,
+ * which ends the Supabase session and redirects to login.
  *
  * On `md` and up the sidebar shows the user instead, so this only renders on
  * small screens.
@@ -22,6 +23,7 @@ import { getProfileInitials } from "@/lib/profile";
 export function HeaderUserMenu() {
     const profile = useProfileStore((state) => state.profile);
     const profileError = useProfileStore((state) => state.error);
+    const [signOutOpen, signOut] = useDisclosure(false);
 
     const initials = getProfileInitials(profile);
     // The fetch can also fail outright, in which case waiting forever on
@@ -67,11 +69,12 @@ export function HeaderUserMenu() {
                         Settings
                     </Menu.Item>
                     <Menu.Divider />
-                    <Menu.Item color="rose" onClick={() => logout()}>
+                    <Menu.Item color="rose" onClick={signOut.open}>
                         Sign out
                     </Menu.Item>
                 </Menu.Dropdown>
             </Menu>
+            <SignOutConfirmModal opened={signOutOpen} onClose={signOut.close} />
         </Box>
     );
 }

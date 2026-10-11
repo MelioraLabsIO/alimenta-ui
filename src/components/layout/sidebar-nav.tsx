@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useDisclosure } from "@mantine/hooks";
 import {
+    ActionIcon,
     Avatar,
     Badge,
     Box,
@@ -22,8 +24,10 @@ import {
     CalendarDays,
     Settings,
     Dices,
+    LogOut,
 } from "lucide-react";
 import { Brand } from "@/components/layout/Brand";
+import { SignOutConfirmModal } from "@/components/layout/SignOutConfirmModal";
 import { useProfileStore } from "@/stores/profile.store";
 import { getProfileInitials } from "@/lib/profile";
 
@@ -39,13 +43,14 @@ const navItems = [
 
 /**
  * Everything inside the floating sidebar panel: brand, the route list, the
- * "spin the wheel" nudge and the signed-in user. `onNavigate` lets the mobile
- * shell close the panel once a link is followed.
+ * "spin the wheel" nudge and the signed-in user with a sign-out button.
+ * `onNavigate` lets the mobile shell close the panel once a link is followed.
  */
 export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
     const pathname = usePathname();
     const profile = useProfileStore((state) => state.profile);
     const initials = getProfileInitials(profile);
+    const [signOutOpen, signOut] = useDisclosure(false);
 
     return (
         <Stack h="100%" gap="xxs">
@@ -116,29 +121,54 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
                     </Stack>
                 </Paper>
 
-                <UnstyledButton
-                    component={Link}
-                    href="/settings"
-                    onClick={onNavigate}
-                    px="sm"
-                    py="xs"
-                    style={{ borderRadius: "var(--mantine-radius-sm)" }}
-                >
-                    <Group gap="sm" wrap="nowrap">
-                        <Avatar size={30} fz="xxs">
-                            {initials || "·"}
-                        </Avatar>
-                        <Box miw={0} style={{ flex: 1 }}>
-                            <Text fw={600} fz="sm" truncate c="var(--tx)">
-                                9{profile?.displayName ?? "Your account"}
-                            </Text>
-                            <Text fz="xxs" truncate c="var(--tx3)">
-                                {profile?.email ?? "Open settings"}
-                            </Text>
-                        </Box>
-                    </Group>
-                </UnstyledButton>
+                <Group gap="xxs" wrap="nowrap">
+                    <UnstyledButton
+                        component={Link}
+                        href="/settings"
+                        onClick={onNavigate}
+                        px="sm"
+                        py="xs"
+                        miw={0}
+                        style={{
+                            flex: 1,
+                            borderRadius: "var(--mantine-radius-sm)",
+                        }}
+                    >
+                        <Group gap="sm" wrap="nowrap">
+                            <Avatar size={30} fz="xxs">
+                                {initials || "·"}
+                            </Avatar>
+                            <Box miw={0} style={{ flex: 1 }}>
+                                <Text fw={600} fz="sm" truncate c="var(--tx)">
+                                    {profile?.displayName ?? "Your account"}
+                                </Text>
+                                <Text fz="xxs" truncate c="var(--tx3)">
+                                    {profile?.email ?? "Open settings"}
+                                </Text>
+                            </Box>
+                        </Group>
+                    </UnstyledButton>
+                    <ActionIcon
+                        variant="subtle"
+                        size={34}
+                        radius="sm"
+                        aria-label="Sign out"
+                        title="Sign out"
+                        onClick={signOut.open}
+                        style={{
+                            flexShrink: 0,
+                            "--ai-color": "var(--tx3)",
+                            "--ai-hover":
+                                "color-mix(in srgb, var(--ro) 14%, transparent)",
+                            "--ai-hover-color": "var(--ro)",
+                        }}
+                    >
+                        <LogOut size={16} />
+                    </ActionIcon>
+                </Group>
             </Stack>
+
+            <SignOutConfirmModal opened={signOutOpen} onClose={signOut.close} />
         </Stack>
     );
 }
