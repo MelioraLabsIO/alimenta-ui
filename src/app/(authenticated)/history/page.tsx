@@ -1324,11 +1324,15 @@ export default function HistoryPage() {
                         >
                             <Table
                                 layout="fixed"
+                                stickyHeader
                                 withRowBorders={false}
                                 horizontalSpacing="md"
                                 verticalSpacing="sm"
                                 styles={{
                                     th: {
+                                        // Sticky cells default to the page
+                                        // background; match the card instead.
+                                        backgroundColor: "var(--sf)",
                                         paddingTop: "var(--mantine-spacing-sm)",
                                         paddingBottom:
                                             "var(--mantine-spacing-sm)",
