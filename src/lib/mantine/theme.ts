@@ -405,8 +405,10 @@ export const alimentaTheme = createTheme({
                 return {
                     wrapper: {
                         "--input-height": px(height),
-                        "--input-padding-inline-start": px(paddingX),
-                        "--input-padding-inline-end": px(paddingX),
+                        // Set the base padding, not the inline-start/end
+                        // vars: Mantine widens those for left/right sections,
+                        // and inline vars here would override that rule.
+                        "--input-padding": px(paddingX),
                         "--input-fz": px(fontSize),
                         "--input-bg": "var(--sf2)",
                         "--input-bd": props.error ? "var(--ro)" : "var(--bd2)",
