@@ -30,7 +30,10 @@ import {
 import { DatePickerInput } from "@mantine/dates";
 import {
     Apple,
+    ArrowDown,
+    ArrowUp,
     CalendarDays,
+    ChevronsUpDown,
     Copy,
     History,
     LayoutGrid,
@@ -148,6 +151,77 @@ const LAYOUT_OPTIONS: {
     { value: "list", label: "List", icon: List },
 ];
 
+type ItemizedRow = {
+    meal: MealResponse;
+    food: {
+        id: string;
+        name: string;
+        quantity: number;
+        unit: string;
+        calories?: number;
+    };
+};
+
+type SortKey = "food" | "amount" | "meal" | "date" | "kcal";
+type SortDirection = "asc" | "desc";
+type ItemizedSort = { key: SortKey; direction: SortDirection };
+
+/** The direction a column starts in the first time it is clicked. */
+const DEFAULT_SORT_DIRECTION: Record<SortKey, SortDirection> = {
+    food: "asc",
+    amount: "asc",
+    meal: "asc",
+    date: "desc",
+    kcal: "desc",
+};
+
+const DEFAULT_ITEMIZED_SORT: ItemizedSort = { key: "date", direction: "desc" };
+
+const textCollator = new Intl.Collator("en-US", {
+    sensitivity: "base",
+    numeric: true,
+});
+
+function mealTimestamp(meal: MealResponse) {
+    return meal.mealTime ? new Date(meal.mealTime).getTime() : 0;
+}
+
+/** Ascending comparison for one column of the by-food table. */
+function compareItemizedRows(a: ItemizedRow, b: ItemizedRow, key: SortKey) {
+    switch (key) {
+        case "food":
+            return textCollator.compare(a.food.name, b.food.name);
+        case "amount":
+            // Quantities only compare within a unit, so group by unit first.
+            return (
+                textCollator.compare(a.food.unit, b.food.unit) ||
+                a.food.quantity - b.food.quantity
+            );
+        case "meal":
+            return textCollator.compare(a.meal.title, b.meal.title);
+        case "date":
+            return mealTimestamp(a.meal) - mealTimestamp(b.meal);
+        case "kcal":
+            return (a.food.calories ?? 0) - (b.food.calories ?? 0);
+    }
+}
+
+function sortItemizedRows(rows: ItemizedRow[], sort: ItemizedSort) {
+    const sign = sort.direction === "asc" ? 1 : -1;
+    return [...rows].sort((a, b) => {
+        if (sort.key === "kcal") {
+            // Rows without calories stay at the bottom in either direction.
+            const aMissing = typeof a.food.calories !== "number";
+            const bMissing = typeof b.food.calories !== "number";
+            if (aMissing !== bMissing) return aMissing ? 1 : -1;
+        }
+        return (
+            sign * compareItemizedRows(a, b, sort.key) ||
+            mealTimestamp(b.meal) - mealTimestamp(a.meal)
+        );
+    });
+}
+
 type HistoryViewState = {
     search: string;
     typeFilter: string;
@@ -231,6 +305,58 @@ function TypeDot({ color, size = 8 }: { color: string; size?: number }) {
                 flexShrink: 0,
             }}
         />
+    );
+}
+
+function SortableTh({
+    label,
+    sortKey,
+    sort,
+    onSort,
+    w,
+    align = "left",
+}: {
+    label: string;
+    sortKey: SortKey;
+    sort: ItemizedSort;
+    onSort: (key: SortKey) => void;
+    w?: number;
+    align?: "left" | "right";
+}) {
+    const active = sort.key === sortKey;
+    const Icon = !active
+        ? ChevronsUpDown
+        : sort.direction === "asc"
+          ? ArrowUp
+          : ArrowDown;
+    return (
+        <Table.Th
+            w={w}
+            ta={align}
+            aria-sort={
+                active
+                    ? sort.direction === "asc"
+                        ? "ascending"
+                        : "descending"
+                    : "none"
+            }
+        >
+            <UnstyledButton
+                fz="inherit"
+                fw="inherit"
+                c={active ? "var(--tx)" : "inherit"}
+                onClick={() => onSort(sortKey)}
+                style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "var(--mantine-spacing-xxs)",
+                    whiteSpace: "nowrap",
+                }}
+            >
+                {label}
+                <Icon size={13} opacity={active ? 1 : 0.5} />
+            </UnstyledButton>
+        </Table.Th>
     );
 }
 
@@ -506,6 +632,9 @@ export default function HistoryPage() {
         defaultValue: "grid",
     });
     const isGrid = layout === "grid";
+    const [itemizedSort, setItemizedSort] = useState<ItemizedSort>(
+        DEFAULT_ITEMIZED_SORT
+    );
 
     /********************************************* QUERIES ************************************************/
     const { data: allMeals, isLoading } = useQuery({
@@ -615,24 +744,38 @@ export default function HistoryPage() {
 
     const itemizedRows = useMemo(
         () =>
-            filtered
-                .flatMap((meal) =>
-                    (meal.items || []).map((item) => ({
-                        meal,
-                        food: {
-                            id: item.id,
-                            name: item.foodName,
-                            quantity: item.quantity,
-                            unit: item.unit,
-                            calories: item.nutrition?.calories,
-                        },
-                    }))
-                )
-                .filter(Boolean),
-        [filtered]
+            sortItemizedRows(
+                filtered.flatMap((meal) =>
+                    (meal.items || []).map(
+                        (item): ItemizedRow => ({
+                            meal,
+                            food: {
+                                id: item.id,
+                                name: item.foodName,
+                                quantity: item.quantity,
+                                unit: item.unit,
+                                calories: item.nutrition?.calories,
+                            },
+                        })
+                    )
+                ),
+                itemizedSort
+            ),
+        [filtered, itemizedSort]
     );
     const tableMaxHeight =
         TABLE_HEADER_HEIGHT_PX + TABLE_MAX_VISIBLE_ROWS * TABLE_ROW_HEIGHT_PX;
+
+    function handleSort(key: SortKey) {
+        setItemizedSort((current) =>
+            current.key === key
+                ? {
+                      key,
+                      direction: current.direction === "asc" ? "desc" : "asc",
+                  }
+                : { key, direction: DEFAULT_SORT_DIRECTION[key] }
+        );
+    }
 
     function handleDelete(id: string) {
         deleteMeal(id);
@@ -1337,13 +1480,40 @@ export default function HistoryPage() {
                             >
                                 <Table.Thead>
                                     <Table.Tr>
-                                        <Table.Th>Food</Table.Th>
-                                        <Table.Th w={110}>Amount</Table.Th>
-                                        <Table.Th>Meal</Table.Th>
-                                        <Table.Th w={120}>Date</Table.Th>
-                                        <Table.Th w={80} ta="right">
-                                            kcal
-                                        </Table.Th>
+                                        <SortableTh
+                                            label="Food"
+                                            sortKey="food"
+                                            sort={itemizedSort}
+                                            onSort={handleSort}
+                                        />
+                                        <SortableTh
+                                            label="Amount"
+                                            sortKey="amount"
+                                            sort={itemizedSort}
+                                            onSort={handleSort}
+                                            w={110}
+                                        />
+                                        <SortableTh
+                                            label="Meal"
+                                            sortKey="meal"
+                                            sort={itemizedSort}
+                                            onSort={handleSort}
+                                        />
+                                        <SortableTh
+                                            label="Date"
+                                            sortKey="date"
+                                            sort={itemizedSort}
+                                            onSort={handleSort}
+                                            w={120}
+                                        />
+                                        <SortableTh
+                                            label="kcal"
+                                            sortKey="kcal"
+                                            sort={itemizedSort}
+                                            onSort={handleSort}
+                                            w={80}
+                                            align="right"
+                                        />
                                     </Table.Tr>
                                 </Table.Thead>
                                 <Table.Tbody>
