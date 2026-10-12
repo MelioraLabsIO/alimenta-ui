@@ -25,19 +25,25 @@ import {
     Settings,
     Dices,
     LogOut,
+    type LucideIcon,
 } from "lucide-react";
 import { Brand } from "@/components/layout/Brand";
 import { SignOutConfirmModal } from "@/components/layout/SignOutConfirmModal";
 import { useProfileStore } from "@/stores/profile.store";
 import { getProfileInitials } from "@/lib/profile";
 
-const navItems = [
+const navItems: {
+    href: string;
+    label: string;
+    icon: LucideIcon;
+    soon?: boolean;
+}[] = [
     { href: "/", label: "Dashboard", icon: LayoutDashboard },
     { href: "/log", label: "Log meal", icon: CirclePlus },
     { href: "/spin", label: "Spin wheel", icon: Dices },
     { href: "/history", label: "History", icon: History },
     { href: "/insights", label: "Insights", icon: ChartLine },
-    { href: "/plans", label: "Planner", icon: CalendarDays, soon: true },
+    { href: "/plans", label: "Planner", icon: CalendarDays },
     { href: "/settings", label: "Settings", icon: Settings },
 ];
 
