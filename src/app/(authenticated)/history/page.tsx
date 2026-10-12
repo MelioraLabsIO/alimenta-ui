@@ -296,7 +296,6 @@ function MealDetailDialog({
                     padding: "var(--mantine-spacing-md)",
                     zIndex: 2,
                 },
-                body: { padding: 0 },
             }}
         >
             <Stack gap="lg">
