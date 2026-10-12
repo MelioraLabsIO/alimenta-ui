@@ -296,6 +296,9 @@ function MealDetailDialog({
                     padding: "var(--mantine-spacing-md)",
                     zIndex: 2,
                 },
+                // Mantine drops the body's top padding when a header is
+                // rendered; ours is absolutely positioned, so restore it.
+                body: { paddingTop: "var(--mb-padding)" },
             }}
         >
             <Stack gap="lg">
