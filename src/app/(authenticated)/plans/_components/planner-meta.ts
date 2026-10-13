@@ -1,6 +1,10 @@
 import { Apple, Moon, Sun, Sunrise, type LucideIcon } from "lucide-react";
 import { EMealType } from "@/core/types/models/meal";
-import type { PlannedMeal, PlannerSlot } from "@/core/types/models/planner";
+import {
+    PLANNER_SLOTS,
+    type PlannedMeal,
+    type PlannerSlot,
+} from "@/core/types/models/planner";
 
 /** Daily calorie target until it comes from the user's goal settings. */
 export const DAILY_KCAL_TARGET = 2250;
@@ -34,6 +38,12 @@ export const SLOT_META: Record<
         time: "20:00",
     },
 };
+
+const MAIN_SLOTS: PlannerSlot[] = [
+    EMealType.BREAKFAST,
+    EMealType.LUNCH,
+    EMealType.DINNER,
+];
 
 export const tint = (color: string, pct: number) =>
     `color-mix(in srgb, ${color} ${pct}%, transparent)`;
@@ -81,4 +91,68 @@ export function dayTotals(meals: PlannedMeal[], past: boolean) {
               .filter((m) => m.status !== "eaten")
               .reduce((sum, m) => sum + m.kcal, 0);
     return { eaten, planned, total: eaten + planned };
+}
+
+export const sortBySlot = (meals: PlannedMeal[]) =>
+    [...meals].sort(
+        (a, b) => PLANNER_SLOTS.indexOf(a.slot) - PLANNER_SLOTS.indexOf(b.slot)
+    );
+
+/** Widths of the eaten / planned segments of a day's calorie bar, in %. */
+export function kcalShares({
+    eaten,
+    planned,
+}: {
+    eaten: number;
+    planned: number;
+}) {
+    const eatenPct = Math.min(100, (eaten / DAILY_KCAL_TARGET) * 100);
+    const plannedPct = Math.min(
+        100 - eatenPct,
+        (planned / DAILY_KCAL_TARGET) * 100
+    );
+    return { eatenPct, plannedPct };
+}
+
+/** How many of a day's meals are eaten, planned and missed. */
+export function dayStateCounts(meals: PlannedMeal[], past: boolean) {
+    const counts: Record<MealVisualState, number> = {
+        eaten: 0,
+        planned: 0,
+        missed: 0,
+    };
+    for (const meal of meals) counts[mealState(meal, past)]++;
+    return counts;
+}
+
+/**
+ * The two footer lines of a week-board day: calories against the target,
+ * then the per-state meal counts ("2 eaten · 1 planned").
+ */
+export function daySummary(meals: PlannedMeal[], past: boolean) {
+    const { eaten, total } = dayTotals(meals, past);
+    const left = DAILY_KCAL_TARGET - total;
+    const main = past
+        ? eaten
+            ? `${formatKcal(eaten)} of ${formatKcal(DAILY_KCAL_TARGET)} kcal`
+            : "Nothing logged"
+        : total
+          ? left >= 0
+              ? `${formatKcal(left)} kcal left`
+              : `${formatKcal(-left)} kcal over`
+          : "Nothing planned";
+
+    const counts = dayStateCounts(meals, past);
+    const sub =
+        (["eaten", "planned", "missed"] as const)
+            .filter((state) => counts[state] > 0)
+            .map((state) => `${counts[state]} ${state}`)
+            .join(" · ") || "—";
+
+    return { main, sub };
+}
+
+/** Main meals a planned day still lacks — snacks are optional. */
+export function missingSlots(meals: PlannedMeal[]): PlannerSlot[] {
+    return MAIN_SLOTS.filter((slot) => !meals.some((m) => m.slot === slot));
 }
