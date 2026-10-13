@@ -7,6 +7,7 @@ import {
     Group,
     SegmentedControl,
     Text,
+    Tooltip,
 } from "@mantine/core";
 import {
     ChevronLeft,
@@ -24,9 +25,13 @@ const NAV_BUTTON = {
     radius: "xs",
 } as const;
 
-/** Range title, prev / Today / next, the Week|Month switch and "Fill week with AI". */
+/**
+ * Range title, prev / Today / next, the Week|Month switch and "Fill week with
+ * AI" — always shown, but only usable from the week view.
+ */
 export function PlannerToolbar({ planner }: { planner: PlannerState }) {
     const { view, selectedDate, filling } = planner;
+    const isWeek = view === "week";
 
     return (
         <Group gap="sm" wrap="wrap">
@@ -86,7 +91,26 @@ export function PlannerToolbar({ planner }: { planner: PlannerState }) {
                 }}
             />
 
-            {view === "week" && (
+            <Tooltip
+                disabled={isWeek}
+                multiline
+                w={240}
+                withArrow
+                position="bottom-end"
+                label={
+                    <>
+                        <Text fz="xs" fw={700} c="inherit">
+                            Available in Week view
+                        </Text>
+                        <Text fz="xs" c="inherit">
+                            AI fills the empty slots one week at a time. Switch
+                            to Week to use it.
+                        </Text>
+                    </>
+                }
+            >
+                {/* `data-disabled` rather than `disabled`, which would
+                    swallow the hover and focus the tooltip relies on. */}
                 <Button
                     variant="light"
                     h={36}
@@ -94,7 +118,9 @@ export function PlannerToolbar({ planner }: { planner: PlannerState }) {
                     radius="md"
                     fz="sm"
                     disabled={filling}
-                    onClick={planner.fillWeek}
+                    data-disabled={!isWeek || undefined}
+                    aria-disabled={!isWeek || undefined}
+                    onClick={isWeek ? planner.fillWeek : undefined}
                     leftSection={
                         filling ? (
                             <LoaderCircle
@@ -112,12 +138,17 @@ export function PlannerToolbar({ planner }: { planner: PlannerState }) {
                         root: {
                             border: `1px solid ${tint("var(--ac)", 45)}`,
                             whiteSpace: "nowrap",
+                            ...(!isWeek && {
+                                background: "var(--acs)",
+                                color: "var(--ac)",
+                                opacity: 0.4,
+                            }),
                         },
                     }}
                 >
                     {filling ? "Planning your week…" : "Fill week with AI"}
                 </Button>
-            )}
+            </Tooltip>
         </Group>
     );
 }

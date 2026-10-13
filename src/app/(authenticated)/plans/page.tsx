@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Box, Flex, Group, Skeleton, Stack } from "@mantine/core";
+import type { PlannedMeal, PlannerSlot } from "@/core/types/models/planner";
 import { DayPanel } from "./_components/DayPanel";
 import { MealTray } from "./_components/MealTray";
 import { MonthGrid } from "./_components/MonthGrid";
@@ -10,12 +11,16 @@ import {
     type MealEditorTarget,
 } from "./_components/PlannedMealModal";
 import { PlannerToolbar } from "./_components/PlannerToolbar";
-import { usePlanner } from "./_components/usePlanner";
+import { usePlanner, type PlannerState } from "./_components/usePlanner";
 import { WeekBoard } from "./_components/WeekBoard";
 
 export default function PlannerPage() {
     const planner = usePlanner();
     const [editor, setEditor] = useState<MealEditorTarget | null>(null);
+
+    const onAdd = (date: string, slot: PlannerSlot) =>
+        setEditor({ mode: "add", date, slot });
+    const onEdit = (meal: PlannedMeal) => setEditor({ mode: "edit", meal });
 
     if (!planner.ready) return <PlannerSkeleton />;
 
@@ -24,26 +29,11 @@ export default function PlannerPage() {
             <PlannerToolbar planner={planner} />
             <MealTray planner={planner} />
 
-            <Flex
-                gap="md"
-                align="flex-start"
-                direction={{ base: "column", lg: "row" }}
-            >
-                <Box miw={0} w="100%" style={{ flex: 1 }}>
-                    {planner.view === "week" ? (
-                        <WeekBoard planner={planner} />
-                    ) : (
-                        <MonthGrid planner={planner} />
-                    )}
-                </Box>
-                <DayPanel
-                    planner={planner}
-                    onAdd={(date, slot) =>
-                        setEditor({ mode: "add", date, slot })
-                    }
-                    onEdit={(meal) => setEditor({ mode: "edit", meal })}
-                />
-            </Flex>
+            {planner.view === "week" ? (
+                <WeekBoard planner={planner} onAdd={onAdd} onEdit={onEdit} />
+            ) : (
+                <MonthView planner={planner} onAdd={onAdd} onEdit={onEdit} />
+            )}
 
             <PlannedMealModal
                 target={editor}
@@ -58,6 +48,28 @@ export default function PlannerPage() {
     );
 }
 
+type DayEditorProps = {
+    planner: PlannerState;
+    onAdd: (date: string, slot: PlannerSlot) => void;
+    onEdit: (meal: PlannedMeal) => void;
+};
+
+/** Month calendar with the selected day's detail beside it. */
+function MonthView({ planner, onAdd, onEdit }: DayEditorProps) {
+    return (
+        <Flex
+            gap="md"
+            align="flex-start"
+            direction={{ base: "column", lg: "row" }}
+        >
+            <Box miw={0} w="100%" style={{ flex: 1 }}>
+                <MonthGrid planner={planner} />
+            </Box>
+            <DayPanel planner={planner} onAdd={onAdd} onEdit={onEdit} />
+        </Flex>
+    );
+}
+
 function PlannerSkeleton() {
     return (
         <Stack gap="md">
@@ -66,10 +78,7 @@ function PlannerSkeleton() {
                 <Skeleton h={32} w={120} radius="xs" />
             </Group>
             <Skeleton h={128} radius="xl" />
-            <Flex gap="md" direction={{ base: "column", lg: "row" }}>
-                <Skeleton h={440} radius="xl" style={{ flex: 1 }} />
-                <Skeleton h={440} w={{ base: "100%", lg: 280 }} radius="xl" />
-            </Flex>
+            <Skeleton h={640} radius="xl" />
         </Stack>
     );
 }

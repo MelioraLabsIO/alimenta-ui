@@ -48,13 +48,7 @@ export function BoardMealCard({
                     {meta.label}
                 </Text>
             </Group>
-            <Text
-                fz="sm"
-                fw={600}
-                lh="sm"
-                mt="xxs"
-                style={{ textWrap: "pretty" }}
-            >
+            <Text fz="sm" fw={600} lh="sm" mt="xxs" lineClamp={2}>
                 {meal.name}
             </Text>
             <Group justify="space-between" gap="xxs" wrap="nowrap" mt="xxs">
