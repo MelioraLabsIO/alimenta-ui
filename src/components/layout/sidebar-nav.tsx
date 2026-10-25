@@ -9,6 +9,7 @@ import {
     Badge,
     Box,
     Button,
+    CloseButton,
     Group,
     NavLink,
     Paper,
@@ -50,9 +51,16 @@ const navItems: {
 /**
  * Everything inside the floating sidebar panel: brand, the route list, the
  * "spin the wheel" nudge and the signed-in user with a sign-out button.
- * `onNavigate` lets the mobile shell close the panel once a link is followed.
+ * `onNavigate` lets the mobile shell close the panel once a link is followed;
+ * `onClose` adds a close button for the mobile panel, which covers the burger.
  */
-export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
+export function SidebarNav({
+    onNavigate,
+    onClose,
+}: {
+    onNavigate?: () => void;
+    onClose?: () => void;
+}) {
     const pathname = usePathname();
     const profile = useProfileStore((state) => state.profile);
     const initials = getProfileInitials(profile);
@@ -60,9 +68,24 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
 
     return (
         <Stack h="100%" gap="xxs">
-            <Box px="sm" pb="md" pt="xxs">
+            <Group
+                px="sm"
+                pb="md"
+                pt="xxs"
+                justify="space-between"
+                wrap="nowrap"
+            >
                 <Brand />
-            </Box>
+                {onClose && (
+                    <CloseButton
+                        hiddenFrom="md"
+                        size="lg"
+                        radius="xl"
+                        aria-label="Close navigation"
+                        onClick={onClose}
+                    />
+                )}
+            </Group>
 
             {navItems.map(({ href, label, icon: Icon, soon }) => {
                 const active =
