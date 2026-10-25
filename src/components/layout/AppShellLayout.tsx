@@ -1,8 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { AppShell, Box } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { AppShell, Box, Overlay } from "@mantine/core";
+import { useDisclosure, useHotkeys } from "@mantine/hooks";
 import { AppHeader } from "@/components/layout/app-header";
 import { SidebarNav } from "@/components/layout/sidebar-nav";
 import { spacing } from "@/lib/mantine/tokens";
@@ -13,10 +13,13 @@ const GUTTER = spacing.md;
 /**
  * The signed-in shell: a floating glass sidebar on the left and a main column
  * that opens with the page header, both on the page wash with a 12px gutter.
- * Below `md` the sidebar collapses and the header's burger slides it in.
+ * Below `md` the sidebar collapses and the header's burger slides it in. The
+ * open panel covers the burger, so it closes from its own close button, a tap
+ * on the backdrop, Escape, or following a link.
  */
 export function AppShellLayout({ children }: { children: ReactNode }) {
     const [navOpened, { toggle, close }] = useDisclosure(false);
+    useHotkeys([["Escape", close]]);
 
     return (
         <AppShell
@@ -51,8 +54,20 @@ export function AppShellLayout({ children }: { children: ReactNode }) {
                 h={{ base: "100dvh", md: `calc(100dvh - ${GUTTER * 2}px)` }}
                 bdrs={{ base: 0, md: "xl" }}
             >
-                <SidebarNav onNavigate={close} />
+                <SidebarNav onNavigate={close} onClose={close} />
             </AppShell.Navbar>
+
+            {navOpened && (
+                <Overlay
+                    fixed
+                    hiddenFrom="md"
+                    zIndex={199}
+                    backgroundOpacity={0.45}
+                    blur={2}
+                    onClick={close}
+                    aria-hidden
+                />
+            )}
 
             <AppShell.Main>
                 <Box
