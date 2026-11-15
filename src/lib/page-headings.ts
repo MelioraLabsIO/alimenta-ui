@@ -14,6 +14,7 @@ const STATIC_HEADINGS: Record<string, PageHeading> = {
         title: "Insights",
     },
     plans: { kicker: "Plan ahead, look back", title: "Planner" },
+    recipes: { kicker: "Write, import, cook and share", title: "Recipes" },
     settings: { kicker: "Profile, preferences and AI", title: "Settings" },
 };
 
