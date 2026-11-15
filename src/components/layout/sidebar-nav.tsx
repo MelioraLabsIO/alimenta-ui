@@ -22,6 +22,7 @@ import {
     History,
     ChartLine,
     CalendarDays,
+    ChefHat,
     Settings,
     Dices,
     LogOut,
@@ -44,6 +45,7 @@ const navItems: {
     { href: "/history", label: "History", icon: History },
     { href: "/insights", label: "Insights", icon: ChartLine },
     { href: "/plans", label: "Planner", icon: CalendarDays },
+    { href: "/recipes", label: "Recipes", icon: ChefHat },
     { href: "/settings", label: "Settings", icon: Settings },
 ];
 
