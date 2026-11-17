@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { ActionIcon, Box, Group, Text } from "@mantine/core";
 import { Plus, X } from "lucide-react";
 import { Autocomplete } from "@/components/foods/autocomplete";
@@ -17,6 +18,12 @@ type PreferenceTagInputProps = {
     onRemoveItemAction: (item: string) => void;
     /** Design token the group is tinted with, e.g. `"var(--am)"`. */
     accent?: string;
+    requirement?: "required" | "optional";
+    error?: string;
+    /** Shown in place of the chips when there are none. */
+    emptyText?: string;
+    /** Extra content under the search-to-add row. */
+    footer?: ReactNode;
 };
 
 /** One "Dislikes" / "Allergies" group: tinted chips plus a search-to-add row. */
@@ -29,10 +36,24 @@ export function PreferenceTagInput({
     onAddItemAction,
     onRemoveItemAction,
     accent = "var(--ac)",
+    requirement,
+    error,
+    emptyText,
+    footer,
 }: PreferenceTagInputProps) {
     return (
-        <SettingsGroup label={label} padded>
+        <SettingsGroup
+            label={label}
+            padded
+            requirement={requirement}
+            error={error}
+        >
             <Group gap="xs" mih={32}>
+                {items.length === 0 && emptyText && (
+                    <Text fz="sm" c="var(--tx3)">
+                        {emptyText}
+                    </Text>
+                )}
                 {items.map((item) => (
                     <Group
                         key={item}
@@ -84,6 +105,7 @@ export function PreferenceTagInput({
                     <Plus size={15} />
                 </ActionIcon>
             </Group>
+            {footer}
         </SettingsGroup>
     );
 }

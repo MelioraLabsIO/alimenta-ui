@@ -1,7 +1,11 @@
 import { apiFetch } from "@/apiClient/client";
 import { getSession } from "@/lib/supabase/session";
 
-import { UserProfile } from "@/core/types/models/profile";
+import {
+    FoodPreferencesUpdate,
+    UserProfile,
+} from "@/core/types/models/profile";
+import { withFoodPreferences } from "@/lib/food-preferences";
 
 interface UpdateProfileInput {
     firstName: string;
@@ -22,9 +26,27 @@ async function updateProfile(
     });
 
     return {
-        ...userProfile,
+        ...withFoodPreferences(userProfile),
         displayName: `${userProfile.firstName} ${userProfile.lastName}`,
     };
 }
 
-export { updateProfile };
+/**
+ * Saves food preferences with `PATCH /api/v1/profile`. Fields left out of
+ * `data` keep their saved values; names and email are never touched.
+ */
+async function updateFoodPreferences(
+    data: FoodPreferencesUpdate
+): Promise<UserProfile & { displayName: string }> {
+    const userProfile = await apiFetch<UserProfile>("/api/v1/profile", {
+        method: "PATCH",
+        body: JSON.stringify(data),
+    });
+
+    return {
+        ...withFoodPreferences(userProfile),
+        displayName: `${userProfile.firstName} ${userProfile.lastName}`,
+    };
+}
+
+export { updateFoodPreferences, updateProfile };
