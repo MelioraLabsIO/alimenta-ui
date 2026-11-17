@@ -10,6 +10,7 @@ import { PreferencesSection } from "./PreferencesSection";
 import { ProfileSection } from "./ProfileSection";
 import { SettingsNav } from "./SettingsNav";
 import { type Goal, type SettingsTab, type Units } from "./settings-types";
+import { useProfileStore } from "@/stores/profile.store";
 
 const NEXT_GOAL: Record<Goal, Goal> = {
     cut: "maintain",
@@ -19,19 +20,16 @@ const NEXT_GOAL: Record<Goal, Goal> = {
 
 /**
  * The settings panel: a section nav on the left, the "food profile" summary
- * and the active section on the right. Goal, units, dislikes and allergies
- * live here because the summary sentence and the Goal/Food tabs both edit
- * them; they are local state only (no API behind them yet), as before.
+ * and the active section on the right. Goal and units live here because the
+ * summary sentence and the Goal tab both edit them; they are local state only
+ * (no API behind them yet). Dislikes and allergies come from the saved
+ * profile, which the Food preferences tab edits.
  */
 export function SettingsPanel() {
     const [tab, setTab] = useState<SettingsTab>("goal");
     const [goal, setGoal] = useState<Goal>("maintain");
     const [units, setUnits] = useState<Units>("metric");
-    const [dislikes, setDislikes] = useState<string[]>(["Mushrooms"]);
-    const [allergies, setAllergies] = useState<string[]>([
-        "Gluten",
-        "Shellfish",
-    ]);
+    const profile = useProfileStore((state) => state.profile);
 
     return (
         <Paper
@@ -64,8 +62,8 @@ export function SettingsPanel() {
                     <FoodProfileSummary
                         goal={goal}
                         units={units}
-                        dislikes={dislikes}
-                        allergies={allergies}
+                        dislikes={profile?.dislikes ?? []}
+                        allergies={profile?.allergies ?? []}
                         onCycleGoal={() => setGoal(NEXT_GOAL[goal])}
                         onCycleUnits={() =>
                             setUnits(units === "metric" ? "imperial" : "metric")
@@ -82,14 +80,7 @@ export function SettingsPanel() {
                             onUnitsChange={setUnits}
                         />
                     )}
-                    {tab === "food" && (
-                        <PreferencesSection
-                            dislikes={dislikes}
-                            allergies={allergies}
-                            onDislikesChange={setDislikes}
-                            onAllergiesChange={setAllergies}
-                        />
-                    )}
+                    {tab === "food" && <PreferencesSection />}
                     {tab === "ai" && <AiPreferencesSection />}
                     {tab === "account" && <AccountSection />}
                 </Stack>
