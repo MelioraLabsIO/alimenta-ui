@@ -1,7 +1,8 @@
-export type SettingsTab = "profile" | "goal" | "food" | "ai" | "account";
+import type { Goal, Units } from "@/core/types/models/profile";
 
-export type Goal = "cut" | "maintain" | "bulk";
-export type Units = "metric" | "imperial";
+export type { Goal, Units };
+
+export type SettingsTab = "profile" | "goal" | "food" | "ai" | "account";
 
 export const GOALS: {
     value: Goal;

@@ -2,13 +2,16 @@
 
 import {
     Box,
+    Button,
     Center,
+    Group,
+    Loader,
     SegmentedControl,
     Stack,
     Text,
     ThemeIcon,
 } from "@mantine/core";
-import { Check, Equal, TrendingDown, TrendingUp } from "lucide-react";
+import { Check, Equal, Save, TrendingDown, TrendingUp } from "lucide-react";
 import { SettingsGroup, SettingsRow } from "./SettingsGroup";
 import {
     GOALS,
@@ -24,18 +27,37 @@ const GOAL_ICONS = {
     bulk: TrendingUp,
 } as const;
 
-/** "Goal & body" tab: pick a goal, choose units. */
+/**
+ * "Goal & body" tab: pick a goal, choose units, then Save. The parent holds
+ * the values and does the saving (PD-133).
+ */
 export function GoalSection({
+    loading,
     goal,
     units,
     onGoalChange,
     onUnitsChange,
+    canSave,
+    saving,
+    onSave,
 }: {
+    loading: boolean;
     goal: Goal;
     units: Units;
     onGoalChange: (goal: Goal) => void;
     onUnitsChange: (units: Units) => void;
+    canSave: boolean;
+    saving: boolean;
+    onSave: () => void;
 }) {
+    if (loading) {
+        return (
+            <Group justify="center" py="xl">
+                <Loader />
+            </Group>
+        );
+    }
+
     return (
         <Stack gap="xl">
             <SettingsGroup label="Goal">
@@ -122,6 +144,19 @@ export function GoalSection({
                     />
                 </SettingsRow>
             </SettingsGroup>
+
+            <Group>
+                <Button
+                    h={40}
+                    px="lg"
+                    disabled={!canSave}
+                    loading={saving}
+                    leftSection={<Save size={15} />}
+                    onClick={onSave}
+                >
+                    Save goal and units
+                </Button>
+            </Group>
         </Stack>
     );
 }

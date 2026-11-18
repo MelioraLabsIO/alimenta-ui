@@ -1,6 +1,6 @@
 import { apiFetch } from "@/apiClient/client";
 import { UserProfile } from "@/core/types/models/profile";
-import { withFoodPreferences } from "@/lib/food-preferences";
+import { withProfilePreferences } from "@/lib/food-preferences";
 
 async function getUserProfile(): Promise<
     UserProfile & { displayName: string }
@@ -16,7 +16,7 @@ async function getUserProfile(): Promise<
     }
 
     return {
-        ...withFoodPreferences(userProfile),
+        ...withProfilePreferences(userProfile),
         displayName: `${userProfile.firstName} ${userProfile.lastName}`,
     };
 }
