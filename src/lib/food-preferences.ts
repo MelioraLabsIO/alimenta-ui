@@ -5,8 +5,10 @@ import {
     type DietType,
     FOOD_DONENESS_LEVELS,
     type FoodDoneness,
-    type FoodPreferences,
+    MEASUREMENT_UNITS,
+    type ProfilePreferences,
     type UserProfile,
+    WEIGHT_GOALS,
 } from "@/core/types/models/profile";
 import { CUISINES } from "./cuisines";
 
@@ -88,15 +90,16 @@ function list(value: unknown): string[] {
 }
 
 /**
- * Fills in the food preferences on a profile from the API, so callers can
- * rely on arrays and `null`s even against an API that doesn't send them yet
- * (alimenta-api before PD-130).
+ * Fills in the preferences on a profile from the API, so callers can rely on
+ * arrays and `null`s even against an API that doesn't send them yet
+ * (alimenta-api before PD-130 for the food ones, before PD-133 for units and
+ * goal).
  */
-export function withFoodPreferences<
-    T extends Omit<UserProfile, keyof FoodPreferences>,
+export function withProfilePreferences<
+    T extends Omit<UserProfile, keyof ProfilePreferences>,
 >(
-    profile: T & Partial<Record<keyof FoodPreferences, unknown>>
-): Omit<T, keyof FoodPreferences> & FoodPreferences {
+    profile: T & Partial<Record<keyof ProfilePreferences, unknown>>
+): Omit<T, keyof ProfilePreferences> & ProfilePreferences {
     return {
         ...profile,
         dietType: pick(DIET_TYPES, profile.dietType),
@@ -108,5 +111,7 @@ export function withFoodPreferences<
         allergies: list(profile.allergies),
         dislikes: list(profile.dislikes),
         favoriteCuisines: list(profile.favoriteCuisines),
+        units: pick(MEASUREMENT_UNITS, profile.units),
+        goal: pick(WEIGHT_GOALS, profile.goal),
     };
 }

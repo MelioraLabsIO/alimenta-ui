@@ -21,9 +21,17 @@ export const FOOD_DONENESS_LEVELS = [
     "well_done",
 ] as const;
 
+/** Measurement units the API accepts (alimenta-api `domain.MeasurementUnits`). */
+export const MEASUREMENT_UNITS = ["metric", "imperial"] as const;
+
+/** Weight goals the API accepts (alimenta-api `domain.WeightGoals`). */
+export const WEIGHT_GOALS = ["cut", "maintain", "bulk"] as const;
+
 export type DietType = (typeof DIET_TYPES)[number];
 export type CookingTimePreference = (typeof COOKING_TIME_PREFERENCES)[number];
 export type FoodDoneness = (typeof FOOD_DONENESS_LEVELS)[number];
+export type Units = (typeof MEASUREMENT_UNITS)[number];
+export type Goal = (typeof WEIGHT_GOALS)[number];
 
 /** The PD-106 food preferences as `GET /api/v1/profile` returns them. */
 export interface FoodPreferences {
@@ -37,7 +45,17 @@ export interface FoodPreferences {
     favoriteCuisines: string[];
 }
 
-export interface UserProfile extends FoodPreferences {
+/** Units and goal (PD-133) as `GET /api/v1/profile` returns them. */
+export interface GeneralPreferences {
+    /** `null` until the user picks one. */
+    units: Units | null;
+    goal: Goal | null;
+}
+
+/** Every preference the profile carries. */
+export type ProfilePreferences = FoodPreferences & GeneralPreferences;
+
+export interface UserProfile extends FoodPreferences, GeneralPreferences {
     id: string;
     firstName: string;
     lastName: string;
@@ -56,4 +74,10 @@ export type FoodPreferencesUpdate = {
     allergies?: string[];
     dislikes?: string[];
     favoriteCuisines?: string[];
+};
+
+/** A profile write may change units, goal or both; omitted ones are kept. */
+export type GeneralPreferencesUpdate = {
+    units?: Units;
+    goal?: Goal;
 };

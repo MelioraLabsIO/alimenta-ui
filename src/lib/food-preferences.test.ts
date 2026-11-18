@@ -6,14 +6,14 @@ import {
     findCuisineName,
     hasItem,
     uniqueItems,
-    withFoodPreferences,
+    withProfilePreferences,
 } from "./food-preferences";
 
 const base = { id: "u1", firstName: "Ada", lastName: "L", email: "a@b.c" };
 
-describe("withFoodPreferences", () => {
+describe("withProfilePreferences", () => {
     it("fills in defaults for an API that doesn't send preferences yet", () => {
-        assert.deepEqual(withFoodPreferences(base), {
+        assert.deepEqual(withProfilePreferences(base), {
             ...base,
             dietType: null,
             cookingTimePreference: null,
@@ -21,11 +21,13 @@ describe("withFoodPreferences", () => {
             allergies: [],
             dislikes: [],
             favoriteCuisines: [],
+            units: null,
+            goal: null,
         });
     });
 
     it("keeps known values and drops unknown ones", () => {
-        const profile = withFoodPreferences({
+        const profile = withProfilePreferences({
             ...base,
             dietType: "low_carb",
             cookingTimePreference: "slow",
@@ -33,6 +35,8 @@ describe("withFoodPreferences", () => {
             allergies: ["Peanuts"],
             dislikes: null,
             favoriteCuisines: ["Cuban"],
+            units: "imperial",
+            goal: "shred",
         });
 
         assert.equal(profile.dietType, "low_carb");
@@ -41,6 +45,8 @@ describe("withFoodPreferences", () => {
         assert.deepEqual(profile.allergies, ["Peanuts"]);
         assert.deepEqual(profile.dislikes, []);
         assert.deepEqual(profile.favoriteCuisines, ["Cuban"]);
+        assert.equal(profile.units, "imperial");
+        assert.equal(profile.goal, null);
     });
 });
 
